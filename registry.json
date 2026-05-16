@@ -1,0 +1,72 @@
+{
+  "name": "carl-skills",
+  "description": "Real-world AI workflows for creators.",
+  "homepage": "https://github.com/LearnPrompt/carl-skills",
+  "license": "MIT",
+  "version": "0.1.0",
+  "updated": "2026-05-16",
+  "skills": [
+    {
+      "id": "humanize-ppt",
+      "name": "Humanize PPT",
+      "status": "active-star",
+      "category": "content",
+      "summary": "Turn raw material into a presentation people actually want to listen to.",
+      "path": "skills/content/humanize-ppt/SKILL.md",
+      "readme": "skills/content/humanize-ppt/README.md",
+      "canonical_repo": "https://github.com/LearnPrompt/humanize-ppt",
+      "collection_repo": "https://github.com/LearnPrompt/carl-skills",
+      "source_commit": "bc172e0ade41ed66c9d3de022cc805c2f17830bc",
+      "installable": true,
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/content/humanize-ppt/SKILL.md"
+    },
+    {
+      "id": "ai-tool-reviewer-skill",
+      "name": "AI Tool Reviewer",
+      "status": "building",
+      "category": "content",
+      "summary": "Test AI tools with real tasks instead of rewriting launch notes.",
+      "installable": false
+    },
+    {
+      "id": "feishu-content-factory-skill",
+      "name": "Feishu Content Factory",
+      "status": "building",
+      "category": "content",
+      "summary": "Turn Feishu notes, comments, and drafts into publishable content.",
+      "installable": false
+    },
+    {
+      "id": "obsidian-topic-planner-skill",
+      "name": "Obsidian Topic Planner",
+      "status": "building",
+      "category": "content",
+      "summary": "Turn an Obsidian vault into a topic and publishing system.",
+      "installable": false
+    },
+    {
+      "id": "carl-humanizer-skill",
+      "name": "Carl Humanizer",
+      "status": "building",
+      "category": "content",
+      "summary": "Make AI-written text sound closer to a real creator.",
+      "installable": false
+    },
+    {
+      "id": "paper-to-ppt-skill",
+      "name": "Paper to PPT",
+      "status": "planned",
+      "category": "content",
+      "summary": "Turn papers and PDFs into presentation-ready outlines.",
+      "installable": false
+    },
+    {
+      "id": "topic-radar-skill",
+      "name": "Topic Radar",
+      "status": "paused",
+      "category": "content",
+      "summary": "Monitor upstream signals for future topics.",
+      "installable": false
+    }
+  ]
+}

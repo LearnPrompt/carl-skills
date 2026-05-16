@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local runs
+.carl-skills-runs/
+.humanize-ppt-runs/
+
+# Secrets and private data
+.env
+.env.*
+*.local
+secrets.*
+private/
+.browser-profile/
+cookies/
