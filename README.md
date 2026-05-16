@@ -39,7 +39,19 @@ Carl Skills只做一件事：
 | [Skillrush Town](https://github.com/LearnPrompt/skillrush-town) | active | `LearnPrompt/skillrush-town` | canonical `skills/skillrush-town/SKILL.md` |
 | [X Article Publisher](https://github.com/LearnPrompt/x-article-publisher-skill) | active | `LearnPrompt/x-article-publisher-skill` | canonical `skills/x-article-publisher/SKILL.md` |
 | [Skill Sync](https://github.com/LearnPrompt/skill-sync) | active | `LearnPrompt/skill-sync` | canonical `SKILL.md` |
-| [CC Harness Skills](https://github.com/LearnPrompt/cc-harness-skills) | active | `LearnPrompt/cc-harness-skills` | canonical `skills/*/SKILL.md` |
+
+### CC Harness Skills
+
+这六个属于同一套Agent工作底座，所以在registry里统一加`cc-harness-`前缀，并放在一起：
+
+| Skill | Status | Canonical path |
+|---|---|---|
+| CC Harness / Dream Memory | active | `skills/dream-memory/SKILL.md` |
+| CC Harness / Kairos Lite | active | `skills/kairos-lite/SKILL.md` |
+| CC Harness / Memory Extractor | active | `skills/memory-extractor/SKILL.md` |
+| CC Harness / Structured Context Compressor | active | `skills/structured-context-compressor/SKILL.md` |
+| CC Harness / Swarm Coordinator | active | `skills/swarm-coordinator/SKILL.md` |
+| CC Harness / Verification Gate | active | `skills/verification-gate/SKILL.md` |
 
 > `AnythingWeb`当前没有发现`SKILL.md`，先作为related project记录在registry里，不放进可安装skill列表。
 
@@ -72,6 +84,7 @@ python3 scripts/install_all_hermes_skills.py --yes
 
 - 哪些skill已经可安装；
 - 每个skill的canonical repo在哪里；
+- 同一套skill是否属于同一个`suite`；
 - 应该从哪个`raw_skill_url`安装；
 - 当前索引到哪个`source_commit`。
 

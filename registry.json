@@ -75,8 +75,8 @@
       "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/skill-sync/main/SKILL.md"
     },
     {
-      "id": "dream-memory",
-      "name": "Dream Memory",
+      "id": "cc-harness-dream-memory",
+      "name": "CC Harness / Dream Memory",
       "status": "active",
       "category": "agent-harness",
       "summary": "把近期日志、会话和记忆文件整理成可持续使用的主题记忆，并控制MEMORY.md长度。",
@@ -85,11 +85,13 @@
       "canonical_path": "skills/dream-memory/SKILL.md",
       "source_commit": "21de62ee4b31e8899630d0586d498d5f409f0317",
       "installable": true,
-      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/dream-memory/SKILL.md"
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/dream-memory/SKILL.md",
+      "suite": "cc-harness-skills",
+      "suite_name": "CC Harness Skills"
     },
     {
-      "id": "kairos-lite",
-      "name": "Kairos Lite",
+      "id": "cc-harness-kairos-lite",
+      "name": "CC Harness / Kairos Lite",
       "status": "active",
       "category": "agent-harness",
       "summary": "构建轻量主动模式：定时检查、睡眠间隔、简洁汇报和过期保护。",
@@ -98,11 +100,13 @@
       "canonical_path": "skills/kairos-lite/SKILL.md",
       "source_commit": "21de62ee4b31e8899630d0586d498d5f409f0317",
       "installable": true,
-      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/kairos-lite/SKILL.md"
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/kairos-lite/SKILL.md",
+      "suite": "cc-harness-skills",
+      "suite_name": "CC Harness Skills"
     },
     {
-      "id": "memory-extractor",
-      "name": "Memory Extractor",
+      "id": "cc-harness-memory-extractor",
+      "name": "CC Harness / Memory Extractor",
       "status": "active",
       "category": "agent-harness",
       "summary": "从近期对话中提取长期记忆，区分用户、反馈、项目和参考信息。",
@@ -111,11 +115,13 @@
       "canonical_path": "skills/memory-extractor/SKILL.md",
       "source_commit": "21de62ee4b31e8899630d0586d498d5f409f0317",
       "installable": true,
-      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/memory-extractor/SKILL.md"
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/memory-extractor/SKILL.md",
+      "suite": "cc-harness-skills",
+      "suite_name": "CC Harness Skills"
     },
     {
-      "id": "structured-context-compressor",
-      "name": "Structured Context Compressor",
+      "id": "cc-harness-structured-context-compressor",
+      "name": "CC Harness / Structured Context Compressor",
       "status": "active",
       "category": "agent-harness",
       "summary": "把长会话压缩成九段式可续接摘要，保留请求、文件、错误、当前工作和下一步。",
@@ -124,11 +130,13 @@
       "canonical_path": "skills/structured-context-compressor/SKILL.md",
       "source_commit": "21de62ee4b31e8899630d0586d498d5f409f0317",
       "installable": true,
-      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/structured-context-compressor/SKILL.md"
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/structured-context-compressor/SKILL.md",
+      "suite": "cc-harness-skills",
+      "suite_name": "CC Harness Skills"
     },
     {
-      "id": "swarm-coordinator",
-      "name": "Swarm Coordinator",
+      "id": "cc-harness-swarm-coordinator",
+      "name": "CC Harness / Swarm Coordinator",
       "status": "active",
       "category": "agent-harness",
       "summary": "把多Agent工作拆成研究、综合、实现和验证，并让协调者专注集成。",
@@ -137,11 +145,13 @@
       "canonical_path": "skills/swarm-coordinator/SKILL.md",
       "source_commit": "21de62ee4b31e8899630d0586d498d5f409f0317",
       "installable": true,
-      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/swarm-coordinator/SKILL.md"
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/swarm-coordinator/SKILL.md",
+      "suite": "cc-harness-skills",
+      "suite_name": "CC Harness Skills"
     },
     {
-      "id": "verification-gate",
-      "name": "Verification Gate",
+      "id": "cc-harness-verification-gate",
+      "name": "CC Harness / Verification Gate",
       "status": "active",
       "category": "agent-harness",
       "summary": "实现后做只读验证，检查完成声明、测试结果和明显遗漏是否真实。",
@@ -150,7 +160,9 @@
       "canonical_path": "skills/verification-gate/SKILL.md",
       "source_commit": "21de62ee4b31e8899630d0586d498d5f409f0317",
       "installable": true,
-      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/verification-gate/SKILL.md"
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/verification-gate/SKILL.md",
+      "suite": "cc-harness-skills",
+      "suite_name": "CC Harness Skills"
     }
   ],
   "related_projects": [
@@ -159,6 +171,22 @@
       "name": "AnythingWeb",
       "repo": "https://github.com/LearnPrompt/AnythingWeb",
       "summary": "OpenAI Agents SDK web multi-agent test cases. No SKILL.md found, so it is listed as a related project rather than an installable skill."
+    }
+  ],
+  "suites": [
+    {
+      "id": "cc-harness-skills",
+      "name": "CC Harness Skills",
+      "repo": "https://github.com/LearnPrompt/cc-harness-skills",
+      "summary": "一组一起使用的Agent工作底座：记忆提取、上下文压缩、多Agent协调、验证门和轻量主动模式。",
+      "skill_ids": [
+        "cc-harness-dream-memory",
+        "cc-harness-kairos-lite",
+        "cc-harness-memory-extractor",
+        "cc-harness-structured-context-compressor",
+        "cc-harness-swarm-coordinator",
+        "cc-harness-verification-gate"
+      ]
     }
   ]
 }
