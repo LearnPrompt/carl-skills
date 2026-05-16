@@ -5,16 +5,12 @@
 > Real-world AI workflows for creators.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-building-D6A85A)](#roadmap)
+[![Status](https://img.shields.io/badge/status-catalog--first-D6A85A)](#registry)
 [![Humanize PPT](https://img.shields.io/badge/first%20star-humanize--ppt-B88746)](https://github.com/LearnPrompt/humanize-ppt)
 
-<br>
+**真实AI工作流技能库：把选题、写作、评测、资料整理、PPT、Agent协作、飞书和Obsidian工作流，沉淀成可以交给AI Agent复用的skills。**
 
-**真实AI工作流技能库，把选题、写作、评测、资料整理、PPT、Agent协作、飞书和Obsidian工作流，沉淀成可以交给AI Agent复用的skills。**
-
-<br>
-
-[Start here](#start-here) · [Skills](#skills) · [Workflow map](#workflow-map) · [Install](#install) · [Safety](#safety)
+[Start here](#start-here) · [Install](#install) · [Registry](#registry) · [Workflow map](#workflow-map)
 
 </div>
 
@@ -22,43 +18,68 @@
 
 ## 这不是prompt合集
 
-我每天都会试AI工具，也会把它们用在真实工作里：选题、写稿、做评测、整理资料、改PPT、处理飞书文档、维护Obsidian素材库、让Hermes/Codex/OpenClaw这类Agent真正帮上忙。
-
-问题是，很多跑通的经验很容易消失。
-
-一次飞书里的讨论，一次Hermes帮我跑通的流程，一次Codex改项目踩过的坑，一次PPT主线被改顺的瞬间，如果不沉淀下来，下次还会重新来一遍。
-
-所以Carl Skills只做一件事：
+Carl Skills只做一件事：
 
 **把真实工作里跑通过的AI方法，变成下次还能交给Agent继续用的skill。**
+
+这里不是把每个skill复制一份做备份，而是做一个公开目录：
+
+- **Canonical repo**：每个skill自己的主仓库，负责源码、README、demo、issue和更新。
+- **Carl Skills registry**：这个仓库的`registry.json`，负责把所有LearnPrompt系skill集中索引起来。
+- **Install URL**：安装时优先指向canonical repo里的`SKILL.md`，避免两边版本不同步。
 
 ---
 
 ## Start here
 
-| Skill | Status | What it helps you do |
-|---|---|---|
-| [Humanize PPT](skills/content/humanize-ppt/) | ![Active Star](https://img.shields.io/badge/status-active--star-B88746) | Turn raw material into a presentation people actually want to listen to |
-| AI Tool Reviewer | ![Building](https://img.shields.io/badge/status-building-D6A85A) | Test AI tools with real tasks instead of rewriting launch notes |
-| Feishu Content Factory | ![Building](https://img.shields.io/badge/status-building-D6A85A) | Turn Feishu notes, comments, and drafts into publishable content |
-| Obsidian Topic Planner | ![Building](https://img.shields.io/badge/status-building-D6A85A) | Turn an Obsidian vault into a topic and publishing system |
-| Carl Humanizer | ![Building](https://img.shields.io/badge/status-building-D6A85A) | Make AI-written text sound closer to a real creator |
-| Paper to PPT | ![Planned](https://img.shields.io/badge/status-planned-6B7280) | Turn papers and PDFs into presentation-ready outlines |
-| Topic Radar | ![Paused](https://img.shields.io/badge/status-paused-8A8175) | Monitor upstream signals for future topics |
+| Skill | Status | Canonical repo | Install source |
+|---|---|---|---|
+| [Humanize PPT](https://github.com/LearnPrompt/humanize-ppt) | active-star | `LearnPrompt/humanize-ppt` | canonical `SKILL.md` |
+| [AI News Radar](https://github.com/LearnPrompt/ai-news-radar) | active | `LearnPrompt/ai-news-radar` | canonical `skills/ai-news-radar/SKILL.md` |
+| [Skillrush Town](https://github.com/LearnPrompt/skillrush-town) | active | `LearnPrompt/skillrush-town` | canonical `skills/skillrush-town/SKILL.md` |
+| [X Article Publisher](https://github.com/LearnPrompt/x-article-publisher-skill) | active | `LearnPrompt/x-article-publisher-skill` | canonical `skills/x-article-publisher/SKILL.md` |
+| [Skill Sync](https://github.com/LearnPrompt/skill-sync) | active | `LearnPrompt/skill-sync` | canonical `SKILL.md` |
+| [CC Harness Skills](https://github.com/LearnPrompt/cc-harness-skills) | active | `LearnPrompt/cc-harness-skills` | canonical `skills/*/SKILL.md` |
+
+> `AnythingWeb`当前没有发现`SKILL.md`，先作为related project记录在registry里，不放进可安装skill列表。
 
 ---
 
-## Skills
+## Install
 
-### Humanize PPT
+### Install one skill
 
-> PPT不是资料容器，是观众状态改变器。
+```bash
+hermes skills install https://raw.githubusercontent.com/LearnPrompt/humanize-ppt/main/SKILL.md --yes
+```
 
-Humanize PPT先把资料变成人愿意听的演示路径，再交给下游工具生成页面。它不是通用PPT生成器，也不是文本润色器；它负责在生成页面之前，先把观众、状态转移、叙事张力、页级意图和素材需求整理清楚。
+### Install all installable skills in this catalog
 
-- Canonical repo: <https://github.com/LearnPrompt/humanize-ppt>
-- Collection mirror: [`skills/content/humanize-ppt/`](skills/content/humanize-ppt/)
-- Agent entry: [`skills/content/humanize-ppt/SKILL.md`](skills/content/humanize-ppt/SKILL.md)
+```bash
+git clone https://github.com/LearnPrompt/carl-skills.git
+cd carl-skills
+python3 scripts/install_all_hermes_skills.py --dry-run
+python3 scripts/install_all_hermes_skills.py --yes
+```
+
+`--dry-run`只打印安装命令，不改本机环境。
+
+---
+
+## Registry
+
+`registry.json`保留。它的作用不是替代Hermes的`SKILL.md`，而是给Agent和脚本一个机器可读目录：
+
+- 哪些skill已经可安装；
+- 每个skill的canonical repo在哪里；
+- 应该从哪个`raw_skill_url`安装；
+- 当前索引到哪个`source_commit`。
+
+所以：
+
+- **单独安装某个skill**：不依赖registry，直接安装它的canonical `raw_skill_url`。
+- **从Carl Skills批量安装/让Agent发现全部skill**：依赖registry。
+- **更新Humanize PPT**：只要主仓库`SKILL.md`更新，用户通过canonical URL安装就会拿到新版；Carl Skills只需要在想更新目录展示或`source_commit`时同步registry，不需要复制一份`SKILL.md`。
 
 ---
 
@@ -74,78 +95,18 @@ Carl Skills follows a simple loop:
 
 ---
 
-## Install
-
-### Install one skill
-
-```bash
-hermes skills install https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/content/humanize-ppt/SKILL.md --yes
-```
-
-### Install bundled skills from this repo
-
-```bash
-git clone https://github.com/LearnPrompt/carl-skills.git
-cd carl-skills
-python3 scripts/install_all_hermes_skills.py --dry-run
-python3 scripts/install_all_hermes_skills.py --yes
-```
-
-`--dry-run`只打印安装命令，不改本机环境。确认无误后再去掉`--dry-run`。
-
----
-
-## Registry
-
-`registry.json`是这个仓库的机器可读目录。它记录每个skill的状态、路径、主仓库和安装入口。
-
-状态规则：
-
-- `active-star`：主推明星，已经有独立仓库/README/demo/可传播截图。
-- `active`：能稳定使用，可以放进主入口。
-- `building`：正在做，适合放Roadmap，不包装成已完成。
-- `planned`：有明确需求和定位，但还没开始工程化。
-- `paused`：暂缓，不抢第一阶段注意力。
-
----
-
 ## Roadmap
 
-第一阶段先把母舰仓库做成可用入口：
-
-- [x] 建立README和registry。
-- [x] 收录Humanize PPT作为第一颗明星skill。
-- [x] 写清楚单个skill和合集安装方式。
-- [ ] 补AI Tool Reviewer。
-- [ ] 补Feishu Content Factory。
-- [ ] 补Obsidian Topic Planner。
-- [ ] 补Carl Humanizer。
-- [ ] 为每个active skill补真实案例和截图。
-
----
-
-## Safety
-
-这个仓库永远不应该包含：
-
-```text
-API keys
-cookies
-tokens
-.env
-真实私有文件
-邮箱内容
-浏览器登录态
-私有飞书文档正文
-个人Obsidian vault原文
-```
-
-私有工作流可以沉淀为结构。私有数据必须留在私有环境里。
+- [x] 建立catalog-first registry。
+- [x] 收录LearnPrompt下已公开且带`SKILL.md`的skill项目。
+- [x] 将Humanize PPT安装入口改回canonical repo，避免collection mirror版本同步问题。
+- [ ] 给每个active skill补更短的人类介绍页和真实使用案例。
+- [ ] 如果未来出现只属于Carl Skills合集的skill，再在本仓库内放置collection-native `SKILL.md`。
 
 ---
 
 ## English
 
-Carl Skills is a collection of real-world AI workflows for creators.
+Carl Skills is a catalog of real-world AI workflows for creators.
 
-It turns repeatable parts of real work—topic planning, content production, AI tool review, presentation shaping, Feishu/Obsidian workflows, and agent collaboration—into reusable skills that an AI agent can run again next time.
+It indexes installable LearnPrompt skills and points agents to each skill's canonical `SKILL.md`, so updates happen in one place instead of drifting across duplicated mirrors.
