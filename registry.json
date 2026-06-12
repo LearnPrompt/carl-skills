@@ -3,8 +3,8 @@
   "description": "Real-world AI workflows for creators.",
   "homepage": "https://github.com/LearnPrompt/carl-skills",
   "license": "MIT",
-  "version": "0.2.0",
-  "updated": "2026-05-16",
+  "version": "0.3.0",
+  "updated": "2026-06-13",
   "model": "catalog-first",
   "install_logic": "Carl Skills is the catalog. Each skill is installed from its canonical repository via raw_skill_url unless a future skill is collection-native.",
   "skills": [
@@ -163,6 +163,71 @@
       "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cc-harness-skills/main/skills/verification-gate/SKILL.md",
       "suite": "cc-harness-skills",
       "suite_name": "CC Harness Skills"
+    },
+    {
+      "id": "luban",
+      "name": "鲁班 Luban",
+      "status": "active",
+      "category": "meta",
+      "summary": "把一个能用的skill打磨成能被装、能传播、能验证的公共资产:验料、访行、过尺、慢刨、回炉五动作,附出生证清单与体检脚本。",
+      "canonical_repo": "https://github.com/LearnPrompt/luban-skill",
+      "canonical_branch": "master",
+      "canonical_path": "skills/luban/SKILL.md",
+      "source_commit": "75567364f179fc502aef30dd80293ad5a174b0e6",
+      "installable": true,
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/luban-skill/master/skills/luban/SKILL.md"
+    },
+    {
+      "id": "paoding",
+      "name": "庖丁 Paoding",
+      "status": "active",
+      "category": "content",
+      "summary": "零API拆解任何博主的爆款打法:收料、观全牛、解牛四层、成谱、试刀盲评,蒸馏成可安装的内容教练。",
+      "canonical_repo": "https://github.com/LearnPrompt/paoding-skill",
+      "canonical_branch": "master",
+      "canonical_path": "skills/paoding/SKILL.md",
+      "source_commit": "b9a7c412c6e592dcbeee63f10cc86d7921e69602",
+      "installable": true,
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/paoding-skill/master/skills/paoding/SKILL.md"
+    },
+    {
+      "id": "cailun",
+      "name": "蔡伦 Cailun",
+      "status": "active",
+      "category": "content",
+      "summary": "把对话里聊出来的结论,3秒造成一页零依赖单文件HTML的纸:纸是静的、字是真的、版是定的。",
+      "canonical_repo": "https://github.com/LearnPrompt/cailun-skill",
+      "canonical_branch": "master",
+      "canonical_path": "skills/cailun/SKILL.md",
+      "source_commit": "245f8bca731e7c6e176625999f9226a8d643303a",
+      "installable": true,
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/cailun-skill/master/skills/cailun/SKILL.md"
+    },
+    {
+      "id": "afu-llm-todo",
+      "name": "阿福 Afu",
+      "status": "active",
+      "category": "ops",
+      "summary": "站在Obsidian收件箱门口的管家:Inbox到Wiki到待办卡到周历一条线,本地LLM驱动,操作有日志可回滚。",
+      "canonical_repo": "https://github.com/LearnPrompt/afu-llm-todo",
+      "canonical_branch": "main",
+      "canonical_path": "SKILL.md",
+      "source_commit": "a9a8189b54f1af517f700e49c250b9a1449e772a",
+      "installable": true,
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/afu-llm-todo/main/SKILL.md"
+    },
+    {
+      "id": "carl-irasutoya-illustrations",
+      "name": "Irasutoya 配图",
+      "status": "active",
+      "category": "content",
+      "summary": "给中文文章生成Irasutoya反应人物正文配图方案与生图提示词:白底、圆润、有梗图感,角色DNA定稿、跨图不走形。",
+      "canonical_repo": "https://github.com/LearnPrompt/carl-irasutoya-illustrations",
+      "canonical_branch": "main",
+      "canonical_path": "SKILL.md",
+      "source_commit": "f69821e5772d2914cc786d45842ca347ba1b3b60",
+      "installable": true,
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/carl-irasutoya-illustrations/main/SKILL.md"
     }
   ],
   "related_projects": [
@@ -186,6 +251,19 @@
         "cc-harness-structured-context-compressor",
         "cc-harness-swarm-coordinator",
         "cc-harness-verification-gate"
+      ]
+    },
+    {
+      "id": "banmen-family",
+      "name": "班门家族 Banmen Family",
+      "repo": "https://github.com/LearnPrompt",
+      "summary": "一组以中国工匠命名的方法论skills:鲁班打磨、庖丁拆解、蔡伦造纸、阿福管家,外加Irasutoya配图。各自独立安装,共享同一套班规。",
+      "skill_ids": [
+        "luban",
+        "paoding",
+        "cailun",
+        "afu-llm-todo",
+        "carl-irasutoya-illustrations"
       ]
     }
   ]

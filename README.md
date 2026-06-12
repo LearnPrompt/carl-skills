@@ -5,7 +5,7 @@
 #### 我自己真实跑通、反复用过的AI工作流，都收在这里
 
 [![License](https://img.shields.io/badge/License-MIT-3B82F6?style=for-the-badge)](./LICENSE)
-[![Skills](https://img.shields.io/badge/Skills-11-10B981?style=for-the-badge)](#-skills)
+[![Skills](https://img.shields.io/badge/Skills-16-10B981?style=for-the-badge)](#-skills)
 [![Registry](https://img.shields.io/badge/Registry-catalog--first-F59E0B?style=for-the-badge)](./registry.json)
 [![First Star](https://img.shields.io/badge/First_Star-Humanize_PPT-8B5CF6?style=for-the-badge)](https://github.com/LearnPrompt/humanize-ppt)
 
@@ -39,6 +39,11 @@
 | ✍️ [**x-article-publisher**](#x-article-publisher) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
 | 🔁 [**skill-sync**](#skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
 | 🧩 [**cc-harness-skills**](#cc-harness-skills) | 一套Agent工作底座，记忆、压缩、协调、验证、主动模式一起用 | [canonical](https://github.com/LearnPrompt/cc-harness-skills) |
+| 🪚 [**鲁班 luban**](#banmen-family) | 把能用的skill打磨成能被装、能传播、能验证的公共资产 | [canonical](https://github.com/LearnPrompt/luban-skill) |
+| 🔪 [**庖丁 paoding**](#banmen-family) | 零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 | [canonical](https://github.com/LearnPrompt/paoding-skill) |
+| 📜 [**蔡伦 cailun**](#banmen-family) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
+| 🏮 [**阿福 afu**](#banmen-family) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
+| 🎨 [**Irasutoya配图**](#banmen-family) | 给中文文章配会吐槽的Irasutoya反应人物正文配图 | [canonical](https://github.com/LearnPrompt/carl-irasutoya-illustrations) |
 
 ---
 
@@ -306,6 +311,42 @@ CC Harness Skills来自同一个仓库，适合一起用。它们处理的不是
 
 如果你想让Agent理解「Carl Skills里到底有什么」，或者想批量安装，就看registry。
 
+<table>
+<tr><td>
+
+<a id="banmen-family"></a>
+
+### 🏯 班门家族
+
+> *"名字背故事，定位背痛苦。装一个，就知道这一家子的脾气。"*
+
+一组以中国工匠命名的方法论skills，各自有独立的canonical repo，共享同一套班规（疑问句不构成授权、宁空不摆拍、commit即push）：
+
+- 🪚 **鲁班**，把"能用的skill"打磨成能被装、能传播、能验证的公共资产 → [luban-skill](https://github.com/LearnPrompt/luban-skill)
+- 🔪 **庖丁**，零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 → [paoding-skill](https://github.com/LearnPrompt/paoding-skill)
+- 📜 **蔡伦**，把对话里聊出来的结论，3秒造成一页零依赖单文件的纸 → [cailun-skill](https://github.com/LearnPrompt/cailun-skill)
+- 🏮 **阿福**，站在Obsidian收件箱门口的管家，Inbox到周历一条线 → [afu-llm-todo](https://github.com/LearnPrompt/afu-llm-todo)
+- 🎨 **Irasutoya配图**，给文章里最值钱的判断配一张会吐槽的图 → [carl-irasutoya-illustrations](https://github.com/LearnPrompt/carl-irasutoya-illustrations)
+
+**安装**（任选其一）：
+
+```bash
+npx skills add LearnPrompt/luban-skill -g        # 鲁班
+npx skills add LearnPrompt/paoding-skill -g      # 庖丁
+npx skills add LearnPrompt/cailun-skill -g       # 蔡伦
+npx skills add LearnPrompt/afu-llm-todo -g       # 阿福
+npx skills add LearnPrompt/carl-irasutoya-illustrations -g  # Irasutoya配图
+```
+
+[![luban](https://img.shields.io/github/stars/LearnPrompt/luban-skill?style=flat-square&label=鲁班)](https://github.com/LearnPrompt/luban-skill)
+[![paoding](https://img.shields.io/github/stars/LearnPrompt/paoding-skill?style=flat-square&label=庖丁)](https://github.com/LearnPrompt/paoding-skill)
+[![cailun](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat-square&label=蔡伦)](https://github.com/LearnPrompt/cailun-skill)
+[![afu](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat-square&label=阿福)](https://github.com/LearnPrompt/afu-llm-todo)
+[![irasutoya](https://img.shields.io/github/stars/LearnPrompt/carl-irasutoya-illustrations?style=flat-square&label=Irasutoya)](https://github.com/LearnPrompt/carl-irasutoya-illustrations)
+
+</td></tr>
+</table>
+
 ---
 
 ## 🛣 Roadmap
@@ -314,6 +355,7 @@ CC Harness Skills来自同一个仓库，适合一起用。它们处理的不是
 - [x] 收录LearnPrompt下已公开且带`SKILL.md`的skill项目
 - [x] 将Humanize PPT安装入口改回canonical repo，避免collection mirror版本同步问题
 - [x] 将CC Harness Skills按suite统一分组
+- [x] 收录班门家族（鲁班/庖丁/蔡伦/阿福/Irasutoya配图）为banmen-family suite
 - [ ] 给每个active skill补真实案例截图和更具体的使用入口
 - [ ] 如果未来出现只属于Carl Skills合集的skill，再在本仓库内放置collection-native `SKILL.md`
 
@@ -333,6 +375,10 @@ CC Harness Skills来自同一个仓库，适合一起用。它们处理的不是
 
 [MIT License](./LICENSE) · Real-world AI workflows for creators
 
-Made by [LearnPrompt](https://github.com/LearnPrompt)
+**[LearnPrompt](https://github.com/LearnPrompt) 出品** · 同门手艺
+
+[鲁班·Skill打磨](https://github.com/LearnPrompt/luban-skill) · [庖丁·博主蒸馏](https://github.com/LearnPrompt/paoding-skill) · [蔡伦·对话造纸](https://github.com/LearnPrompt/cailun-skill) · [阿福·LLM Todo](https://github.com/LearnPrompt/afu-llm-todo) · [AI雷达·零API资讯](https://github.com/LearnPrompt/ai-news-radar) · [淘金小镇·ClawHub日榜](https://github.com/LearnPrompt/skillrush-town) · [Irasutoya·正文配图](https://github.com/LearnPrompt/carl-irasutoya-illustrations) · [Humanize PPT·简报编排](https://github.com/LearnPrompt/humanize-ppt) · [CC Harness·六件套](https://github.com/LearnPrompt/cc-harness-skills)
+
+<sub>公众号「卡尔的AI沃茨」 · [X @aiwarts](https://x.com/aiwarts) · [learnprompt.pro](https://www.learnprompt.pro)</sub>
 
 </div>
