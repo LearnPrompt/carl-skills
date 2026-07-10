@@ -31,22 +31,22 @@
 
 ## 📋 目录
 
-| 名字 | 一句话 | 安装来源 |
-|---|---|---|
-| 🛰️ [**ai-news-radar**](#ai-news-radar) | 24小时AI/科技信息雷达，持续追踪高信号更新 | [canonical](https://github.com/LearnPrompt/ai-news-radar) |
-| 🪚 [**鲁班 luban**](#banmen-family) | 把能用的skill打磨成能被装、能传播、能验证的公共资产 | [canonical](https://github.com/LearnPrompt/luban-skill) |
-| 🎯 [**humanize-ppt**](#humanize-ppt) | 先把资料变成人愿意听的PPT主线，再交给下游工具生成页面 | [canonical](https://github.com/LearnPrompt/humanize-ppt) |
-| 🧩 [**cc-harness-skills**](#cc-harness-skills) | 一套Agent工作底座，记忆、压缩、协调、验证、主动模式一起用 | [canonical](https://github.com/LearnPrompt/cc-harness-skills) |
-| 🏘️ [**skillrush-town**](#skillrush-town) | 淘金小镇，追踪ClawHub Top100和潜力Skill变化 | [canonical](https://github.com/LearnPrompt/skillrush-town) |
-| 📚 [**carl-weread**](#carl-weread) | 微信读书行动型阅读教练，按当前问题推荐今天读的一小节 | [canonical](https://github.com/LearnPrompt/carl-weread) |
-| 🔪 [**庖丁 paoding**](#banmen-family) | 零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 | [canonical](https://github.com/LearnPrompt/paoding-skill) |
-| 🤝 [**搭子 dazi**](#banmen-family) | 让Claude和Codex结对开发，分工、互查、合并一条线 | [canonical](https://github.com/LearnPrompt/partner-skill) |
-| ✍️ [**x-article-publisher**](#x-article-publisher) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
-| 🔁 [**skill-sync**](#skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
-| 🏮 [**阿福 afu**](#banmen-family) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
-| 📜 [**蔡伦 cailun**](#banmen-family) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
-| ⛰️ [**愚公 yugong**](#banmen-family) | Loop工程方法论，把模糊目标改造成带验证门的自动循环 | [canonical](https://github.com/LearnPrompt/loop-engineering) |
-| 🎨 [**Irasutoya配图**](#banmen-family) | 给中文文章配会吐槽的Irasutoya反应人物正文配图 | [canonical](https://github.com/LearnPrompt/carl-irasutoya-illustrations) |
+| 名字 | Star | 一句话 | 安装来源 |
+|---|---|---|---|
+| 🛰️ [**ai-news-radar**](#ai-news-radar) | [![](https://img.shields.io/github/stars/LearnPrompt/ai-news-radar?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/ai-news-radar) | 24小时AI/科技信息雷达，持续追踪高信号更新 | [canonical](https://github.com/LearnPrompt/ai-news-radar) |
+| 🪚 [**鲁班 luban**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/luban-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/luban-skill) | 把能用的skill打磨成能被装、能传播、能验证的公共资产 | [canonical](https://github.com/LearnPrompt/luban-skill) |
+| 🎯 [**humanize-ppt**](#humanize-ppt) | [![](https://img.shields.io/github/stars/LearnPrompt/humanize-ppt?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/humanize-ppt) | 先把资料变成人愿意听的PPT主线，再交给下游工具生成页面 | [canonical](https://github.com/LearnPrompt/humanize-ppt) |
+| 🧩 [**cc-harness-skills**](#cc-harness-skills) | [![](https://img.shields.io/github/stars/LearnPrompt/cc-harness-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/cc-harness-skills) | 一套Agent工作底座，记忆、压缩、协调、验证、主动模式一起用 | [canonical](https://github.com/LearnPrompt/cc-harness-skills) |
+| 🏘️ [**skillrush-town**](#skillrush-town) | [![](https://img.shields.io/github/stars/LearnPrompt/skillrush-town?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/skillrush-town) | 淘金小镇，追踪ClawHub Top100和潜力Skill变化 | [canonical](https://github.com/LearnPrompt/skillrush-town) |
+| 📚 [**carl-weread**](#carl-weread) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-weread?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-weread) | 微信读书行动型阅读教练，按当前问题推荐今天读的一小节 | [canonical](https://github.com/LearnPrompt/carl-weread) |
+| 🔪 [**庖丁 paoding**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/paoding-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/paoding-skill) | 零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 | [canonical](https://github.com/LearnPrompt/paoding-skill) |
+| 🤝 [**搭子 dazi**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/partner-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/partner-skill) | 让Claude和Codex结对开发，分工、互查、合并一条线 | [canonical](https://github.com/LearnPrompt/partner-skill) |
+| ✍️ [**x-article-publisher**](#x-article-publisher) | [![](https://img.shields.io/github/stars/LearnPrompt/x-article-publisher-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/x-article-publisher-skill) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
+| 🔁 [**skill-sync**](#skill-sync) | [![](https://img.shields.io/github/stars/LearnPrompt/skill-sync?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
+| 🏮 [**阿福 afu**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/afu-llm-todo) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
+| 📜 [**蔡伦 cailun**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/cailun-skill) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
+| ⛰️ [**愚公 yugong**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/loop-engineering?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/loop-engineering) | Loop工程方法论，把模糊目标改造成带验证门的自动循环 | [canonical](https://github.com/LearnPrompt/loop-engineering) |
+| 🎨 [**Irasutoya配图**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-irasutoya-illustrations?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-irasutoya-illustrations) | 给中文文章配会吐槽的Irasutoya反应人物正文配图 | [canonical](https://github.com/LearnPrompt/carl-irasutoya-illustrations) |
 
 ---
 
