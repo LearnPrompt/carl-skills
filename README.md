@@ -33,16 +33,19 @@
 
 | 名字 | 一句话 | 安装来源 |
 |---|---|---|
-| 🎯 [**humanize-ppt**](#humanize-ppt) | 先把资料变成人愿意听的PPT主线，再交给下游工具生成页面 | [canonical](https://github.com/LearnPrompt/humanize-ppt) |
 | 🛰️ [**ai-news-radar**](#ai-news-radar) | 24小时AI/科技信息雷达，持续追踪高信号更新 | [canonical](https://github.com/LearnPrompt/ai-news-radar) |
+| 🪚 [**鲁班 luban**](#banmen-family) | 把能用的skill打磨成能被装、能传播、能验证的公共资产 | [canonical](https://github.com/LearnPrompt/luban-skill) |
+| 🎯 [**humanize-ppt**](#humanize-ppt) | 先把资料变成人愿意听的PPT主线，再交给下游工具生成页面 | [canonical](https://github.com/LearnPrompt/humanize-ppt) |
+| 🧩 [**cc-harness-skills**](#cc-harness-skills) | 一套Agent工作底座，记忆、压缩、协调、验证、主动模式一起用 | [canonical](https://github.com/LearnPrompt/cc-harness-skills) |
 | 🏘️ [**skillrush-town**](#skillrush-town) | 淘金小镇，追踪ClawHub Top100和潜力Skill变化 | [canonical](https://github.com/LearnPrompt/skillrush-town) |
+| 📚 [**carl-weread**](#carl-weread) | 微信读书行动型阅读教练，按当前问题推荐今天读的一小节 | [canonical](https://github.com/LearnPrompt/carl-weread) |
+| 🔪 [**庖丁 paoding**](#banmen-family) | 零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 | [canonical](https://github.com/LearnPrompt/paoding-skill) |
+| 🤝 [**搭子 dazi**](#banmen-family) | 让Claude和Codex结对开发，分工、互查、合并一条线 | [canonical](https://github.com/LearnPrompt/partner-skill) |
 | ✍️ [**x-article-publisher**](#x-article-publisher) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
 | 🔁 [**skill-sync**](#skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
-| 🧩 [**cc-harness-skills**](#cc-harness-skills) | 一套Agent工作底座，记忆、压缩、协调、验证、主动模式一起用 | [canonical](https://github.com/LearnPrompt/cc-harness-skills) |
-| 🪚 [**鲁班 luban**](#banmen-family) | 把能用的skill打磨成能被装、能传播、能验证的公共资产 | [canonical](https://github.com/LearnPrompt/luban-skill) |
-| 🔪 [**庖丁 paoding**](#banmen-family) | 零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 | [canonical](https://github.com/LearnPrompt/paoding-skill) |
-| 📜 [**蔡伦 cailun**](#banmen-family) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
 | 🏮 [**阿福 afu**](#banmen-family) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
+| 📜 [**蔡伦 cailun**](#banmen-family) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
+| ⛰️ [**愚公 yugong**](#banmen-family) | Loop工程方法论，把模糊目标改造成带验证门的自动循环 | [canonical](https://github.com/LearnPrompt/loop-engineering) |
 | 🎨 [**Irasutoya配图**](#banmen-family) | 给中文文章配会吐槽的Irasutoya反应人物正文配图 | [canonical](https://github.com/LearnPrompt/carl-irasutoya-illustrations) |
 
 ---
@@ -92,39 +95,6 @@ Carl Skills现在是**catalog-first**。
 <table>
 <tr><td>
 
-<a id="humanize-ppt"></a>
-
-### 🎯 humanize-ppt
-
-> *"PPT不是资料容器，是观众状态改变器。"*
-
-很多AI工具都能生成PPT，但它们经常只是把资料塞进页面里。页数不少，信息不少，听众却不知道为什么要继续听。
-
-Humanize PPT做的是更前面的那一步：先把原始资料整理成一条人愿意听下去的演示路径。它会先处理听众、场景、状态转移、叙事张力、页级意图，再把结构交给下游工具生成页面。
-
-**适合**
-
-- 已经有一堆资料，但PPT主线很散
-- 想把文章、报告、产品介绍改成演讲型deck
-- 做AI生成PPT前，先把观众路径和页面意图定住
-
-**不适合**
-
-- 只想一键生成漂亮模板
-- 只需要改字体、配色、版式
-- 原始资料还完全没有方向
-
-[![Repo](https://img.shields.io/badge/GitHub-humanize--ppt-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/humanize-ppt)
-[![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/humanize-ppt/main/SKILL.md)
-
-→ [canonical repo](https://github.com/LearnPrompt/humanize-ppt) · [raw SKILL.md](https://raw.githubusercontent.com/LearnPrompt/humanize-ppt/main/SKILL.md)
-
-</td></tr>
-</table>
-
-<table>
-<tr><td>
-
 <a id="ai-news-radar"></a>
 
 ### 🛰️ ai-news-radar
@@ -158,6 +128,81 @@ AI News Radar是一个24小时AI/科技信息雷达。它把RSS、OPML、GitHub 
 <table>
 <tr><td>
 
+<a id="humanize-ppt"></a>
+
+### 🎯 humanize-ppt
+
+> *"PPT不是资料容器，是观众状态改变器。"*
+
+很多AI工具都能生成PPT，但它们经常只是把资料塞进页面里。页数不少，信息不少，听众却不知道为什么要继续听。
+
+Humanize PPT做的是更前面的那一步：先把原始资料整理成一条人愿意听下去的演示路径。它会先处理听众、场景、状态转移、叙事张力、页级意图，再把结构交给下游工具生成页面。
+
+**适合**
+
+- 已经有一堆资料，但PPT主线很散
+- 想把文章、报告、产品介绍改成演讲型deck
+- 做AI生成PPT前，先把观众路径和页面意图定住
+
+**不适合**
+
+- 只想一键生成漂亮模板
+- 只需要改字体、配色、版式
+- 原始资料还完全没有方向
+
+[![Repo](https://img.shields.io/badge/GitHub-humanize--ppt-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/humanize-ppt)
+[![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/humanize-ppt/main/SKILL.md)
+
+→ [canonical repo](https://github.com/LearnPrompt/humanize-ppt) · [raw SKILL.md](https://raw.githubusercontent.com/LearnPrompt/humanize-ppt/main/SKILL.md)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="cc-harness-skills"></a>
+
+### 🧩 CC Harness Skills
+
+> *"这不是六个散装skill，是一套Agent工作底座。"*
+
+CC Harness Skills来自同一个仓库，适合一起用。它们处理的不是某个具体内容任务，而是Agent长期工作时绕不开的底层问题：怎么记忆、怎么压缩上下文、怎么协调多Agent、怎么验证完成声明、怎么做轻量主动模式。
+
+所以在Carl Skills里统一加`cc-harness-`前缀，并放在同一个suite里。
+
+| 名字 | 用来干什么 |
+|---|---|
+| `cc-harness-dream-memory` | 把近期日志、会话和记忆文件整理成可持续使用的主题记忆 |
+| `cc-harness-kairos-lite` | 构建轻量主动模式，包含定时检查、睡眠间隔和过期保护 |
+| `cc-harness-memory-extractor` | 从近期对话里提取长期记忆，避免把临时状态写成永久事实 |
+| `cc-harness-structured-context-compressor` | 把长会话压缩成可续接摘要，保留当前工作和下一步 |
+| `cc-harness-swarm-coordinator` | 拆分多Agent工作，让协调者专注集成而不是淹没在探索里 |
+| `cc-harness-verification-gate` | 做只读验证，检查完成声明和测试结果是不是真的 |
+
+**适合**
+
+- 长时间跑Agent任务
+- 多Agent协作
+- 需要跨会话延续上下文
+- 不想让Agent越跑越乱
+
+**不适合**
+
+- 只想完成一次简单问答
+- 不需要记忆、压缩、验证和调度
+
+[![Repo](https://img.shields.io/badge/GitHub-cc--harness--skills-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/cc-harness-skills)
+[![Suite](https://img.shields.io/badge/Suite-6_skills-8B5CF6?style=flat-square)](./registry.json)
+
+→ [canonical repo](https://github.com/LearnPrompt/cc-harness-skills) · [registry suite](./registry.json)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
 <a id="skillrush-town"></a>
 
 ### 🏘️ skillrush-town
@@ -184,6 +229,43 @@ Skillrush Town，淘金小镇，用来追踪ClawHub Top100下载快照和潜力A
 [![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/skillrush-town/main/skills/skillrush-town/SKILL.md)
 
 → [canonical repo](https://github.com/LearnPrompt/skillrush-town) · [GitHub Pages](https://learnprompt.github.io/skillrush-town/) · [raw SKILL.md](https://raw.githubusercontent.com/LearnPrompt/skillrush-town/main/skills/skillrush-town/SKILL.md)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="carl-weread"></a>
+
+### 📚 carl-weread
+
+> *"把微信读书从「读了多少」改成「今天哪个问题可以被读懂一点」。"*
+
+carl-weread是一个微信读书行动型阅读教练。它根据你当前卡住的问题，交叉书架、笔记和章节，推荐一本书里今天读的一小节，并把阅读收束成一张读后行动卡，Markdown回流，周阅读行动复盘。
+
+它解决的不是「读什么书」，而是「今天读哪一小节、读完做什么」。
+
+**适合**
+
+- 微信读书里囤了很多书，但阅读和手头问题脱节
+- 想让每次阅读都落成一个可执行动作
+- 希望Agent帮你做书架、笔记、章节的交叉推荐
+
+**不适合**
+
+- 只想要一串书单推荐
+- 不用微信读书
+- 不想登录微信读书API
+
+```bash
+hermes skills install https://raw.githubusercontent.com/LearnPrompt/carl-weread/main/SKILL.md
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-carl--weread-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-weread)
+[![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/carl-weread/main/SKILL.md)
+
+→ [canonical repo](https://github.com/LearnPrompt/carl-weread) · [raw SKILL.md](https://raw.githubusercontent.com/LearnPrompt/carl-weread/main/SKILL.md)
 
 </td></tr>
 </table>
@@ -253,48 +335,6 @@ Skill Sync用来审计Codex、Claude、OpenClaw、OpenCode、本地workspace和�
 </td></tr>
 </table>
 
-<table>
-<tr><td>
-
-<a id="cc-harness-skills"></a>
-
-### 🧩 CC Harness Skills
-
-> *"这不是六个散装skill，是一套Agent工作底座。"*
-
-CC Harness Skills来自同一个仓库，适合一起用。它们处理的不是某个具体内容任务，而是Agent长期工作时绕不开的底层问题：怎么记忆、怎么压缩上下文、怎么协调多Agent、怎么验证完成声明、怎么做轻量主动模式。
-
-所以在Carl Skills里统一加`cc-harness-`前缀，并放在同一个suite里。
-
-| 名字 | 用来干什么 |
-|---|---|
-| `cc-harness-dream-memory` | 把近期日志、会话和记忆文件整理成可持续使用的主题记忆 |
-| `cc-harness-kairos-lite` | 构建轻量主动模式，包含定时检查、睡眠间隔和过期保护 |
-| `cc-harness-memory-extractor` | 从近期对话里提取长期记忆，避免把临时状态写成永久事实 |
-| `cc-harness-structured-context-compressor` | 把长会话压缩成可续接摘要，保留当前工作和下一步 |
-| `cc-harness-swarm-coordinator` | 拆分多Agent工作，让协调者专注集成而不是淹没在探索里 |
-| `cc-harness-verification-gate` | 做只读验证，检查完成声明和测试结果是不是真的 |
-
-**适合**
-
-- 长时间跑Agent任务
-- 多Agent协作
-- 需要跨会话延续上下文
-- 不想让Agent越跑越乱
-
-**不适合**
-
-- 只想完成一次简单问答
-- 不需要记忆、压缩、验证和调度
-
-[![Repo](https://img.shields.io/badge/GitHub-cc--harness--skills-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/cc-harness-skills)
-[![Suite](https://img.shields.io/badge/Suite-6_skills-8B5CF6?style=flat-square)](./registry.json)
-
-→ [canonical repo](https://github.com/LearnPrompt/cc-harness-skills) · [registry suite](./registry.json)
-
-</td></tr>
-</table>
-
 ---
 
 ## 🗂 Registry
@@ -324,8 +364,10 @@ CC Harness Skills来自同一个仓库，适合一起用。它们处理的不是
 
 - 🪚 **鲁班**，把"能用的skill"打磨成能被装、能传播、能验证的公共资产 → [luban-skill](https://github.com/LearnPrompt/luban-skill)
 - 🔪 **庖丁**，零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 → [paoding-skill](https://github.com/LearnPrompt/paoding-skill)
-- 📜 **蔡伦**，把对话里聊出来的结论，3秒造成一页零依赖单文件的纸 → [cailun-skill](https://github.com/LearnPrompt/cailun-skill)
+- 🤝 **搭子**，让Claude和Codex结对开发，分工、互查、合并一条线 → [partner-skill](https://github.com/LearnPrompt/partner-skill)
 - 🏮 **阿福**，站在Obsidian收件箱门口的管家，Inbox到周历一条线 → [afu-llm-todo](https://github.com/LearnPrompt/afu-llm-todo)
+- 📜 **蔡伦**，把对话里聊出来的结论，3秒造成一页零依赖单文件的纸 → [cailun-skill](https://github.com/LearnPrompt/cailun-skill)
+- ⛰️ **愚公**，把模糊目标改造成带验证门、会自己挖的自动循环 → [loop-engineering](https://github.com/LearnPrompt/loop-engineering)
 - 🎨 **Irasutoya配图**，给文章里最值钱的判断配一张会吐槽的图 → [carl-irasutoya-illustrations](https://github.com/LearnPrompt/carl-irasutoya-illustrations)
 
 **安装**（任选其一）：
@@ -333,15 +375,19 @@ CC Harness Skills来自同一个仓库，适合一起用。它们处理的不是
 ```bash
 npx skills add LearnPrompt/luban-skill -g        # 鲁班
 npx skills add LearnPrompt/paoding-skill -g      # 庖丁
-npx skills add LearnPrompt/cailun-skill -g       # 蔡伦
+npx skills add LearnPrompt/partner-skill -g      # 搭子
 npx skills add LearnPrompt/afu-llm-todo -g       # 阿福
+npx skills add LearnPrompt/cailun-skill -g       # 蔡伦
+npx skills add LearnPrompt/loop-engineering      # 愚公
 npx skills add LearnPrompt/carl-irasutoya-illustrations -g  # Irasutoya配图
 ```
 
 [![luban](https://img.shields.io/github/stars/LearnPrompt/luban-skill?style=flat-square&label=鲁班)](https://github.com/LearnPrompt/luban-skill)
 [![paoding](https://img.shields.io/github/stars/LearnPrompt/paoding-skill?style=flat-square&label=庖丁)](https://github.com/LearnPrompt/paoding-skill)
-[![cailun](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat-square&label=蔡伦)](https://github.com/LearnPrompt/cailun-skill)
+[![dazi](https://img.shields.io/github/stars/LearnPrompt/partner-skill?style=flat-square&label=搭子)](https://github.com/LearnPrompt/partner-skill)
 [![afu](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat-square&label=阿福)](https://github.com/LearnPrompt/afu-llm-todo)
+[![cailun](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat-square&label=蔡伦)](https://github.com/LearnPrompt/cailun-skill)
+[![yugong](https://img.shields.io/github/stars/LearnPrompt/loop-engineering?style=flat-square&label=愚公)](https://github.com/LearnPrompt/loop-engineering)
 [![irasutoya](https://img.shields.io/github/stars/LearnPrompt/carl-irasutoya-illustrations?style=flat-square&label=Irasutoya)](https://github.com/LearnPrompt/carl-irasutoya-illustrations)
 
 </td></tr>
@@ -375,10 +421,18 @@ npx skills add LearnPrompt/carl-irasutoya-illustrations -g  # Irasutoya配图
 
 [MIT License](./LICENSE) · Real-world AI workflows for creators
 
-**[LearnPrompt](https://github.com/LearnPrompt) 出品** · 同门手艺
+</div>
 
-[鲁班·Skill打磨](https://github.com/LearnPrompt/luban-skill) · [庖丁·博主蒸馏](https://github.com/LearnPrompt/paoding-skill) · [蔡伦·对话造纸](https://github.com/LearnPrompt/cailun-skill) · [阿福·LLM Todo](https://github.com/LearnPrompt/afu-llm-todo) · [AI雷达·零API资讯](https://github.com/LearnPrompt/ai-news-radar) · [淘金小镇·ClawHub日榜](https://github.com/LearnPrompt/skillrush-town) · [Irasutoya·正文配图](https://github.com/LearnPrompt/carl-irasutoya-illustrations) · [Humanize PPT·简报编排](https://github.com/LearnPrompt/humanize-ppt) · [CC Harness·六件套](https://github.com/LearnPrompt/cc-harness-skills)
+---
 
-<sub>公众号「卡尔的AI沃茨」 · [X @aiwarts](https://x.com/aiwarts) · [learnprompt.pro/workshop](https://learnprompt.pro/workshop/)</sub>
+<div align="center">
+
+**更多好用 Skill · More Skills** → [learnprompt.pro/skills](https://learnprompt.pro/skills/)
+
+[鲁班·Skill打磨](https://github.com/LearnPrompt/luban-skill) · [庖丁·博主蒸馏](https://github.com/LearnPrompt/paoding-skill) · [蔡伦·对话造纸](https://github.com/LearnPrompt/cailun-skill) · [阿福·LLM Todo](https://github.com/LearnPrompt/afu-llm-todo) · [愚公·Loop工程](https://github.com/LearnPrompt/loop-engineering) · [搭子·结对开发](https://github.com/LearnPrompt/partner-skill) · [AI雷达·零API资讯](https://github.com/LearnPrompt/ai-news-radar)
+
+[淘金小镇·ClawHub日榜](https://github.com/LearnPrompt/skillrush-town) · [Irasutoya·正文配图](https://github.com/LearnPrompt/carl-irasutoya-illustrations) · [Humanize PPT·演讲系统](https://github.com/LearnPrompt/humanize-ppt) · [CC Harness·六件套](https://github.com/LearnPrompt/cc-harness-skills) · [微信读书教练](https://github.com/LearnPrompt/carl-weread) · [X Article发布](https://github.com/LearnPrompt/x-article-publisher-skill)
+
+<sub>**[LearnPrompt](https://github.com/LearnPrompt) 出品** · 公众号「卡尔的AI沃茨」 · [X @aiwarts](https://x.com/aiwarts)</sub>
 
 </div>
