@@ -5,7 +5,8 @@
 #### 我自己真实跑通、反复用过的AI工作流，都收在这里
 
 [![License](https://img.shields.io/badge/License-MIT-3B82F6?style=for-the-badge)](./LICENSE)
-[![Skills](https://img.shields.io/badge/Skills-17-10B981?style=for-the-badge)](#-skills)
+[![Workflows](https://img.shields.io/badge/Workflows-15-3B82F6?style=for-the-badge)](#-skills)
+[![Skills](https://img.shields.io/badge/Skills-20-10B981?style=for-the-badge)](./registry.json)
 [![Registry](https://img.shields.io/badge/Registry-catalog--first-F59E0B?style=for-the-badge)](./registry.json)
 [![First Star](https://img.shields.io/badge/First_Star-Humanize_PPT-8B5CF6?style=for-the-badge)](https://github.com/LearnPrompt/humanize-ppt)
 
@@ -34,20 +35,20 @@
 | 名字 | Star | 一句话 | 安装来源 |
 |---|---|---|---|
 | 🛰️ [**ai-news-radar**](#ai-news-radar) | [![](https://img.shields.io/github/stars/LearnPrompt/ai-news-radar?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/ai-news-radar) | 24小时AI/科技信息雷达，持续追踪高信号更新 | [canonical](https://github.com/LearnPrompt/ai-news-radar) |
-| 🪚 [**鲁班 luban**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/luban-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/luban-skill) | 把能用的skill打磨成能被装、能传播、能验证的公共资产 | [canonical](https://github.com/LearnPrompt/luban-skill) |
+| 🪚 [**鲁班 luban**](#luban) | [![](https://img.shields.io/github/stars/LearnPrompt/luban-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/luban-skill) | 把能用的skill打磨成能被装、能传播、能验证的公共资产 | [canonical](https://github.com/LearnPrompt/luban-skill) |
 | 🎯 [**humanize-ppt**](#humanize-ppt) | [![](https://img.shields.io/github/stars/LearnPrompt/humanize-ppt?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/humanize-ppt) | 先把资料变成人愿意听的PPT主线，再交给下游工具生成页面 | [canonical](https://github.com/LearnPrompt/humanize-ppt) |
 | 🧩 [**cc-harness-skills**](#cc-harness-skills) | [![](https://img.shields.io/github/stars/LearnPrompt/cc-harness-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/cc-harness-skills) | 一套Agent工作底座，记忆、压缩、协调、验证、主动模式一起用 | [canonical](https://github.com/LearnPrompt/cc-harness-skills) |
 | 🏘️ [**skillrush-town**](#skillrush-town) | [![](https://img.shields.io/github/stars/LearnPrompt/skillrush-town?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/skillrush-town) | 淘金小镇，追踪ClawHub Top100和潜力Skill变化 | [canonical](https://github.com/LearnPrompt/skillrush-town) |
 | 📚 [**carl-weread**](#carl-weread) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-weread?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-weread) | 微信读书行动型阅读教练，按当前问题推荐今天读的一小节 | [canonical](https://github.com/LearnPrompt/carl-weread) |
-| 🔪 [**庖丁 paoding**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/paoding-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/paoding-skill) | 零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 | [canonical](https://github.com/LearnPrompt/paoding-skill) |
-| 🤝 [**搭子 dazi**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/partner-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/partner-skill) | 让Claude和Codex结对开发，分工、互查、合并一条线 | [canonical](https://github.com/LearnPrompt/partner-skill) |
+| 🔪 [**庖丁 paoding**](#paoding) | [![](https://img.shields.io/github/stars/LearnPrompt/paoding-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/paoding-skill) | 零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 | [canonical](https://github.com/LearnPrompt/paoding-skill) |
+| 🤝 [**搭子 dazi**](#partner-skill) | [![](https://img.shields.io/github/stars/LearnPrompt/partner-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/partner-skill) | 让Claude和Codex结对开发，分工、互查、合并一条线 | [canonical](https://github.com/LearnPrompt/partner-skill) |
 | ✍️ [**x-article-publisher**](#x-article-publisher) | [![](https://img.shields.io/github/stars/LearnPrompt/x-article-publisher-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/x-article-publisher-skill) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
 | 🔁 [**skill-sync**](#skill-sync) | [![](https://img.shields.io/github/stars/LearnPrompt/skill-sync?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
 | 🧭 [**Skill 瘦身**](#skill-slimming) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-skills) | 把Agent能力整理成全局、项目和按需触发 | [collection-native](./skills/ops/skill-slimming/SKILL.md) |
-| 🏮 [**阿福 afu**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/afu-llm-todo) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
-| 📜 [**蔡伦 cailun**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/cailun-skill) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
-| ⛰️ [**愚公 yugong**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/loop-engineering?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/loop-engineering) | Loop工程方法论，把模糊目标改造成带验证门的自动循环 | [canonical](https://github.com/LearnPrompt/loop-engineering) |
-| 🎨 [**Irasutoya配图**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-irasutoya-illustrations?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-irasutoya-illustrations) | 给中文文章配会吐槽的Irasutoya反应人物正文配图 | [canonical](https://github.com/LearnPrompt/carl-irasutoya-illustrations) |
+| 🏮 [**阿福 afu**](#afu-llm-todo) | [![](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/afu-llm-todo) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
+| 📜 [**蔡伦 cailun**](#cailun) | [![](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/cailun-skill) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
+| ⛰️ [**愚公 yugong**](#loop-engineering) | [![](https://img.shields.io/github/stars/LearnPrompt/loop-engineering?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/loop-engineering) | Loop工程方法论，把模糊目标改造成带验证门的自动循环 | [canonical](https://github.com/LearnPrompt/loop-engineering) |
+| 🎨 [**Irasutoya配图**](#carl-irasutoya-illustrations) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-irasutoya-illustrations?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-irasutoya-illustrations) | 给中文文章配会吐槽的Irasutoya反应人物正文配图 | [canonical](https://github.com/LearnPrompt/carl-irasutoya-illustrations) |
 
 ---
 
@@ -127,6 +128,41 @@ AI News Radar是一个24小时AI/科技信息雷达。它把RSS、OPML、GitHub 
 [![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/ai-news-radar/master/skills/ai-news-radar/SKILL.md)
 
 → [canonical repo](https://github.com/LearnPrompt/ai-news-radar) · [raw SKILL.md](https://raw.githubusercontent.com/LearnPrompt/ai-news-radar/master/skills/ai-news-radar/SKILL.md)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="luban"></a>
+
+### 🪚 鲁班 luban
+
+> *"Skill不是写完就算完，要经得住安装、触发、执行和传播。"*
+
+鲁班负责把一个“能用”的Skill打磨成可以公开交付的产品。它会检查真实来源、用户路径、触发描述、目录结构、安装方式和验证证据，再通过访行、过尺和回炉收紧缺口。
+
+**适合**
+
+- 已经有一个Skill，但安装、说明或验证还不完整
+- 准备把内部工作流发布到GitHub
+- 想让Skill经过结构化体检和真实试跑
+
+**不适合**
+
+- 还没有明确能力，只想从零头脑风暴
+- 只是修一处普通代码问题
+- 不准备提供真实安装和运行证据
+
+```bash
+npx skills add LearnPrompt/luban-skill -g
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-luban--skill-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/luban-skill)
+[![Install](https://img.shields.io/badge/Install-npx-10B981?style=flat-square)](https://github.com/LearnPrompt/luban-skill)
+
+→ [canonical repo](https://github.com/LearnPrompt/luban-skill) · [SKILL.md](https://github.com/LearnPrompt/luban-skill/blob/master/skills/luban/SKILL.md)
 
 </td></tr>
 </table>
@@ -265,13 +301,83 @@ carl-weread是一个微信读书行动型阅读教练。它根据你当前卡住
 - 不想登录微信读书API
 
 ```bash
-hermes skills install https://raw.githubusercontent.com/LearnPrompt/carl-weread/main/SKILL.md
+npx skills add LearnPrompt/carl-weread -g
 ```
 
 [![Repo](https://img.shields.io/badge/GitHub-carl--weread-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-weread)
-[![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/carl-weread/main/SKILL.md)
+[![Install](https://img.shields.io/badge/Install-skill_folder-10B981?style=flat-square)](https://github.com/LearnPrompt/carl-weread)
 
-→ [canonical repo](https://github.com/LearnPrompt/carl-weread) · [raw SKILL.md](https://raw.githubusercontent.com/LearnPrompt/carl-weread/main/SKILL.md)
+→ [canonical repo](https://github.com/LearnPrompt/carl-weread) · [SKILL.md](https://github.com/LearnPrompt/carl-weread/blob/main/SKILL.md)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="paoding"></a>
+
+### 🔪 庖丁 paoding
+
+> *"不是模仿一篇爆文，而是拆出这个创作者稳定重复的刀法。"*
+
+庖丁在不依赖平台API的前提下，读取公开内容样本，拆解选题、标题、结构、语气和转化机制，再把规律蒸馏成可安装、可盲评的内容教练。
+
+**适合**
+
+- 想系统拆解小红书、公众号、抖音等创作者
+- 需要从多篇样本提取稳定方法，而不是抄一篇
+- 想把拆解结果继续做成内容Skill
+
+**不适合**
+
+- 只提供一条无法访问的内容链接
+- 想批量抓取私人或受限数据
+- 只需要普通文章摘要
+
+```bash
+npx skills add LearnPrompt/paoding-skill -g
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-paoding--skill-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/paoding-skill)
+[![Install](https://img.shields.io/badge/Install-npx-10B981?style=flat-square)](https://github.com/LearnPrompt/paoding-skill)
+
+→ [canonical repo](https://github.com/LearnPrompt/paoding-skill) · [SKILL.md](https://github.com/LearnPrompt/paoding-skill/blob/master/skills/paoding/SKILL.md)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="partner-skill"></a>
+
+### 🤝 搭子 dazi
+
+> *"我的 Claude Code 和 Codex 天下第一好。"*
+
+搭子让Claude Code和Codex围绕同一份目标事实源协作：一边负责高价值规划、交互判断和复核，另一边负责主要实现、命令验证和持续推进，并保留可继续执行的交接与验收记录。
+
+**适合**
+
+- 需要Claude与Codex分工完成成规模开发
+- 希望规划、实现和Review由不同视角完成
+- 长任务需要Goal、PR和Verification闭环
+
+**不适合**
+
+- 一次性的小改动或普通问答
+- 只有一个Agent可用
+- 不准备验证子任务的真实输出
+
+```bash
+npx skills add LearnPrompt/partner-skill --skill partner-skill -g
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-partner--skill-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/partner-skill)
+[![Install](https://img.shields.io/badge/Install-skill_folder-10B981?style=flat-square)](https://github.com/LearnPrompt/partner-skill)
+
+→ [canonical repo](https://github.com/LearnPrompt/partner-skill) · [SKILL.md](https://github.com/LearnPrompt/partner-skill/blob/main/SKILL.md)
 
 </td></tr>
 </table>
@@ -379,6 +485,146 @@ npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
 </td></tr>
 </table>
 
+<table>
+<tr><td>
+
+<a id="afu-llm-todo"></a>
+
+### 🏮 阿福 afu
+
+> *"收件箱不是仓库，是门口；东西进来以后要知道往哪里走。"*
+
+阿福是Obsidian收件箱管家，把临时资料整理成Wiki、待办卡和周历，并保留处理日志与恢复路径。它强调本地运行、可追溯状态和不误删源笔记。
+
+**适合**
+
+- Obsidian收件箱长期堆积，资料与待办混在一起
+- 想把Inbox稳定流转到Wiki和周计划
+- 需要本地LLM和可回滚处理记录
+
+**不适合**
+
+- 不使用Obsidian
+- 想直接永久删除原始笔记
+- 只需要一次性的文件分类
+
+```bash
+npx skills add LearnPrompt/afu-llm-todo -g
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-afu--llm--todo-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/afu-llm-todo)
+[![Install](https://img.shields.io/badge/Install-npx-10B981?style=flat-square)](https://github.com/LearnPrompt/afu-llm-todo)
+
+→ [canonical repo](https://github.com/LearnPrompt/afu-llm-todo) · [SKILL.md](https://github.com/LearnPrompt/afu-llm-todo/blob/main/SKILL.md)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="cailun"></a>
+
+### 📜 蔡伦 cailun
+
+> *"对话里聊出来的结论，应该马上变成一张能传阅的纸。"*
+
+蔡伦把已经明确的内容造成一页零依赖HTML：文字是真实内容，版式固定而克制，打开就能读、截图和分享，不把信息藏进复杂交互。
+
+**适合**
+
+- 把聊天结论快速整理成单页说明
+- 需要离线可打开、方便截图的HTML
+- 做方案纸、决策纸、复盘纸或交接纸
+
+**不适合**
+
+- 需要复杂Web应用或后台系统
+- 内容本身还没有形成结论
+- 只想套一个炫技模板
+
+```bash
+npx skills add LearnPrompt/cailun-skill -g
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-cailun--skill-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/cailun-skill)
+[![Install](https://img.shields.io/badge/Install-npx-10B981?style=flat-square)](https://github.com/LearnPrompt/cailun-skill)
+
+→ [canonical repo](https://github.com/LearnPrompt/cailun-skill) · [SKILL.md](https://github.com/LearnPrompt/cailun-skill/blob/master/skills/cailun/SKILL.md)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="loop-engineering"></a>
+
+### ⛰️ 愚公 yugong
+
+> *"真正的自动化不是多跑几轮提示词，而是先把循环的停止判据和护栏装好。"*
+
+愚公把“让Agent自己反复做某件事”的愿望装配成Loop Spec：goal、intake、trigger、worktree、maker/checker、state、verification和guardrails都有明确落点，最后交付可运行命令，但不替用户扣下启动扳机。
+
+**适合**
+
+- 反复维护、triage、升级或内容流水线
+- 需要Agent自主迭代到可验证目标
+- 想让Claude Code和Codex共用一份Loop事实源
+
+**不适合**
+
+- 普通一次性任务
+- 从零编写一个普通Skill
+- 没有可判定的完成条件
+
+```bash
+npx skills add LearnPrompt/loop-engineering --skill loop-engineering -g
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-loop--engineering-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/loop-engineering)
+[![Install](https://img.shields.io/badge/Install-skill_folder-10B981?style=flat-square)](https://github.com/LearnPrompt/loop-engineering)
+
+→ [canonical repo](https://github.com/LearnPrompt/loop-engineering) · [SKILL.md](https://github.com/LearnPrompt/loop-engineering/blob/main/skills/loop-engineering/SKILL.md)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="carl-irasutoya-illustrations"></a>
+
+### 🎨 Irasutoya 配图
+
+> *"不是给每一段配图，而是给文章里最值钱的判断配一个会吐槽的人。"*
+
+Irasutoya配图从中文文章中挑出值得视觉化的判断，设计白底、圆润、有梗图感的反应人物和生图提示词，并通过角色DNA保持跨图一致。
+
+**适合**
+
+- 公众号、博客、Notion文章需要正文配图
+- 想用人物反应强化观点和节奏
+- 同一角色需要跨多张图保持一致
+
+**不适合**
+
+- 需要复刻Irasutoya原作素材
+- 只想生成装饰性背景图
+- 不提供文章上下文和关键判断
+
+```bash
+npx skills add LearnPrompt/carl-irasutoya-illustrations -g
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-carl--irasutoya--illustrations-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-irasutoya-illustrations)
+[![Install](https://img.shields.io/badge/Install-npx-10B981?style=flat-square)](https://github.com/LearnPrompt/carl-irasutoya-illustrations)
+
+→ [canonical repo](https://github.com/LearnPrompt/carl-irasutoya-illustrations) · [SKILL.md](https://github.com/LearnPrompt/carl-irasutoya-illustrations/blob/main/SKILL.md)
+
+</td></tr>
+</table>
+
 ---
 
 ## 🗂 Registry
@@ -391,52 +637,11 @@ npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
 - 应该用`raw_skill_url`还是完整`skill-folder`安装
 - 外部canonical skill当前索引到哪个`source_commit`
 - collection-native skill在本仓库的哪个`canonical_path`
+- 20个实际Skill如何通过`catalog_anchor`映射到上面的15个工作流卡片
 
 如果你只装一个skill，不需要关心registry。单文件Skill可以装raw `SKILL.md`；带脚本和资源的Skill要用目录感知安装器并通过`--skill`只选择目标项。
 
-如果你想让Agent理解「Carl Skills里到底有什么」，或者想批量安装，就看registry。
-
-<table>
-<tr><td>
-
-<a id="banmen-family"></a>
-
-### 🏯 班门家族
-
-> *"名字背故事，定位背痛苦。装一个，就知道这一家子的脾气。"*
-
-一组以中国工匠命名的方法论skills，各自有独立的canonical repo，共享同一套班规（疑问句不构成授权、宁空不摆拍、commit即push）：
-
-- 🪚 **鲁班**，把"能用的skill"打磨成能被装、能传播、能验证的公共资产 → [luban-skill](https://github.com/LearnPrompt/luban-skill)
-- 🔪 **庖丁**，零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 → [paoding-skill](https://github.com/LearnPrompt/paoding-skill)
-- 🤝 **搭子**，让Claude和Codex结对开发，分工、互查、合并一条线 → [partner-skill](https://github.com/LearnPrompt/partner-skill)
-- 🏮 **阿福**，站在Obsidian收件箱门口的管家，Inbox到周历一条线 → [afu-llm-todo](https://github.com/LearnPrompt/afu-llm-todo)
-- 📜 **蔡伦**，把对话里聊出来的结论，3秒造成一页零依赖单文件的纸 → [cailun-skill](https://github.com/LearnPrompt/cailun-skill)
-- ⛰️ **愚公**，把模糊目标改造成带验证门、会自己挖的自动循环 → [loop-engineering](https://github.com/LearnPrompt/loop-engineering)
-- 🎨 **Irasutoya配图**，给文章里最值钱的判断配一张会吐槽的图 → [carl-irasutoya-illustrations](https://github.com/LearnPrompt/carl-irasutoya-illustrations)
-
-**安装**（任选其一）：
-
-```bash
-npx skills add LearnPrompt/luban-skill -g        # 鲁班
-npx skills add LearnPrompt/paoding-skill -g      # 庖丁
-npx skills add LearnPrompt/partner-skill -g      # 搭子
-npx skills add LearnPrompt/afu-llm-todo -g       # 阿福
-npx skills add LearnPrompt/cailun-skill -g       # 蔡伦
-npx skills add LearnPrompt/loop-engineering      # 愚公
-npx skills add LearnPrompt/carl-irasutoya-illustrations -g  # Irasutoya配图
-```
-
-[![luban](https://img.shields.io/github/stars/LearnPrompt/luban-skill?style=flat-square&label=鲁班)](https://github.com/LearnPrompt/luban-skill)
-[![paoding](https://img.shields.io/github/stars/LearnPrompt/paoding-skill?style=flat-square&label=庖丁)](https://github.com/LearnPrompt/paoding-skill)
-[![dazi](https://img.shields.io/github/stars/LearnPrompt/partner-skill?style=flat-square&label=搭子)](https://github.com/LearnPrompt/partner-skill)
-[![afu](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat-square&label=阿福)](https://github.com/LearnPrompt/afu-llm-todo)
-[![cailun](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat-square&label=蔡伦)](https://github.com/LearnPrompt/cailun-skill)
-[![yugong](https://img.shields.io/github/stars/LearnPrompt/loop-engineering?style=flat-square&label=愚公)](https://github.com/LearnPrompt/loop-engineering)
-[![irasutoya](https://img.shields.io/github/stars/LearnPrompt/carl-irasutoya-illustrations?style=flat-square&label=Irasutoya)](https://github.com/LearnPrompt/carl-irasutoya-illustrations)
-
-</td></tr>
-</table>
+如果你想让Agent理解「Carl Skills里到底有什么」，或者想批量安装，就看registry。README里的每一行目录都必须对应一张同名卡片；Registry可以把同一个套装拆成多个实际Skill，但必须共享同一个`catalog_anchor`。
 
 ---
 
@@ -446,7 +651,8 @@ npx skills add LearnPrompt/carl-irasutoya-illustrations -g  # Irasutoya配图
 - [x] 收录LearnPrompt下已公开且带`SKILL.md`的skill项目
 - [x] 将Humanize PPT安装入口改回canonical repo，避免collection mirror版本同步问题
 - [x] 将CC Harness Skills按suite统一分组
-- [x] 收录班门家族（鲁班/庖丁/蔡伦/阿福/Irasutoya配图）为banmen-family suite
+- [x] 收录班门家族（鲁班/庖丁/搭子/蔡伦/愚公/阿福/Irasutoya配图）并为每项提供独立卡片
+- [x] 保证15个工作流目录、15张README卡片和20个Registry Skill自动对账
 - [x] 收录首个collection-native skill：Skill 瘦身
 - [ ] 给每个active skill补真实案例截图和更具体的使用入口
 
