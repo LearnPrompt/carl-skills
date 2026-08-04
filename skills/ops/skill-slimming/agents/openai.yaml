@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill 瘦身"
+  short_description: "盘点并项目化、触发化 Agent Skills"
+  default_prompt: "使用 $skill-slimming 只读盘点当前 Agent 的 Skills、插件与 MCP，生成可持续保存的本地复审页；不要执行任何归档或配置修改。"

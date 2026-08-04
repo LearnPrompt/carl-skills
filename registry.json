@@ -3,7 +3,7 @@
   "description": "Real-world AI workflows for creators.",
   "homepage": "https://github.com/LearnPrompt/carl-skills",
   "license": "MIT",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "updated": "2026-08-04",
   "model": "catalog-first",
   "install_logic": "Carl Skills is the catalog. Most skills are installed from their canonical repository via raw_skill_url; collection-native skills are maintained directly under this repository's skills directory.",
@@ -85,7 +85,10 @@
       "canonical_path": "skills/ops/skill-slimming/SKILL.md",
       "distribution": "collection-native",
       "installable": true,
-      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/ops/skill-slimming/SKILL.md"
+      "install_mode": "skill-folder",
+      "install_command": "npx skills add LearnPrompt/carl-skills --skill skill-slimming -g",
+      "hermes_installable": false,
+      "hermes_skip_reason": "完整运行时包含 scripts/assets/references，raw SKILL.md 安装会得到残缺版本"
     },
     {
       "id": "cc-harness-dream-memory",

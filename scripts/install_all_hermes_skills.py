@@ -27,10 +27,16 @@ def main() -> int:
     args = parser.parse_args()
 
     registry = load_registry()
-    skills = [s for s in registry.get("skills", []) if s.get("installable")]
+    installable = [s for s in registry.get("skills", []) if s.get("installable")]
+    skills = [s for s in installable if s.get("hermes_installable", True)]
+    skipped = [s for s in installable if not s.get("hermes_installable", True)]
+
+    for skill in skipped:
+        reason = skill.get("hermes_skip_reason", "requires a folder-aware installer")
+        print(f"SKIP {skill.get('id', '<unknown>')}: {reason}")
 
     if not skills:
-        print("No installable skills found in registry.json")
+        print("No Hermes-installable skills found in registry.json")
         return 0
 
     hermes = shutil.which("hermes")

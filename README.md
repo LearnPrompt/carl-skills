@@ -59,9 +59,11 @@
 
 ```bash
 npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
-# 或用Hermes安装raw SKILL.md
-hermes skills install https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/ops/skill-slimming/SKILL.md --yes
 ```
+
+这条命令会读取仓库目录来发现Skill，但只把`skill-slimming`这一个完整目录安装到Agent，不会把Carl Skills里的其他Skill一起启用。
+
+Skill 瘦身包含本地复审网页、状态服务和参考合同，不能只下载raw `SKILL.md`。因此它暂不支持Hermes的单文件raw安装；否则能看到提示词，却缺少实际运行层。
 
 ### 装这个目录里的全部可安装skill
 
@@ -72,7 +74,7 @@ python3 scripts/install_all_hermes_skills.py --dry-run
 python3 scripts/install_all_hermes_skills.py --yes
 ```
 
-`--dry-run`只打印安装命令，不改本机环境。确认没问题后再执行`--yes`。
+`--dry-run`只打印安装命令，不改本机环境。确认没问题后再执行`--yes`。脚本会明确跳过需要整目录安装、而Hermes当前只能按raw `SKILL.md`处理的条目。
 
 ---
 
@@ -88,7 +90,7 @@ Carl Skills现在是**catalog-first**，同时允许少量只属于这个合集�
 - Agent批量安装时，仍然可以通过`registry.json`找到全部canonical install URL
 - Skill 瘦身这类collection-native skill可以直接在同一仓库长期迭代和安装
 
-每个条目的真实安装源都以`registry.json`的`raw_skill_url`为准。
+每个条目的真实安装方式以`registry.json`为准：单文件Skill使用`raw_skill_url`，带脚本和资源的Skill使用`install_mode: skill-folder`与`install_command`。
 
 ---
 
@@ -348,9 +350,9 @@ Skill Sync用来审计Codex、Claude、OpenClaw、OpenCode、本地workspace和�
 
 > *"装Skill很容易，难的是让正确的能力只在正确的项目、正确的时机出现。"*
 
-Skill 瘦身把已经在本地控制台中跑通的治理过程，整理成一个可直接安装的`SKILL.md`。它先只读盘点Codex、Claude Code等宿主中的Skills、插件和MCP，再用来源证据、实际使用信号和两阶段上下文成本，给出全局、项目、按需触发三档建议。瘦掉的是无效全局暴露和上下文负担，不是粗暴删除能力。
+Skill 瘦身把已经在本地控制台中跑通的治理过程，整理成一个可直接安装的完整Skill目录。它先只读盘点Codex、Claude Code等宿主中的Skills、插件和MCP，再用来源证据、实际使用信号和两阶段上下文成本，给出全局、项目、按需触发三档建议。瘦掉的是无效全局暴露和上下文负担，不是粗暴删除能力。
 
-它不会看到低频就删除。首轮只生成审计、复审页面和decision JSON；用户复审并再次明确授权后，才会生成独立执行计划。`RARE_CRITICAL`、60天观察、可逆归档和恢复入口都写进了同一份治理合同。
+它不会看到低频就删除。首轮只生成审计和本地复审页面，用户选择会自动保存并在下次恢复；用户说“我选好了”后，Agent直接读取持久状态并生成独立执行计划。`RARE_CRITICAL`、60天观察、可逆归档和恢复入口都写进了同一份治理合同。
 
 **适合**
 
@@ -363,16 +365,14 @@ Skill 瘦身把已经在本地控制台中跑通的治理过程，整理成一�
 
 - 只想安装一个新Skill
 - 想跳过复审直接批量删除
-- 希望Agent未经确认就读取浏览器里的本地选择并执行
+- 希望保存选择后不经计划与确认就自动执行
 
 ```bash
 npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
-# 或用Hermes安装raw SKILL.md
-hermes skills install https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/ops/skill-slimming/SKILL.md --yes
 ```
 
 [![Repo](https://img.shields.io/badge/GitHub-carl--skills-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-skills)
-[![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/ops/skill-slimming/SKILL.md)
+[![Install](https://img.shields.io/badge/Install-skill_folder-10B981?style=flat-square)](./skills/ops/skill-slimming/SKILL.md)
 
 → [SKILL.md](./skills/ops/skill-slimming/SKILL.md) · [registry entry](./registry.json)
 
@@ -388,11 +388,11 @@ hermes skills install https://raw.githubusercontent.com/LearnPrompt/carl-skills/
 - 哪些skill已经可安装
 - 每个skill的canonical repo在哪里
 - 同一套skill是否属于同一个`suite`
-- 应该从哪个`raw_skill_url`安装
+- 应该用`raw_skill_url`还是完整`skill-folder`安装
 - 外部canonical skill当前索引到哪个`source_commit`
 - collection-native skill在本仓库的哪个`canonical_path`
 
-如果你只装一个skill，不需要关心registry。直接装它的raw `SKILL.md`就行。
+如果你只装一个skill，不需要关心registry。单文件Skill可以装raw `SKILL.md`；带脚本和资源的Skill要用目录感知安装器并通过`--skill`只选择目标项。
 
 如果你想让Agent理解「Carl Skills里到底有什么」，或者想批量安装，就看registry。
 
