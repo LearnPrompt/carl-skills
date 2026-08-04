@@ -5,7 +5,7 @@
 #### 我自己真实跑通、反复用过的AI工作流，都收在这里
 
 [![License](https://img.shields.io/badge/License-MIT-3B82F6?style=for-the-badge)](./LICENSE)
-[![Skills](https://img.shields.io/badge/Skills-16-10B981?style=for-the-badge)](#-skills)
+[![Skills](https://img.shields.io/badge/Skills-17-10B981?style=for-the-badge)](#-skills)
 [![Registry](https://img.shields.io/badge/Registry-catalog--first-F59E0B?style=for-the-badge)](./registry.json)
 [![First Star](https://img.shields.io/badge/First_Star-Humanize_PPT-8B5CF6?style=for-the-badge)](https://github.com/LearnPrompt/humanize-ppt)
 
@@ -43,6 +43,7 @@
 | 🤝 [**搭子 dazi**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/partner-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/partner-skill) | 让Claude和Codex结对开发，分工、互查、合并一条线 | [canonical](https://github.com/LearnPrompt/partner-skill) |
 | ✍️ [**x-article-publisher**](#x-article-publisher) | [![](https://img.shields.io/github/stars/LearnPrompt/x-article-publisher-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/x-article-publisher-skill) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
 | 🔁 [**skill-sync**](#skill-sync) | [![](https://img.shields.io/github/stars/LearnPrompt/skill-sync?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
+| 🧭 [**Skill 瘦身**](#skill-slimming) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-skills) | 把Agent能力整理成全局、项目和按需触发 | [collection-native](./skills/ops/skill-slimming/SKILL.md) |
 | 🏮 [**阿福 afu**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/afu-llm-todo) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
 | 📜 [**蔡伦 cailun**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/cailun-skill) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
 | ⛰️ [**愚公 yugong**](#banmen-family) | [![](https://img.shields.io/github/stars/LearnPrompt/loop-engineering?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/loop-engineering) | Loop工程方法论，把模糊目标改造成带验证门的自动循环 | [canonical](https://github.com/LearnPrompt/loop-engineering) |
@@ -54,10 +55,12 @@
 
 ### 装一个skill
 
-比如只装Humanize PPT：
+比如只装这个仓库原生维护的Skill 瘦身：
 
 ```bash
-hermes skills install https://raw.githubusercontent.com/LearnPrompt/humanize-ppt/main/SKILL.md --yes
+npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
+# 或用Hermes安装raw SKILL.md
+hermes skills install https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/ops/skill-slimming/SKILL.md --yes
 ```
 
 ### 装这个目录里的全部可安装skill
@@ -75,16 +78,17 @@ python3 scripts/install_all_hermes_skills.py --yes
 
 ## 🧠 这个仓库的逻辑
 
-Carl Skills现在是**catalog-first**。
+Carl Skills现在是**catalog-first**，同时允许少量只属于这个合集的collection-native skill。
 
-也就是说，这里不再把每个`SKILL.md`复制一份做镜像。每个skill都有自己的canonical repo，源码、README、demo、issue、更新都在那里维护。Carl Skills只负责把它们放进一个好找、好读、Agent也能读的目录里。
+也就是说，这里不会把外部skill的`SKILL.md`复制一份做镜像。已有独立canonical repo的skill，源码、README、demo、issue、更新仍在那里维护；只属于Carl Skills合集的能力，才直接放在本仓库的`skills/`目录。
 
 这样有两个好处：
 
 - 更新Humanize PPT这类独立skill时，只需要改它自己的主仓库
 - Agent批量安装时，仍然可以通过`registry.json`找到全部canonical install URL
+- Skill 瘦身这类collection-native skill可以直接在同一仓库长期迭代和安装
 
-如果以后有只属于Carl Skills合集的skill，再把`SKILL.md`直接放在这个仓库里。
+每个条目的真实安装源都以`registry.json`的`raw_skill_url`为准。
 
 ---
 
@@ -335,6 +339,46 @@ Skill Sync用来审计Codex、Claude、OpenClaw、OpenCode、本地workspace和�
 </td></tr>
 </table>
 
+<table>
+<tr><td>
+
+<a id="skill-slimming"></a>
+
+### 🧭 Skill 瘦身（skill-slimming）
+
+> *"装Skill很容易，难的是让正确的能力只在正确的项目、正确的时机出现。"*
+
+Skill 瘦身把已经在本地控制台中跑通的治理过程，整理成一个可直接安装的`SKILL.md`。它先只读盘点Codex、Claude Code等宿主中的Skills、插件和MCP，再用来源证据、实际使用信号和两阶段上下文成本，给出全局、项目、按需触发三档建议。瘦掉的是无效全局暴露和上下文负担，不是粗暴删除能力。
+
+它不会看到低频就删除。首轮只生成审计、复审页面和decision JSON；用户复审并再次明确授权后，才会生成独立执行计划。`RARE_CRITICAL`、60天观察、可逆归档和恢复入口都写进了同一份治理合同。
+
+**适合**
+
+- 装了很多Skill，已经分不清安装数、暴露数、内容版本和唯一名称
+- 想知道哪些能力来自系统、插件、项目或用户目录
+- 想把Skill改成全局、项目或先询问再加载的触发空壳
+- 想用`/doctor`、`/context`、session日志和fresh-session A/B核对上下文成本
+
+**不适合**
+
+- 只想安装一个新Skill
+- 想跳过复审直接批量删除
+- 希望Agent未经确认就读取浏览器里的本地选择并执行
+
+```bash
+npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
+# 或用Hermes安装raw SKILL.md
+hermes skills install https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/ops/skill-slimming/SKILL.md --yes
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-carl--skills-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-skills)
+[![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/carl-skills/main/skills/ops/skill-slimming/SKILL.md)
+
+→ [SKILL.md](./skills/ops/skill-slimming/SKILL.md) · [registry entry](./registry.json)
+
+</td></tr>
+</table>
+
 ---
 
 ## 🗂 Registry
@@ -345,7 +389,8 @@ Skill Sync用来审计Codex、Claude、OpenClaw、OpenCode、本地workspace和�
 - 每个skill的canonical repo在哪里
 - 同一套skill是否属于同一个`suite`
 - 应该从哪个`raw_skill_url`安装
-- 当前索引到哪个`source_commit`
+- 外部canonical skill当前索引到哪个`source_commit`
+- collection-native skill在本仓库的哪个`canonical_path`
 
 如果你只装一个skill，不需要关心registry。直接装它的raw `SKILL.md`就行。
 
@@ -402,8 +447,8 @@ npx skills add LearnPrompt/carl-irasutoya-illustrations -g  # Irasutoya配图
 - [x] 将Humanize PPT安装入口改回canonical repo，避免collection mirror版本同步问题
 - [x] 将CC Harness Skills按suite统一分组
 - [x] 收录班门家族（鲁班/庖丁/蔡伦/阿福/Irasutoya配图）为banmen-family suite
+- [x] 收录首个collection-native skill：Skill 瘦身
 - [ ] 给每个active skill补真实案例截图和更具体的使用入口
-- [ ] 如果未来出现只属于Carl Skills合集的skill，再在本仓库内放置collection-native `SKILL.md`
 
 ---
 
@@ -431,7 +476,7 @@ npx skills add LearnPrompt/carl-irasutoya-illustrations -g  # Irasutoya配图
 
 [鲁班·Skill打磨](https://github.com/LearnPrompt/luban-skill) · [庖丁·博主蒸馏](https://github.com/LearnPrompt/paoding-skill) · [蔡伦·对话造纸](https://github.com/LearnPrompt/cailun-skill) · [阿福·LLM Todo](https://github.com/LearnPrompt/afu-llm-todo) · [愚公·Loop工程](https://github.com/LearnPrompt/loop-engineering) · [搭子·结对开发](https://github.com/LearnPrompt/partner-skill) · [AI雷达·零API资讯](https://github.com/LearnPrompt/ai-news-radar)
 
-[淘金小镇·ClawHub日榜](https://github.com/LearnPrompt/skillrush-town) · [Irasutoya·正文配图](https://github.com/LearnPrompt/carl-irasutoya-illustrations) · [Humanize PPT·演讲系统](https://github.com/LearnPrompt/humanize-ppt) · [CC Harness·六件套](https://github.com/LearnPrompt/cc-harness-skills) · [微信读书教练](https://github.com/LearnPrompt/carl-weread) · [X Article发布](https://github.com/LearnPrompt/x-article-publisher-skill)
+[淘金小镇·ClawHub日榜](https://github.com/LearnPrompt/skillrush-town) · [Skill 瘦身·能力治理](./skills/ops/skill-slimming/SKILL.md) · [Irasutoya·正文配图](https://github.com/LearnPrompt/carl-irasutoya-illustrations) · [Humanize PPT·演讲系统](https://github.com/LearnPrompt/humanize-ppt) · [CC Harness·六件套](https://github.com/LearnPrompt/cc-harness-skills) · [微信读书教练](https://github.com/LearnPrompt/carl-weread) · [X Article发布](https://github.com/LearnPrompt/x-article-publisher-skill)
 
 <sub>**[LearnPrompt](https://github.com/LearnPrompt) 出品** · 公众号「卡尔的AI沃茨」 · [X @aiwarts](https://x.com/aiwarts)</sub>
 
