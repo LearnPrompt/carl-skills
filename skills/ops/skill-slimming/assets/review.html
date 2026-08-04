@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skill 瘦身 · 本地复审</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f5f3ea;
+      --muted: #9c9f95;
+      --dim: #6f756d;
+      --bg: #070a08;
+      --surface: rgba(15, 20, 17, .86);
+      --surface-2: #111713;
+      --line: rgba(235, 238, 224, .14);
+      --acid: #c8f36a;
+      --cyan: #70dcd0;
+      --amber: #f6c969;
+      --coral: #ff826e;
+      --display: "Iowan Old Style", "Bodoni 72", "Songti SC", serif;
+      --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at 50% -12%, rgba(119, 180, 92, .16), transparent 38rem),
+        linear-gradient(180deg, #0a0e0c 0%, #070907 74%);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitchTiles'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    button, input, select, textarea { font: inherit; }
+    button, select { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+      outline: 2px solid var(--acid);
+      outline-offset: 2px;
+    }
+    button:disabled { cursor: not-allowed; opacity: .44; }
+    .shell { width: min(1480px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 88px; }
+    .eyebrow {
+      color: var(--muted);
+      font: .68rem/1.2 var(--mono);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .hero {
+      min-height: 360px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(290px, .6fr);
+      align-items: end;
+      gap: 56px;
+      padding: 34px 0 52px;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 980px;
+      margin: 20px 0 28px;
+      font: 500 clamp(4rem, 9vw, 8rem)/.78 var(--display);
+      letter-spacing: -.065em;
+    }
+    h1 span { color: var(--acid); font-style: italic; white-space: nowrap; }
+    .hero-copy { max-width: 760px; color: #c7c9c1; font-size: 1.12rem; line-height: 1.75; }
+    .safety-card {
+      padding: 28px;
+      border: 1px solid rgba(200, 243, 106, .28);
+      border-radius: 3px 34px 3px 3px;
+      background: linear-gradient(145deg, rgba(200, 243, 106, .1), transparent 62%), var(--surface);
+    }
+    .safety-card strong { display: block; margin: 42px 0 8px; font: 500 1.55rem var(--display); }
+    .safety-card p { color: var(--muted); line-height: 1.65; }
+    .autosave { display: flex; align-items: center; gap: 8px; color: var(--cyan); font: .72rem var(--mono); }
+    .autosave::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 14px currentColor; }
+    .autosave.error { color: var(--coral); }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      background: var(--surface);
+    }
+    .stat { min-height: 126px; padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stat:last-child { border-right: 0; }
+    .stat span { color: var(--muted); font: .68rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .stat strong { display: block; margin-top: 12px; font: 500 2.25rem var(--display); }
+    .stat small { color: var(--dim); }
+    .loading-model {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin: 26px 0 48px;
+      border: 1px solid var(--line);
+      background: rgba(9, 13, 10, .7);
+    }
+    .loading-model article { min-height: 150px; padding: 24px; border-right: 1px solid var(--line); }
+    .loading-model article:last-child { border-right: 0; }
+    .loading-model b { display: block; margin: 10px 0 7px; font: 500 1.3rem var(--display); }
+    .loading-model p { color: var(--muted); font-size: .86rem; line-height: 1.6; }
+    .loading-model em { color: var(--acid); font-style: normal; }
+    .deck {
+      position: sticky;
+      top: 12px;
+      z-index: 20;
+      margin-bottom: 58px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: rgba(7, 10, 8, .92);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, .28);
+    }
+    .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 8px; }
+    .filters input, .filters select, .project-add input {
+      width: 100%;
+      min-width: 0;
+      height: 46px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      color: var(--ink);
+      background: #090d0a;
+    }
+    .search { grid-column: span 2; }
+    .deck-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 12px; }
+    .button {
+      min-height: 40px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: transparent;
+    }
+    .button:hover { border-color: rgba(200, 243, 106, .5); }
+    .button.primary { border-color: var(--acid); color: #0b100c; background: var(--acid); font-weight: 700; }
+    .button.danger { color: var(--coral); }
+    .save-note { margin-left: auto; color: var(--muted); font-size: .78rem; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin: 0 0 26px; }
+    .section-head h2 { margin: 8px 0 0; font: 500 clamp(2rem, 4vw, 3.7rem)/1 var(--display); letter-spacing: -.035em; }
+    .legend { display: flex; gap: 14px; color: var(--muted); font-size: .74rem; }
+    .legend i { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--acid); }
+    .legend span:nth-child(2) i { background: var(--cyan); }
+    .legend span:nth-child(3) i { background: var(--amber); }
+    .source-group { margin-bottom: 14px; border: 1px solid var(--line); background: rgba(12, 17, 13, .7); }
+    .source-group > summary { list-style: none; display: grid; grid-template-columns: 120px 1fr auto; gap: 22px; align-items: center; min-height: 104px; padding: 20px 24px; }
+    .source-group > summary::-webkit-details-marker { display: none; }
+    .source-index { color: var(--acid); font: .66rem var(--mono); letter-spacing: .12em; }
+    .source-title strong { display: block; font: 500 1.8rem var(--display); }
+    .source-title span { color: var(--muted); font-size: .78rem; }
+    .source-count { font: 500 2.4rem var(--display); }
+    .group-body { padding: 0 10px 10px; border-top: 1px solid rgba(200, 243, 106, .28); }
+    .skill-card {
+      display: grid;
+      grid-template-columns: minmax(300px, 1.3fr) minmax(210px, .55fr) minmax(350px, .8fr);
+      gap: 22px;
+      margin-top: 10px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--cyan);
+      background: var(--surface-2);
+    }
+    .skill-card.critical { border-left-color: var(--coral); }
+    .skill-card.managed { border-left-color: var(--dim); opacity: .82; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .tag { padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font: .62rem var(--mono); }
+    .tag.critical { color: var(--coral); border-color: rgba(255, 130, 110, .45); }
+    .tag.acid { color: var(--acid); border-color: rgba(200, 243, 106, .35); }
+    .skill-title { margin: 0 0 7px; font-size: 1rem; }
+    .skill-summary { margin-bottom: 10px; color: #b8bcb4; font-size: .82rem; line-height: 1.55; }
+    .skill-meta { color: var(--dim); font: .64rem/1.6 var(--mono); overflow-wrap: anywhere; }
+    .context { padding-left: 18px; border-left: 1px solid var(--line); }
+    .context > span { color: var(--muted); font-size: .68rem; }
+    .context > strong { display: block; margin: 6px 0; font: 500 1.75rem var(--display); }
+    .context > strong i { padding: 0 7px; color: var(--dim); font-style: normal; }
+    .impact { display: inline-block; padding: 3px 7px; border: 1px solid rgba(200, 243, 106, .25); color: var(--acid); font: .62rem var(--mono); }
+    .impact.adds { color: var(--amber); border-color: rgba(246, 201, 105, .3); }
+    .post-call { display: block; margin-top: 10px; color: var(--muted); font-size: .67rem; line-height: 1.55; }
+    .decision-panel { min-width: 0; }
+    .scope-picker { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .scope-picker button { min-height: 42px; border: 1px solid var(--line); border-right: 0; color: var(--muted); background: transparent; }
+    .scope-picker button:last-child { border-right: 1px solid var(--line); }
+    .scope-picker button.active { color: #0a0e0b; background: var(--acid); font-weight: 700; }
+    .scope-picker button.critical-choice:not(.active) { color: var(--coral); background: repeating-linear-gradient(-45deg, rgba(255,130,110,.08), rgba(255,130,110,.08) 5px, transparent 5px, transparent 10px); }
+    .editor { margin-top: 12px; padding: 12px; border: 1px solid var(--line); background: #0a0e0b; }
+    .editor label { display: block; margin-bottom: 9px; color: var(--muted); font-size: .7rem; }
+    .editor textarea, .editor input { width: 100%; margin-top: 6px; padding: 9px; border: 1px solid var(--line); color: var(--ink); background: #070a08; resize: vertical; }
+    .editor small { color: var(--dim); line-height: 1.45; }
+    .project-options { display: grid; gap: 7px; max-height: 150px; overflow: auto; }
+    .project-options label { display: flex; align-items: center; gap: 8px; margin: 0; }
+    .critical-confirm { display: flex !important; align-items: center; gap: 8px; color: var(--coral) !important; }
+    .empty { padding: 80px 20px; border: 1px dashed var(--line); text-align: center; color: var(--muted); }
+    .project-manager { margin: 50px 0 0; padding: 24px; border: 1px solid var(--line); }
+    .project-manager h3 { font: 500 1.7rem var(--display); }
+    .project-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .project-pill { padding: 6px 10px; border: 1px solid var(--line); color: var(--cyan); font-size: .72rem; }
+    .project-add { display: grid; grid-template-columns: 1fr 1fr 1.4fr auto; gap: 8px; }
+    .handoff { margin-top: 60px; padding: 30px; border: 1px solid rgba(112, 220, 208, .28); background: linear-gradient(120deg, rgba(112,220,208,.08), transparent 55%), var(--surface); }
+    .handoff h2 { margin: 9px 0 12px; font: 500 2.3rem var(--display); }
+    .handoff p { color: var(--muted); line-height: 1.7; }
+    .handoff code { color: var(--cyan); font-family: var(--mono); }
+    .toast { position: fixed; z-index: 50; right: 24px; bottom: 24px; max-width: 460px; padding: 14px 16px; border: 1px solid var(--line); color: var(--ink); background: #151a16; box-shadow: 0 12px 50px #000; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { border-color: var(--coral); }
+    @media (max-width: 1040px) {
+      .hero, .skill-card { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat:last-child { grid-column: span 2; }
+      .context { padding: 15px 0 0; border: 0; border-top: 1px solid var(--line); }
+    }
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 24px, 1480px); }
+      .hero { display: block; min-height: auto; }
+      h1 { font-size: 4.2rem; }
+      .safety-card { margin-top: 28px; }
+      .stats, .loading-model { grid-template-columns: 1fr; }
+      .stat, .loading-model article { border-right: 0; }
+      .stat:last-child { grid-column: auto; }
+      .search { grid-column: auto; }
+      .source-group > summary { grid-template-columns: 1fr auto; }
+      .source-index { display: none; }
+      .scope-picker { grid-template-columns: repeat(2, 1fr); }
+      .scope-picker button:nth-child(2) { border-right: 1px solid var(--line); }
+      .project-add { grid-template-columns: 1fr; }
+      .save-note { width: 100%; margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Local capability governance / decision-only</span>
+        <h1>Skill <span>瘦身</span></h1>
+        <p class="hero-copy">先按可靠来源收纳，再决定哪些能力全局可发现、只在指定项目生效，或只保留一个先询问你的触发空壳。</p>
+      </div>
+      <aside class="safety-card">
+        <div id="autosave" class="autosave">正在连接本地状态…</div>
+        <strong>这里保存决定，不执行改变</strong>
+        <p>页面没有安装、移动、归档、禁用或删除接口。点击“完成复审”只让 Agent 可以读取结果并生成下一阶段计划。</p>
+      </aside>
+    </section>
+
+    <section id="stats" class="stats" aria-label="审计摘要"></section>
+
+    <section class="loading-model" aria-label="上下文加载模型">
+      <article><span class="eyebrow">01 / 未命中时</span><b>只加载可发现入口</b><p>全局不是每轮都读取完整 Skill。先进入上下文的是名称、描述和路径等入口信息。</p></article>
+      <article><span class="eyebrow">02 / 触发空壳</span><b>只在入口更短时省启动 token</b><p><em>全局入口 → 触发空壳</em> 是每个新会话的入口估算；倒挂时只是治理收益，不应显示成节省。</p></article>
+      <article><span class="eyebrow">03 / 命中后</span><b>两种方式都读完整 Skill</b><p>无论全局或触发，真正命中后都可能加载完整入口文件；触发模式会先询问是否为当前项目临时加载。</p></article>
+    </section>
+
+    <section class="deck" aria-label="筛选与复审操作">
+      <div class="filters">
+        <input id="search" class="search" type="search" placeholder="搜索 Skill、来源、用途或触发词" aria-label="搜索 Skill">
+        <select id="source-filter" aria-label="来源"><option value="all">全部来源</option></select>
+        <select id="category-filter" aria-label="用途大类"><option value="all">全部用途大类</option></select>
+        <select id="host-filter" aria-label="宿主"><option value="all">全部宿主</option></select>
+        <select id="decision-filter" aria-label="决定">
+          <option value="all">全部决定</option><option value="undecided">暂不决定</option><option value="global">全局可发现</option><option value="project">指定项目</option><option value="trigger">触发空壳</option>
+        </select>
+        <select id="management-filter" aria-label="管理边界"><option value="all">全部管理边界</option><option value="reviewable">用户可复审</option><option value="managed">托管只读</option><option value="critical">RARE_CRITICAL</option></select>
+      </div>
+      <div class="deck-actions">
+        <button id="suggestions" class="button" type="button">恢复审计建议</button>
+        <button id="undecided" class="button" type="button">全部待定</button>
+        <button id="download" class="button" type="button">下载 JSON 备份</button>
+        <button id="complete" class="button primary" type="button">完成复审</button>
+        <span class="save-note">自动保存到本机私有目录；下次启动会恢复。</span>
+      </div>
+    </section>
+
+    <section>
+      <header class="section-head">
+        <div><span id="inventory-label" class="eyebrow">Inventory</span><h2>先按来源折叠，再逐项决定</h2></div>
+        <div class="legend"><span><i></i>全局</span><span><i></i>项目</span><span><i></i>触发</span></div>
+      </header>
+      <div id="groups"><div class="empty">正在读取审计清单…</div></div>
+    </section>
+
+    <section class="project-manager">
+      <span class="eyebrow">Project catalog</span>
+      <h3>可绑定项目</h3>
+      <div id="project-list" class="project-list"></div>
+      <div class="project-add">
+        <input id="project-id" placeholder="项目 ID（如 goodcase）">
+        <input id="project-name" placeholder="项目名称">
+        <input id="project-location" placeholder="项目路径（可选）">
+        <button id="add-project" class="button" type="button">添加项目</button>
+      </div>
+    </section>
+
+    <section class="handoff">
+      <span class="eyebrow">Agent handoff</span>
+      <h2>你只要说：“我选好了”</h2>
+      <p>Agent 应读取本机保存状态：<code>review_server.py read --require-complete</code>。它接下来只能生成 operation plan；没有新的明确授权，不能安装、启用、复制、归档、删除或执行。</p>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script>
+    "use strict";
+
+    const GATE_PROMPT = "这个能力对应的 Skill 已归档，是否要为当前项目临时加载？";
+    const token = new URLSearchParams(location.search).get("token") || "";
+    history.replaceState({}, "", location.pathname);
+
+    const ui = {
+      autosave: document.getElementById("autosave"), stats: document.getElementById("stats"),
+      groups: document.getElementById("groups"), toast: document.getElementById("toast"),
+      inventoryLabel: document.getElementById("inventory-label"), projectList: document.getElementById("project-list"),
+      search: document.getElementById("search"), source: document.getElementById("source-filter"),
+      category: document.getElementById("category-filter"), host: document.getElementById("host-filter"),
+      decision: document.getElementById("decision-filter"), management: document.getElementById("management-filter")
+    };
+
+    let inventory = null;
+    let state = null;
+    let decisions = new Map();
+    let saveTimer = null;
+    let toastTimer = null;
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined && text !== null) node.textContent = String(text);
+      return node;
+    }
+
+    function option(select, value, text) {
+      const node = document.createElement("option");
+      node.value = value;
+      node.textContent = text;
+      select.appendChild(node);
+    }
+
+    function formatNumber(value) {
+      return Number.isFinite(Number(value)) ? Number(value).toLocaleString("zh-CN") : "—";
+    }
+
+    function showToast(message, isError = false) {
+      clearTimeout(toastTimer);
+      ui.toast.textContent = message;
+      ui.toast.className = "toast show" + (isError ? " error" : "");
+      toastTimer = setTimeout(() => { ui.toast.className = "toast"; }, 4200);
+    }
+
+    function setSaveStatus(message, isError = false) {
+      ui.autosave.textContent = message;
+      ui.autosave.className = "autosave" + (isError ? " error" : "");
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: { "Content-Type": "application/json", "X-Skill-Slimming-Token": token, ...(options.headers || {}) }
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || payload.error || `HTTP ${response.status}`);
+      return payload;
+    }
+
+    function decisionFor(skillId) { return decisions.get(skillId); }
+
+    function snapshot(reviewStatus = state.reviewStatus || "draft") {
+      return {
+        schemaVersion: 1,
+        auditId: inventory.auditId,
+        environmentId: inventory.environmentId,
+        inventoryRevision: inventory.inventoryRevision,
+        reviewStatus,
+        safety: "decision-only; no configuration changes",
+        gatePrompt: GATE_PROMPT,
+        projectCatalog: state.projectCatalog,
+        decisions: inventory.skills.map(skill => decisionFor(skill.skillId)),
+        reconciliation: state.reconciliation || {}
+      };
+    }
+
+    async function persist(reviewStatus = "draft") {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+      setSaveStatus("正在保存本机草稿…");
+      try {
+        const payload = await api("/api/state", { method: "PUT", body: JSON.stringify(snapshot(reviewStatus)) });
+        state = payload.state;
+        decisions = new Map(state.decisions.map(item => [item.skillId, item]));
+        setSaveStatus(state.reviewStatus === "complete" ? "复审完成 · 已持久保存" : "草稿已自动保存");
+        renderStats();
+        return true;
+      } catch (error) {
+        setSaveStatus("保存失败 · 请检查页面提示", true);
+        showToast(error.message, true);
+        return false;
+      }
+    }
+
+    function scheduleSave() {
+      state.reviewStatus = "draft";
+      setSaveStatus("有未保存的修改…");
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => { saveTimer = null; persist("draft"); }, 450);
+    }
+
+    function currentFilters() {
+      return { search: ui.search.value.trim().toLocaleLowerCase(), source: ui.source.value, category: ui.category.value, host: ui.host.value, decision: ui.decision.value, management: ui.management.value };
+    }
+
+    function filteredSkills() {
+      const f = currentFilters();
+      return inventory.skills.filter(skill => {
+        const record = decisionFor(skill.skillId);
+        const haystack = [skill.name, skill.summary, skill.sourceGroup, skill.category, skill.specificUse, ...(skill.triggerTerms || []), ...(record.triggerTerms || [])].join(" ").toLocaleLowerCase();
+        const managed = skill.managementPolicy !== "reviewable";
+        return (!f.search || haystack.includes(f.search)) &&
+          (f.source === "all" || skill.sourceGroup === f.source) &&
+          (f.category === "all" || skill.category === f.category) &&
+          (f.host === "all" || (skill.hosts || []).includes(f.host)) &&
+          (f.decision === "all" || record.decision === f.decision) &&
+          (f.management === "all" ||
+            (f.management === "reviewable" && !managed) ||
+            (f.management === "managed" && managed) ||
+            (f.management === "critical" && skill.rareCritical));
+      });
+    }
+
+    function renderStats() {
+      ui.stats.replaceChildren();
+      const all = inventory.skills;
+      const baseline = all.reduce((sum, skill) => sum + Number(skill.currentStartupTokens || 0), 0);
+      const projected = all.reduce((sum, skill) => {
+        const record = decisionFor(skill.skillId);
+        if (skill.managementPolicy !== "reviewable" || record.decision === "undecided" || record.decision === "global") return sum + Number(skill.currentStartupTokens || 0);
+        if (record.decision === "trigger") return sum + Number(skill.shellStartupTokens || 0);
+        return sum;
+      }, 0);
+      const counts = { global: 0, project: 0, trigger: 0, undecided: 0 };
+      all.forEach(skill => { if (skill.managementPolicy === "reviewable") counts[decisionFor(skill.skillId).decision]++; });
+      const values = [
+        ["Skills / 精确值", inventory.counts.skills, `${inventory.counts.reviewable} 可复审 · ${inventory.counts.managed} 托管`],
+        ["插件 / MCP", `${inventory.counts.plugins} / ${inventory.counts.mcps}`, "清单值；是否精确见审计证据"],
+        ["全局 / 项目", `${counts.global} / ${counts.project}`, "当前浏览器决定"],
+        ["触发 / 用户待定", `${counts.trigger} / ${counts.undecided}`, `${inventory.counts.rareCritical} 个 RARE_CRITICAL`],
+        ["全局入口估算", `${formatNumber(baseline)} → ${formatNumber(projected)}`, baseline >= projected ? `估算减少 ${formatNumber(baseline - projected)} token / 会话` : `估算反增 ${formatNumber(projected - baseline)} token / 会话`]
+      ];
+      values.forEach(([label, value, note]) => {
+        const card = el("article", "stat"); card.append(el("span", "", label), el("strong", "", value), el("small", "", note)); ui.stats.appendChild(card);
+      });
+    }
+
+    function tag(text, className = "") { return el("span", `tag ${className}`.trim(), text); }
+
+    function buildDecisionEditor(skill) {
+      const record = decisionFor(skill.skillId);
+      const panel = el("div", "decision-panel");
+      const picker = el("div", "scope-picker");
+      const managed = skill.managementPolicy !== "reviewable";
+      const choices = [["undecided", "待定"], ["global", "全局"], ["project", "项目"], ["trigger", "触发"]];
+      choices.forEach(([value, label]) => {
+        const button = el("button", record.decision === value ? "active" : "", label);
+        button.type = "button";
+        button.disabled = managed;
+        if (skill.rareCritical && ["project", "trigger"].includes(value)) button.classList.add("critical-choice");
+        button.addEventListener("click", () => {
+          if (skill.rareCritical && ["project", "trigger"].includes(value) && !record.rareCriticalConfirmed) {
+            const ok = confirm("这是 RARE_CRITICAL 能力。改变全局可发现范围前需要人工二次确认；本页只保存决策，不执行归档、复制或删除。继续？");
+            if (!ok) return;
+            record.rareCriticalConfirmed = true;
+          }
+          record.decision = value;
+          if (value !== "project") record.projects = [];
+          if (value !== "trigger") record.triggerTerms = [];
+          record.needsReview = false;
+          scheduleSave(); renderAll();
+        });
+        picker.appendChild(button);
+      });
+      panel.appendChild(picker);
+
+      if (record.decision === "project") {
+        const editor = el("div", "editor");
+        const options = el("div", "project-options");
+        if (!state.projectCatalog.length) options.appendChild(el("small", "", "先在页面下方添加项目，再回来绑定。"));
+        state.projectCatalog.forEach(project => {
+          const label = el("label"); const input = document.createElement("input"); input.type = "checkbox"; input.checked = record.projects.includes(project.id);
+          input.addEventListener("change", () => {
+            record.projects = input.checked ? [...new Set([...record.projects, project.id])] : record.projects.filter(id => id !== project.id);
+            scheduleSave(); renderStats();
+          });
+          label.append(input, el("span", "", `${project.name}${project.location ? ` · ${project.location}` : ""}`)); options.appendChild(label);
+        });
+        editor.appendChild(options);
+        if (skill.rareCritical) editor.appendChild(criticalConfirmation(record));
+        panel.appendChild(editor);
+      }
+
+      if (record.decision === "trigger") {
+        const editor = el("div", "editor");
+        const label = el("label", "", "2–5 个自然语言触发词（每行一个）");
+        const textarea = document.createElement("textarea"); textarea.rows = 4; textarea.placeholder = "例如：整理 Skill\nSkill 太多了"; textarea.value = (record.triggerTerms || []).join("\n");
+        textarea.addEventListener("input", () => {
+          record.triggerTerms = textarea.value.split("\n").map(value => value.trim()).filter((value, index, array) => value && array.indexOf(value) === index).slice(0, 5);
+          scheduleSave();
+        });
+        label.appendChild(textarea); editor.append(label, el("small", "", `命中后只提示：“${GATE_PROMPT}”`));
+        if (skill.rareCritical) editor.appendChild(criticalConfirmation(record));
+        panel.appendChild(editor);
+      }
+      return panel;
+    }
+
+    function criticalConfirmation(record) {
+      const label = el("label", "critical-confirm"); const input = document.createElement("input"); input.type = "checkbox"; input.checked = record.rareCriticalConfirmed;
+      input.addEventListener("change", () => { record.rareCriticalConfirmed = input.checked; scheduleSave(); });
+      label.append(input, el("span", "", "我确认这是关键能力，仍要改变其作用域")); return label;
+    }
+
+    function buildSkillCard(skill) {
+      const record = decisionFor(skill.skillId);
+      const managed = skill.managementPolicy !== "reviewable";
+      const card = el("article", `skill-card${skill.rareCritical ? " critical" : ""}${managed ? " managed" : ""}`);
+      const info = el("div"); const tags = el("div", "tags");
+      tags.append(tag(managed ? "托管只读" : "用户可复审"), tag(skill.category), tag(skill.sourceConfidence));
+      (skill.ownershipTags || []).forEach(value => tags.appendChild(tag(value, "acid")));
+      if (skill.rareCritical) tags.appendChild(tag("RARE_CRITICAL", "critical"));
+      if (record.needsReview) tags.appendChild(tag("内容已变化 · 需复审", "critical"));
+      info.append(tags, el("h3", "skill-title", skill.name), el("p", "skill-summary", skill.summary));
+      const usage = skill.actualCallCount === null || skill.actualCallCount === undefined ? "调用不可用" : `调用 ${skill.actualCallCount} · ${skill.usageMeasurement}`;
+      info.appendChild(el("div", "skill-meta", `${skill.sourceLabel} · ${skill.specificUse} · ${usage}${skill.lastUsedAt ? ` · 最近 ${skill.lastUsedAt}` : ""}`));
+      if (managed && skill.managementReason) info.appendChild(el("p", "skill-summary", `只读原因：${skill.managementReason}`));
+
+      const context = el("div", "context");
+      context.appendChild(el("span", "", `未命中时 · 全局入口 → 触发空壳 · ${skill.tokenMeasurement}`));
+      const strong = el("strong"); strong.append(el("span", "", formatNumber(skill.currentStartupTokens)), el("i", "", "→"), el("span", "", formatNumber(skill.shellStartupTokens))); context.appendChild(strong);
+      const delta = Number(skill.currentStartupTokens) - Number(skill.shellStartupTokens);
+      context.appendChild(el("b", `impact${delta < 0 ? " adds" : ""}`, delta > 0 ? `入口缩短 ${formatNumber(delta)} / 会话` : delta < 0 ? `入口反增 ${formatNumber(-delta)} · 仅治理收益` : "token 不变 · 仅治理收益"));
+      context.appendChild(el("small", "post-call", `命中后：两种方式都可能加载完整 Skill ≈ ${formatNumber(skill.postCallTokens)} token`));
+      card.append(info, context, buildDecisionEditor(skill)); return card;
+    }
+
+    function renderGroups() {
+      ui.groups.replaceChildren(); const skills = filteredSkills();
+      ui.inventoryLabel.textContent = `Inventory / ${skills.length} of ${inventory.skills.length}`;
+      if (!skills.length) { ui.groups.appendChild(el("div", "empty", "当前筛选条件没有匹配项。")); return; }
+      const grouped = new Map(); skills.forEach(skill => { if (!grouped.has(skill.sourceGroup)) grouped.set(skill.sourceGroup, []); grouped.get(skill.sourceGroup).push(skill); });
+      [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b, "zh-CN")).forEach(([source, groupSkills], index) => {
+        const details = el("details", "source-group"); details.open = index < 2;
+        const summary = el("summary"); summary.append(el("span", "source-index", `SOURCE / ${String(index + 1).padStart(2, "0")}`));
+        const title = el("div", "source-title"); title.append(el("strong", "", source), el("span", "", [...new Set(groupSkills.map(skill => skill.category))].slice(0, 4).join(" · "))); summary.append(title, el("span", "source-count", groupSkills.length)); details.appendChild(summary);
+        const body = el("div", "group-body"); groupSkills.sort((a, b) => a.name.localeCompare(b.name, "zh-CN")).forEach(skill => body.appendChild(buildSkillCard(skill))); details.appendChild(body); ui.groups.appendChild(details);
+      });
+    }
+
+    function renderProjects() {
+      ui.projectList.replaceChildren();
+      if (!state.projectCatalog.length) ui.projectList.appendChild(el("span", "project-pill", "还没有项目；请添加后再选择项目级"));
+      state.projectCatalog.forEach(project => ui.projectList.appendChild(el("span", "project-pill", `${project.name} · ${project.id}${project.location ? ` · ${project.location}` : ""}`)));
+    }
+
+    function renderAll() { renderStats(); renderGroups(); renderProjects(); }
+
+    function fillSelects() {
+      [...new Set(inventory.skills.map(skill => skill.sourceGroup))].sort().forEach(value => option(ui.source, value, value));
+      [...new Set(inventory.skills.map(skill => skill.category))].sort().forEach(value => option(ui.category, value, value));
+      [...new Set(inventory.skills.flatMap(skill => skill.hosts || []))].sort().forEach(value => option(ui.host, value, value));
+    }
+
+    async function boot() {
+      if (!token) { setSaveStatus("链接缺少本地访问令牌", true); return; }
+      try {
+        const payload = await api("/api/bootstrap"); inventory = payload.inventory; state = payload.state;
+        decisions = new Map(state.decisions.map(item => [item.skillId, item])); fillSelects(); renderAll();
+        const reconciliation = state.reconciliation || {};
+        if (reconciliation.resetBecauseChanged) showToast(`${reconciliation.resetBecauseChanged} 个 Skill 内容已变化，相关决定已重置为待复审。`);
+        setSaveStatus(state.savedAt ? (state.reviewStatus === "complete" ? "已恢复完成的复审" : "已恢复上次草稿") : "新草稿 · 修改后自动保存");
+      } catch (error) { setSaveStatus("无法读取本地审计状态", true); showToast(error.message, true); }
+    }
+
+    [ui.search, ui.source, ui.category, ui.host, ui.decision, ui.management].forEach(control => control.addEventListener("input", renderGroups));
+
+    document.getElementById("suggestions").addEventListener("click", () => {
+      inventory.skills.forEach(skill => {
+        const record = decisionFor(skill.skillId); let decision = skill.managementPolicy === "reviewable" ? skill.suggestedDecision : "undecided";
+        const suggestedProjects = decision === "project" ? [...(skill.appliedProjects || [])] : [];
+        const suggestedTerms = decision === "trigger" ? [...(skill.triggerTerms || [])].slice(0, 5) : [];
+        const knownProjects = new Set(state.projectCatalog.map(project => project.id));
+        if (decision === "project" && (!suggestedProjects.length || suggestedProjects.some(id => !knownProjects.has(id)))) decision = "undecided";
+        if (decision === "trigger" && suggestedTerms.length < 2) decision = "undecided";
+        record.decision = decision; record.projects = decision === "project" ? suggestedProjects : [];
+        record.triggerTerms = decision === "trigger" ? suggestedTerms : [];
+        record.rareCriticalConfirmed = false; record.needsReview = false;
+      }); scheduleSave(); renderAll();
+    });
+
+    document.getElementById("undecided").addEventListener("click", () => {
+      if (!confirm("把所有可复审项改为待定？本次只更新本机草稿。")) return;
+      inventory.skills.forEach(skill => { if (skill.managementPolicy === "reviewable") { const record = decisionFor(skill.skillId); record.decision = "undecided"; record.projects = []; record.triggerTerms = []; record.rareCriticalConfirmed = false; } });
+      scheduleSave(); renderAll();
+    });
+
+    document.getElementById("download").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(snapshot(), null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `skill-slimming-${inventory.environmentId}.json`; link.click(); URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("complete").addEventListener("click", async () => {
+      const ok = await persist("complete"); if (ok) showToast("复审结果已锁定为 complete。下一步仍只是让 Agent 生成计划，不会自动执行。", false);
+    });
+
+    document.getElementById("add-project").addEventListener("click", () => {
+      const id = document.getElementById("project-id").value.trim(); const name = document.getElementById("project-name").value.trim(); const location = document.getElementById("project-location").value.trim();
+      if (!id || !name) { showToast("项目 ID 和名称不能为空。", true); return; }
+      if (state.projectCatalog.some(project => project.id === id)) { showToast("项目 ID 已存在。", true); return; }
+      state.projectCatalog.push({ id, name, location }); document.getElementById("project-id").value = ""; document.getElementById("project-name").value = ""; document.getElementById("project-location").value = ""; scheduleSave(); renderAll();
+    });
+
+    addEventListener("pagehide", () => { if (saveTimer) fetch("/api/state", { method: "PUT", headers: { "Content-Type": "application/json", "X-Skill-Slimming-Token": token }, body: JSON.stringify(snapshot("draft")), keepalive: true }).catch(() => {}); });
+    boot();
+  </script>
+</body>
+</html>
