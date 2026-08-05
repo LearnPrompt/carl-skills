@@ -130,7 +130,7 @@ python3 "$SKILL_DIR/scripts/review_server.py" serve \
 - 生成随机访问令牌，并自动打开黑绿色复审页；
 - 状态写入 `$HOME/.skill-slimming/profiles/<profile>/current.json`；
 - 状态目录权限为 `0700`，JSON 为 `0600`，原子写入并保留最近 50 个历史版本；
-- 页面支持搜索、来源/用途/宿主/决定/管理边界筛选、来源折叠、项目绑定、2–5 个触发词和 `RARE_CRITICAL` 二次确认；
+- 页面支持搜索、来源/用途/宿主/决定/管理边界筛选、来源折叠、项目绑定、2–5 个触发词和 `RARE_CRITICAL` 二次确认、状态快速分段、决定分布条与筛选结果批量设置（`RARE_CRITICAL` 与托管项不进批量）；
 - 页面关闭后状态仍存在；下一次对同一 `profile` 启动会恢复；
 - 新 inventory 出现时，只保留 `skillId + contentHash` 均未变化的决定；变化项和新增项回到待复审。
 

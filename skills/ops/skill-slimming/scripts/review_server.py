@@ -312,6 +312,10 @@ def load_inventory(path: Path, profile: str | None = None) -> dict[str, Any]:
 
 def default_decision(skill: dict[str, Any]) -> dict[str, Any]:
     decision = skill["suggestedDecision"]
+    # RARE_CRITICAL 改为 project/trigger 需要人工二次确认，种子状态不能预先替用户做
+    # 这个决定，否则初始状态本身无法通过 validate_state 保存。
+    if skill["rareCritical"] and decision in ("project", "trigger"):
+        decision = "undecided"
     trigger_terms = skill["triggerTerms"][:5] if decision == "trigger" else []
     if decision == "trigger" and len(trigger_terms) < 2:
         decision = "undecided"

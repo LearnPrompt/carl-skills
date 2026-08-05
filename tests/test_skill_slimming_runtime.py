@@ -131,6 +131,20 @@ class RuntimeContractTests(unittest.TestCase):
         validated = runtime.validate_state(state, inventory)
         self.assertEqual(validated["reviewStatus"], "draft")
 
+    def test_initial_state_passes_own_validation_even_with_rare_critical_suggestion(self) -> None:
+        inventory = sample_inventory()
+        for skill in inventory["skills"]:
+            if skill["skillId"] == "deploy":
+                skill["suggestedDecision"] = "trigger"
+                skill["triggerTerms"] = ["准备发布", "回滚版本"]
+        normalized = runtime.normalize_inventory(inventory)
+        state = runtime.initial_state(normalized)
+        deploy = next(d for d in state["decisions"] if d["skillId"] == "deploy")
+        self.assertEqual(deploy["decision"], "undecided")
+        self.assertFalse(deploy["rareCriticalConfirmed"])
+        # 种子状态必须能原样通过 validate_state，否则页面首次自动保存必然 422。
+        runtime.validate_state(state, normalized)
+
     def test_runtime_recomputes_declared_inventory_revision(self) -> None:
         raw = sample_inventory()
         raw["inventoryRevision"] = "stale-revision"
@@ -282,6 +296,18 @@ class LoopbackServerTests(unittest.TestCase):
         self.assertIn("我选好了", html)
         self.assertIn("自动保存到本机私有目录", html)
         self.assertIn("connect-src 'self'", headers["Content-Security-Policy"])
+
+    def test_review_html_has_batch_and_quick_filter_controls(self) -> None:
+        status, body, _ = self.request(f"/?token={self.token}")
+        html = body.decode("utf-8")
+        self.assertEqual(status, 200)
+        self.assertIn("选择筛选结果", html)
+        self.assertIn("批量全局", html)
+        self.assertIn("批量项目", html)
+        self.assertIn("批量触发", html)
+        self.assertIn("需要判断", html)
+        # rareCritical items must never enter the batch pool.
+        self.assertIn("!skill.rareCritical", html)
 
 
 if __name__ == "__main__":
