@@ -38,6 +38,7 @@ description: >-
 | `plan` | 用户说“我选好了”，或明确要求读取已完成状态 | 输出 operation plan，等待执行授权 |
 | `apply` | 用户明确批准一份准确计划和目标集合 | 小批量执行并验收；不删除 |
 | `delete` | 观察满 60 天、0 次触发、非关键，并再次点名确认 | 删除后输出恢复缺口和证据 |
+| `recheck` | 用户要求复查上次 apply 结果或治理漂移 | 输出漂移报告，不做任何改动 |
 
 如果请求同时包含多个阶段，仍按顺序推进，并在每个授权门停下。不能把“执行整个计划”解释成删除授权。
 
@@ -62,9 +63,10 @@ description: >-
 - Git remote/commit、安装锁、manifest、路径前缀和 AI 用途分类的证据等级；
 - 结构化调用次数、Last used、日志窗口和无法获得的指标；
 - `/doctor`、`/context` 和官方 fresh-session A/B；
-- 当前全局入口、触发空壳入口与命中后完整内容的上下文成本。
+- 当前全局入口、触发空壳入口与命中后完整内容的上下文成本；
+- 宿主控制面现状（Claude Code settings.json 的 `skillOverrides` 等启用/禁用清单）与入口健康度（断链 symlink、跨机器绝对路径），可用 `python3 "$SKILL_DIR/scripts/review_server.py" probe --skills-dir <目录> --settings <settings.json>` 只读采集。
 
-来源证据优先级：安装锁/宿主清单 > 插件 manifest > bundle manifest > Git remote/commit > 项目加载规则 > 前缀/相似度 > AI 用途推断。
+来源证据优先级：安装锁/宿主清单（含宿主控制面启用/禁用清单）> 插件 manifest > bundle manifest > Git remote/commit > 项目加载规则 > 前缀/相似度 > AI 用途推断。
 
 来源置信度固定为 `verified / strong / inferred / unknown`。用途分类不能冒充安装来源。
 
@@ -192,14 +194,25 @@ python3 "$SKILL_DIR/scripts/review_server.py" read \
 1. 再校验 inventory revision 和目标集合；
 2. 建立独立备份/归档 manifest；
 3. 确认不在系统或插件托管区；
-4. 先 dry-run，再小批量执行；
-5. 每批检查发现面、项目作用域、触发门、恢复路径和 fresh-session context；
-6. 输出 `verification_receipt.json`，区分已完成、失败并回滚、未知/未验证；
-7. 不进入删除。
+4. 执行前后各保存一次宿主配置快照（如 settings.json）并纳入 `verification_receipt.json`，用于 `recheck` 对比和并发会话覆盖检测；
+5. 先 dry-run，再小批量执行；
+6. 每批检查发现面、项目作用域、触发门、恢复路径和 fresh-session context；
+7. 输出 `verification_receipt.json`，区分已完成、失败并回滚、未知/未验证；
+8. 不进入删除。
 
 `delete` 只处理用户再次点名确认、观察已满、0 次触发、非关键、备份可读且恢复演练通过的目标。删除后说明删了什么、备份在哪里、能否恢复。
 
 任何安装、移动、归档、插件开关、MCP 变更或删除发生前，都必须向用户复述准确目标和当前授权阶段。
+
+## `recheck`：复查治理漂移
+
+读取最近一次 `verification_receipt.json` 与 operation plan，重跑 `probe` 和轻量只读盘点，对比三类漂移：
+
+1. 已执行清理从宿主配置中消失（如 settings.json 被重建）；
+2. 断链或跨机器路径回归；
+3. 目标集合内容哈希变化。
+
+输出漂移报告，然后等待新的授权；`recheck` 本身不做任何修改。
 
 ## 输出要求
 

@@ -170,6 +170,14 @@ def normalize_skill(raw: Any, index: int) -> dict[str, Any]:
     hosts = as_text_list(first_present(raw, "hosts", "host"))
     trigger_terms = as_text_list(first_present(raw, "triggers", "triggerTerms", "trigger"))[:5]
 
+    host_override_state = as_text(first_present(raw, "hostOverrideState"), "unknown")
+    if host_override_state not in {"on", "off", "unknown"}:
+        host_override_state = "unknown"
+
+    entry_health = as_text(first_present(raw, "entryHealth"), "unknown")
+    if entry_health not in {"ok", "broken-symlink", "cross-machine-path", "unknown"}:
+        entry_health = "unknown"
+
     return {
         "skillId": skill_id,
         "name": name,
@@ -197,6 +205,8 @@ def normalize_skill(raw: Any, index: int) -> dict[str, Any]:
         "lastUsedMeasurement": as_text(first_present(raw, "lastUsedMeasurement"), "不可用"),
         "triggerTerms": trigger_terms,
         "appliedProjects": as_text_list(first_present(raw, "appliedProjects", "projects")),
+        "hostOverrideState": host_override_state,
+        "entryHealth": entry_health,
     }
 
 
@@ -752,6 +762,119 @@ def read_saved_state(root: Path, profile: str | None) -> tuple[Path, dict[str, A
     return path, state
 
 
+def is_cross_machine(target: str, home: str) -> bool:
+    """Pure predicate: does an absolute /Users/... target fall outside the current home?
+
+    Only meaningful for already-resolved absolute paths; callers decide whether the
+    entry is a symlink and whether it is broken before consulting this.
+    """
+    if not target.startswith("/Users/"):
+        return False
+    home_norm = home.rstrip("/")
+    if not home_norm:
+        return True
+    return target != home_norm and not target.startswith(home_norm + "/")
+
+
+def classify_entry(path: Path) -> dict[str, Any]:
+    """Read-only classification of one skills-dir entry: symlink-ness, target, health.
+
+    Never reads file contents. broken-symlink takes priority over cross-machine-path
+    when both conditions would otherwise apply.
+    """
+    is_symlink = os.path.islink(path)
+    target = os.readlink(path) if is_symlink else None
+    broken = os.path.lexists(path) and not os.path.exists(path)
+    entry_health = "ok"
+    if broken:
+        entry_health = "broken-symlink"
+    elif is_symlink:
+        try:
+            resolved = os.path.realpath(path)
+        except OSError:
+            resolved = target
+        home = os.path.expanduser("~")
+        if is_cross_machine(resolved, home):
+            entry_health = "cross-machine-path"
+    return {"isSymlink": is_symlink, "target": target, "entryHealth": entry_health}
+
+
+def read_settings_overrides(path: Path) -> dict[str, Any] | None:
+    """Read skillOverrides from a host settings.json. None means unreadable/invalid."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(raw, dict):
+        return None
+    overrides = raw.get("skillOverrides")
+    if not isinstance(overrides, dict):
+        return {}
+    return overrides
+
+
+def command_probe(args: argparse.Namespace) -> int:
+    overrides: dict[str, Any] | None = None
+    if args.settings:
+        settings_path = Path(args.settings).expanduser()
+        overrides = read_settings_overrides(settings_path)
+        if overrides is None:
+            sys.stderr.write(
+                f"[skill-slimming] 警告：无法读取或解析 settings：{settings_path}，overrideState 全部标记 unknown。\n"
+            )
+
+    scanned_dirs: list[str] = []
+    entries: list[dict[str, Any]] = []
+    any_dir_found = False
+
+    for raw_dir in args.skills_dir:
+        skills_dir = Path(raw_dir).expanduser()
+        if not skills_dir.exists():
+            sys.stderr.write(f"[skill-slimming] 警告：目录不存在，已跳过：{skills_dir}\n")
+            continue
+        any_dir_found = True
+        scanned_dirs.append(str(skills_dir))
+        for child in sorted(skills_dir.iterdir(), key=lambda p: p.name):
+            if child.name.startswith("."):
+                continue
+            is_symlink = os.path.islink(child)
+            if not is_symlink and not child.is_dir():
+                continue
+            classified = classify_entry(child)
+            if args.settings and overrides is not None:
+                override_state = "off" if overrides.get(child.name) == "off" else "on"
+            else:
+                override_state = "unknown"
+            entries.append(
+                {
+                    "name": child.name,
+                    "path": str(child),
+                    "isSymlink": classified["isSymlink"],
+                    "target": classified["target"],
+                    "entryHealth": classified["entryHealth"],
+                    "overrideState": override_state,
+                }
+            )
+
+    result = {
+        "generatedBy": "skill-slimming probe",
+        "scannedDirs": scanned_dirs,
+        "entries": entries,
+        "summary": {
+            "total": len(entries),
+            "ok": sum(1 for e in entries if e["entryHealth"] == "ok"),
+            "brokenSymlink": sum(1 for e in entries if e["entryHealth"] == "broken-symlink"),
+            "crossMachinePath": sum(1 for e in entries if e["entryHealth"] == "cross-machine-path"),
+            "overrideOff": sum(1 for e in entries if e["overrideState"] == "off"),
+            "overrideUnknown": sum(1 for e in entries if e["overrideState"] == "unknown"),
+        },
+    }
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    if args.skills_dir and not any_dir_found:
+        return 2
+    return 0
+
+
 def command_validate(args: argparse.Namespace) -> int:
     inventory = load_inventory(Path(args.inventory), args.profile)
     print(json.dumps(inventory, ensure_ascii=False, indent=2))
@@ -835,6 +958,14 @@ def build_parser() -> argparse.ArgumentParser:
     validate_parser.add_argument("--inventory", required=True)
     validate_parser.add_argument("--profile")
     validate_parser.set_defaults(func=command_validate)
+
+    probe_parser = subparsers.add_parser(
+        "probe", help="只读采集 skills 目录的入口健康度与宿主控制面 overrideState。"
+    )
+    probe_parser.add_argument("--skills-dir", action="append", required=True, dest="skills_dir")
+    probe_parser.add_argument("--settings", help="宿主 settings.json 路径；缺省时 overrideState 全部为 unknown。")
+    probe_parser.add_argument("--json", action="store_true", help="与默认输出相同；显式声明输出为 JSON。")
+    probe_parser.set_defaults(func=command_probe)
 
     serve_parser = subparsers.add_parser("serve", help="启动 127.0.0.1 复审网页并持续保存状态。")
     serve_parser.add_argument("--inventory", required=True)

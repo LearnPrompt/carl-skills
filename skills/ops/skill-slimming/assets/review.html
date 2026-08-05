@@ -198,6 +198,8 @@
     .tag { padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font: .62rem var(--mono); }
     .tag.critical { color: var(--coral); border-color: rgba(255, 130, 110, .45); }
     .tag.acid { color: var(--acid); border-color: rgba(200, 243, 106, .35); }
+    .tag.dim { color: var(--muted); border-color: var(--line); }
+    .tag.amber { color: var(--amber); border-color: rgba(246, 201, 105, .4); }
     .skill-title { margin: 0 0 7px; font-size: 1rem; }
     .skill-summary { margin-bottom: 10px; color: #b8bcb4; font-size: .82rem; line-height: 1.55; }
     .skill-meta { color: var(--dim); font: .64rem/1.6 var(--mono); overflow-wrap: anywhere; }
@@ -663,6 +665,9 @@
       (skill.ownershipTags || []).forEach(value => tags.appendChild(tag(value, "acid")));
       if (skill.rareCritical) tags.appendChild(tag("RARE_CRITICAL", "critical"));
       if (record.needsReview) tags.appendChild(tag("内容已变化 · 需复审", "critical"));
+      if (skill.hostOverrideState === "off") tags.appendChild(tag("宿主已禁用", "dim"));
+      if (skill.entryHealth === "broken-symlink") tags.appendChild(tag("断链", "critical"));
+      if (skill.entryHealth === "cross-machine-path") tags.appendChild(tag("跨机路径", "amber"));
       info.append(tags, el("h3", "skill-title", skill.name), el("p", "skill-summary", skill.summary));
       const usage = skill.actualCallCount === null || skill.actualCallCount === undefined ? "调用不可用" : `调用 ${skill.actualCallCount} · ${skill.usageMeasurement}`;
       info.appendChild(el("div", "skill-meta", `${skill.sourceLabel} · ${skill.specificUse} · ${usage}${skill.lastUsedAt ? ` · 最近 ${skill.lastUsedAt}` : ""}`));
