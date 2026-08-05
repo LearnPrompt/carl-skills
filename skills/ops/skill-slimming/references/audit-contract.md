@@ -48,6 +48,8 @@ Management policies:
 
 Ownership tags can include `Codex 内置`, `Codex 官方插件`, `第三方插件`, `Claude Code`, and `用户安装`. A Skill may have multiple host tags but one management policy.
 
+Host control-plane enable/disable state (e.g. Claude Code settings.json `skillOverrides`) ranks with tier 1 host installation evidence; record per-skill `hostOverrideState` and `entryHealth` (broken symlinks and cross-machine absolute paths are dead exposure, not active entries).
+
 ## Usage evidence
 
 Evidence priority:
@@ -121,7 +123,9 @@ The local review runtime requires a JSON object with a `skills` array. This exam
       "lastUsedAt": "2026-08-01T08:40:00+08:00",
       "lastUsedMeasurement": "日志观测值",
       "triggerTerms": ["审查代码", "大型 review"],
-      "appliedProjects": []
+      "appliedProjects": [],
+      "hostOverrideState": "on",
+      "entryHealth": "ok"
     }
   ]
 }

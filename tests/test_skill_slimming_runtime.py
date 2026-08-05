@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import contextlib
 import importlib.util
+import io
 import json
 import stat
 import tempfile
@@ -116,6 +118,112 @@ class RuntimeContractTests(unittest.TestCase):
         self.assertNotIn("token", inventory["plugins"][0])
         self.assertNotIn("env", inventory["mcps"][0])
 
+    def test_normalize_passes_through_host_state(self) -> None:
+        raw = sample_inventory()
+        raw["skills"][0]["hostOverrideState"] = "off"
+        raw["skills"][0]["entryHealth"] = "broken-symlink"
+        raw["skills"][1]["hostOverrideState"] = "bogus"
+        raw["skills"][1]["entryHealth"] = "bogus"
+        inventory = runtime.normalize_inventory(raw)
+        writer = next(skill for skill in inventory["skills"] if skill["skillId"] == "writer")
+        deploy = next(skill for skill in inventory["skills"] if skill["skillId"] == "deploy")
+        self.assertEqual(writer["hostOverrideState"], "off")
+        self.assertEqual(writer["entryHealth"], "broken-symlink")
+        # Invalid values must fall back to unknown rather than being passed through.
+        self.assertEqual(deploy["hostOverrideState"], "unknown")
+        self.assertEqual(deploy["entryHealth"], "unknown")
+        builtin = next(skill for skill in inventory["skills"] if skill["skillId"] == "builtin")
+        self.assertEqual(builtin["hostOverrideState"], "unknown")
+        self.assertEqual(builtin["entryHealth"], "unknown")
+
+    def test_is_cross_machine_pure_predicate(self) -> None:
+        home = "/Users/carl2077"
+        self.assertFalse(runtime.is_cross_machine("/Users/carl2077/projects/x", home))
+        self.assertFalse(runtime.is_cross_machine("/Users/carl2077", home))
+        self.assertTrue(runtime.is_cross_machine("/Users/otheruser/projects/x", home))
+        self.assertFalse(runtime.is_cross_machine("/opt/skills/x", home))
+        self.assertFalse(runtime.is_cross_machine("relative/path", home))
+
+    def test_probe_classifies_entries_and_reads_override_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skills_dir = Path(temp_dir) / "skills"
+            skills_dir.mkdir()
+            (skills_dir / ".hidden").mkdir()
+            (skills_dir / "plain.txt").write_text("noop", encoding="utf-8")
+            ok_target = skills_dir / "_ok-target"
+            ok_target.mkdir()
+            (skills_dir / "normal-skill").mkdir()
+            (skills_dir / "ok-link").symlink_to(ok_target, target_is_directory=True)
+            (skills_dir / "broken-link").symlink_to(skills_dir / "does-not-exist")
+            # Target doesn't exist on this test machine, so broken wins over cross-machine
+            # per the runtime's stated precedence rule.
+            (skills_dir / "cross-link").symlink_to("/Users/otheruser/somewhere")
+
+            settings_path = Path(temp_dir) / "settings.json"
+            settings_path.write_text(
+                json.dumps({"skillOverrides": {"normal-skill": "off"}}), encoding="utf-8"
+            )
+
+            parser = runtime.build_parser()
+            args = parser.parse_args(
+                [
+                    "probe",
+                    "--skills-dir", str(skills_dir),
+                    "--settings", str(settings_path),
+                    "--json",
+                ]
+            )
+            buffer = io.StringIO()
+            with contextlib.redirect_stdout(buffer):
+                exit_code = args.func(args)
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(buffer.getvalue())
+            self.assertEqual(payload["generatedBy"], "skill-slimming probe")
+            self.assertEqual(payload["scannedDirs"], [str(skills_dir)])
+            entries_by_name = {entry["name"]: entry for entry in payload["entries"]}
+            self.assertNotIn(".hidden", entries_by_name)
+            self.assertNotIn("plain.txt", entries_by_name)
+            self.assertEqual(entries_by_name["normal-skill"]["entryHealth"], "ok")
+            self.assertEqual(entries_by_name["normal-skill"]["overrideState"], "off")
+            self.assertFalse(entries_by_name["normal-skill"]["isSymlink"])
+            self.assertEqual(entries_by_name["ok-link"]["entryHealth"], "ok")
+            self.assertEqual(entries_by_name["ok-link"]["overrideState"], "on")
+            self.assertTrue(entries_by_name["ok-link"]["isSymlink"])
+            self.assertEqual(entries_by_name["broken-link"]["entryHealth"], "broken-symlink")
+            self.assertEqual(entries_by_name["broken-link"]["overrideState"], "on")
+            self.assertEqual(entries_by_name["cross-link"]["entryHealth"], "broken-symlink")
+            self.assertEqual(payload["summary"]["total"], 5)
+            # normal-skill, ok-link, and the plain _ok-target directory are all "ok".
+            self.assertEqual(payload["summary"]["ok"], 3)
+            self.assertEqual(payload["summary"]["brokenSymlink"], 2)
+            self.assertEqual(payload["summary"]["overrideOff"], 1)
+            self.assertEqual(payload["summary"]["overrideUnknown"], 0)
+
+    def test_probe_marks_override_unknown_without_settings(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skills_dir = Path(temp_dir) / "skills"
+            skills_dir.mkdir()
+            (skills_dir / "normal-skill").mkdir()
+            parser = runtime.build_parser()
+            args = parser.parse_args(["probe", "--skills-dir", str(skills_dir)])
+            buffer = io.StringIO()
+            with contextlib.redirect_stdout(buffer):
+                exit_code = args.func(args)
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(buffer.getvalue())
+            self.assertEqual(payload["entries"][0]["overrideState"], "unknown")
+            self.assertEqual(payload["summary"]["overrideUnknown"], 1)
+
+    def test_probe_exits_2_when_all_dirs_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing_dir = Path(temp_dir) / "does-not-exist"
+            parser = runtime.build_parser()
+            args = parser.parse_args(["probe", "--skills-dir", str(missing_dir)])
+            buffer = io.StringIO()
+            with contextlib.redirect_stdout(buffer):
+                exit_code = args.func(args)
+            self.assertEqual(exit_code, 2)
+
     def test_trigger_requires_two_terms_and_rare_critical_confirmation(self) -> None:
         inventory = runtime.normalize_inventory(sample_inventory())
         state = runtime.initial_state(inventory)
@@ -130,6 +238,20 @@ class RuntimeContractTests(unittest.TestCase):
         deploy["rareCriticalConfirmed"] = True
         validated = runtime.validate_state(state, inventory)
         self.assertEqual(validated["reviewStatus"], "draft")
+
+    def test_initial_state_passes_own_validation_even_with_rare_critical_suggestion(self) -> None:
+        inventory = sample_inventory()
+        for skill in inventory["skills"]:
+            if skill["skillId"] == "deploy":
+                skill["suggestedDecision"] = "trigger"
+                skill["triggerTerms"] = ["准备发布", "回滚版本"]
+        normalized = runtime.normalize_inventory(inventory)
+        state = runtime.initial_state(normalized)
+        deploy = next(d for d in state["decisions"] if d["skillId"] == "deploy")
+        self.assertEqual(deploy["decision"], "undecided")
+        self.assertFalse(deploy["rareCriticalConfirmed"])
+        # 种子状态必须能原样通过 validate_state，否则页面首次自动保存必然 422。
+        runtime.validate_state(state, normalized)
 
     def test_runtime_recomputes_declared_inventory_revision(self) -> None:
         raw = sample_inventory()
@@ -282,6 +404,26 @@ class LoopbackServerTests(unittest.TestCase):
         self.assertIn("我选好了", html)
         self.assertIn("自动保存到本机私有目录", html)
         self.assertIn("connect-src 'self'", headers["Content-Security-Policy"])
+
+    def test_review_html_has_batch_and_quick_filter_controls(self) -> None:
+        status, body, _ = self.request(f"/?token={self.token}")
+        html = body.decode("utf-8")
+        self.assertEqual(status, 200)
+        self.assertIn("选择筛选结果", html)
+        self.assertIn("批量全局", html)
+        self.assertIn("批量项目", html)
+        self.assertIn("批量触发", html)
+        self.assertIn("需要判断", html)
+        # rareCritical items must never enter the batch pool.
+        self.assertIn("!skill.rareCritical", html)
+
+    def test_review_html_has_host_state_badges(self) -> None:
+        status, body, _ = self.request(f"/?token={self.token}")
+        html = body.decode("utf-8")
+        self.assertEqual(status, 200)
+        self.assertIn("宿主已禁用", html)
+        self.assertIn("断链", html)
+        self.assertIn("跨机路径", html)
 
 
 if __name__ == "__main__":

@@ -119,7 +119,7 @@
       backdrop-filter: blur(22px);
       box-shadow: 0 18px 60px rgba(0, 0, 0, .28);
     }
-    .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 8px; }
+    .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 8px; flex-wrap: wrap; }
     .filters input, .filters select, .project-add input {
       width: 100%;
       min-width: 0;
@@ -130,7 +130,14 @@
       color: var(--ink);
       background: #090d0a;
     }
+    .filters select { min-width: 130px; }
+    .filters input { min-width: 130px; }
     .search { grid-column: span 2; }
+    .quick-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .quick-filter-btn { min-height: 38px; padding: 8px 14px; border: 1px solid var(--line); color: var(--muted); background: transparent; font-size: .78rem; }
+    .quick-filter-btn b { margin-left: 6px; font-weight: 700; }
+    .quick-filter-btn:hover:not(.active) { border-color: rgba(200, 243, 106, .5); }
+    .quick-filter-btn.active { border-color: var(--acid); color: #0a0e0b; background: var(--acid); font-weight: 700; }
     .deck-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 12px; }
     .button {
       min-height: 40px;
@@ -143,6 +150,24 @@
     .button.primary { border-color: var(--acid); color: #0b100c; background: var(--acid); font-weight: 700; }
     .button.danger { color: var(--coral); }
     .save-note { margin-left: auto; color: var(--muted); font-size: .78rem; }
+    .batch-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .batch-toggle { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .78rem; }
+    .batch-toggle input { width: 16px; height: 16px; }
+    .batch-toggle b { padding: 2px 7px; border: 1px solid var(--line); color: var(--acid); font: 700 .72rem var(--mono); }
+    #batch-project-select { min-width: 160px; height: 40px; padding: 0 10px; border: 1px solid var(--line); color: var(--ink); background: #090d0a; }
+    .decision-bar-wrap { grid-column: 1 / -1; padding: 18px 22px 22px; border-top: 1px solid var(--line); }
+    .decision-bar { display: flex; height: 10px; border: 1px solid var(--line); overflow: hidden; background: rgba(111, 117, 109, .18); }
+    .decision-bar span { display: block; height: 100%; }
+    .decision-bar .seg-global { background: var(--acid); }
+    .decision-bar .seg-project { background: var(--cyan); }
+    .decision-bar .seg-trigger { background: var(--amber); }
+    .decision-bar .seg-undecided { background: var(--dim); opacity: .55; }
+    .decision-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; color: var(--muted); font-size: .74rem; }
+    .decision-legend i { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; }
+    .decision-legend .seg-global-dot { background: var(--acid); }
+    .decision-legend .seg-project-dot { background: var(--cyan); }
+    .decision-legend .seg-trigger-dot { background: var(--amber); }
+    .decision-legend .seg-undecided-dot { background: var(--dim); opacity: .7; }
     .section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin: 0 0 26px; }
     .section-head h2 { margin: 8px 0 0; font: 500 clamp(2rem, 4vw, 3.7rem)/1 var(--display); letter-spacing: -.035em; }
     .legend { display: flex; gap: 14px; color: var(--muted); font-size: .74rem; }
@@ -173,6 +198,8 @@
     .tag { padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font: .62rem var(--mono); }
     .tag.critical { color: var(--coral); border-color: rgba(255, 130, 110, .45); }
     .tag.acid { color: var(--acid); border-color: rgba(200, 243, 106, .35); }
+    .tag.dim { color: var(--muted); border-color: var(--line); }
+    .tag.amber { color: var(--amber); border-color: rgba(246, 201, 105, .4); }
     .skill-title { margin: 0 0 7px; font-size: 1rem; }
     .skill-summary { margin-bottom: 10px; color: #b8bcb4; font-size: .82rem; line-height: 1.55; }
     .skill-meta { color: var(--dim); font: .64rem/1.6 var(--mono); overflow-wrap: anywhere; }
@@ -267,12 +294,29 @@
         </select>
         <select id="management-filter" aria-label="管理边界"><option value="all">全部管理边界</option><option value="reviewable">用户可复审</option><option value="managed">托管只读</option><option value="critical">RARE_CRITICAL</option></select>
       </div>
+      <div id="quick-filters" class="quick-filters" role="tablist" aria-label="状态快速筛选">
+        <button type="button" class="quick-filter-btn" data-quick="needs-decision">需要判断 <b>0</b></button>
+        <button type="button" class="quick-filter-btn" data-quick="reviewable">可复审 <b>0</b></button>
+        <button type="button" class="quick-filter-btn" data-quick="managed">托管只读 <b>0</b></button>
+        <button type="button" class="quick-filter-btn active" data-quick="all">全部 <b>0</b></button>
+      </div>
       <div class="deck-actions">
         <button id="suggestions" class="button" type="button">恢复审计建议</button>
         <button id="undecided" class="button" type="button">全部待定</button>
         <button id="download" class="button" type="button">下载 JSON 备份</button>
         <button id="complete" class="button primary" type="button">完成复审</button>
         <span class="save-note">自动保存到本机私有目录；下次启动会恢复。</span>
+      </div>
+      <div class="batch-row" aria-label="筛选结果批量操作">
+        <label class="batch-toggle">
+          <input type="checkbox" id="batch-enable">
+          <span>选择筛选结果</span>
+          <b id="batch-count">0</b>
+        </label>
+        <button id="batch-global" class="button" type="button" disabled>批量全局</button>
+        <button id="batch-project" class="button" type="button" disabled>批量项目</button>
+        <select id="batch-project-select" aria-label="批量项目目标" disabled><option value="">选择项目…</option></select>
+        <button id="batch-trigger" class="button" type="button" disabled>批量触发</button>
       </div>
     </section>
 
@@ -317,7 +361,11 @@
       inventoryLabel: document.getElementById("inventory-label"), projectList: document.getElementById("project-list"),
       search: document.getElementById("search"), source: document.getElementById("source-filter"),
       category: document.getElementById("category-filter"), host: document.getElementById("host-filter"),
-      decision: document.getElementById("decision-filter"), management: document.getElementById("management-filter")
+      decision: document.getElementById("decision-filter"), management: document.getElementById("management-filter"),
+      quickFilters: document.getElementById("quick-filters"),
+      batchEnable: document.getElementById("batch-enable"), batchCount: document.getElementById("batch-count"),
+      batchGlobal: document.getElementById("batch-global"), batchProject: document.getElementById("batch-project"),
+      batchProjectSelect: document.getElementById("batch-project-select"), batchTrigger: document.getElementById("batch-trigger")
     };
 
     let inventory = null;
@@ -325,6 +373,7 @@
     let decisions = new Map();
     let saveTimer = null;
     let toastTimer = null;
+    let quickFilter = "all";
 
     function el(tag, className, text) {
       const node = document.createElement(tag);
@@ -418,7 +467,12 @@
         const record = decisionFor(skill.skillId);
         const haystack = [skill.name, skill.summary, skill.sourceGroup, skill.category, skill.specificUse, ...(skill.triggerTerms || []), ...(record.triggerTerms || [])].join(" ").toLocaleLowerCase();
         const managed = skill.managementPolicy !== "reviewable";
-        return (!f.search || haystack.includes(f.search)) &&
+        const matchesQuick = quickFilter === "all" ||
+          (quickFilter === "needs-decision" && !managed && record.decision === "undecided") ||
+          (quickFilter === "reviewable" && !managed) ||
+          (quickFilter === "managed" && managed);
+        return matchesQuick &&
+          (!f.search || haystack.includes(f.search)) &&
           (f.source === "all" || skill.sourceGroup === f.source) &&
           (f.category === "all" || skill.category === f.category) &&
           (f.host === "all" || (skill.hosts || []).includes(f.host)) &&
@@ -428,6 +482,76 @@
             (f.management === "managed" && managed) ||
             (f.management === "critical" && skill.rareCritical));
       });
+    }
+
+    function quickFilterCounts() {
+      const counts = { "needs-decision": 0, reviewable: 0, managed: 0, all: inventory.skills.length };
+      inventory.skills.forEach(skill => {
+        const managed = skill.managementPolicy !== "reviewable";
+        if (managed) { counts.managed++; return; }
+        counts.reviewable++;
+        if (decisionFor(skill.skillId).decision === "undecided") counts["needs-decision"]++;
+      });
+      return counts;
+    }
+
+    function renderQuickFilters() {
+      const counts = quickFilterCounts();
+      ui.quickFilters.querySelectorAll(".quick-filter-btn").forEach(button => {
+        const key = button.dataset.quick;
+        button.querySelector("b").textContent = formatNumber(counts[key]);
+        button.classList.toggle("active", key === quickFilter);
+      });
+    }
+
+    function eligibleBatchSkills() {
+      return filteredSkills().filter(skill => skill.managementPolicy === "reviewable" && !skill.rareCritical);
+    }
+
+    function fillBatchProjectSelect() {
+      const previous = ui.batchProjectSelect.value;
+      ui.batchProjectSelect.replaceChildren();
+      option(ui.batchProjectSelect, "", "选择项目…");
+      state.projectCatalog.forEach(project => option(ui.batchProjectSelect, project.id, project.name));
+      if ([...ui.batchProjectSelect.options].some(o => o.value === previous)) ui.batchProjectSelect.value = previous;
+    }
+
+    function updateBatchState() {
+      const eligible = eligibleBatchSkills();
+      ui.batchCount.textContent = formatNumber(eligible.length);
+      const enabled = ui.batchEnable.checked;
+      const hasProjects = state.projectCatalog.length > 0;
+      const hasEligible = enabled && eligible.length > 0;
+      ui.batchGlobal.disabled = !hasEligible;
+      ui.batchTrigger.disabled = !hasEligible;
+      ui.batchProjectSelect.disabled = !enabled || !hasProjects;
+      ui.batchProject.disabled = !hasEligible || !hasProjects || !ui.batchProjectSelect.value;
+    }
+
+    function runBatchDecision(kind) {
+      const filtered = filteredSkills();
+      let success = 0;
+      const skipped = { rareCritical: 0, managed: 0, triggerShort: 0 };
+      filtered.forEach(skill => {
+        if (skill.managementPolicy !== "reviewable") { skipped.managed++; return; }
+        if (skill.rareCritical) { skipped.rareCritical++; return; }
+        const record = decisionFor(skill.skillId);
+        if (kind === "global") {
+          record.decision = "global"; record.projects = []; record.triggerTerms = []; record.needsReview = false; success++;
+        } else if (kind === "project") {
+          const projectId = ui.batchProjectSelect.value;
+          if (!projectId) return;
+          record.decision = "project"; record.projects = [projectId]; record.triggerTerms = []; record.needsReview = false; success++;
+        } else if (kind === "trigger") {
+          const terms = (record.triggerTerms && record.triggerTerms.length >= 2 ? record.triggerTerms : (skill.triggerTerms || [])).slice(0, 5);
+          if (terms.length < 2) { skipped.triggerShort++; return; }
+          record.decision = "trigger"; record.triggerTerms = terms; record.projects = []; record.needsReview = false; success++;
+        }
+      });
+      scheduleSave(); renderAll();
+      const skipTotal = skipped.rareCritical + skipped.managed + skipped.triggerShort;
+      const kindLabel = kind === "global" ? "全局" : kind === "project" ? "项目" : "触发";
+      showToast(`批量${kindLabel}：成功 ${success} 项，跳过 ${skipTotal} 项（RARE_CRITICAL ${skipped.rareCritical} · 托管 ${skipped.managed} · 触发词不足 ${skipped.triggerShort}）。`);
     }
 
     function renderStats() {
@@ -452,6 +576,17 @@
       values.forEach(([label, value, note]) => {
         const card = el("article", "stat"); card.append(el("span", "", label), el("strong", "", value), el("small", "", note)); ui.stats.appendChild(card);
       });
+      const barWrap = el("div", "decision-bar-wrap");
+      const barTrack = el("div", "decision-bar");
+      const segments = [["global", counts.global], ["project", counts.project], ["trigger", counts.trigger], ["undecided", counts.undecided]];
+      const labels = { global: "全局", project: "项目", trigger: "触发", undecided: "待定" };
+      segments.forEach(([key, count]) => { const seg = el("span", `seg-${key}`); seg.style.flexGrow = String(count); barTrack.appendChild(seg); });
+      barWrap.appendChild(barTrack);
+      const legend = el("div", "decision-legend");
+      segments.forEach(([key, count]) => { const item = el("span"); item.append(el("i", `seg-${key}-dot`), ` ${labels[key]} ${formatNumber(count)}`); legend.appendChild(item); });
+      barWrap.appendChild(legend);
+      ui.stats.appendChild(barWrap);
+      renderQuickFilters();
     }
 
     function tag(text, className = "") { return el("span", `tag ${className}`.trim(), text); }
@@ -530,6 +665,9 @@
       (skill.ownershipTags || []).forEach(value => tags.appendChild(tag(value, "acid")));
       if (skill.rareCritical) tags.appendChild(tag("RARE_CRITICAL", "critical"));
       if (record.needsReview) tags.appendChild(tag("内容已变化 · 需复审", "critical"));
+      if (skill.hostOverrideState === "off") tags.appendChild(tag("宿主已禁用", "dim"));
+      if (skill.entryHealth === "broken-symlink") tags.appendChild(tag("断链", "critical"));
+      if (skill.entryHealth === "cross-machine-path") tags.appendChild(tag("跨机路径", "amber"));
       info.append(tags, el("h3", "skill-title", skill.name), el("p", "skill-summary", skill.summary));
       const usage = skill.actualCallCount === null || skill.actualCallCount === undefined ? "调用不可用" : `调用 ${skill.actualCallCount} · ${skill.usageMeasurement}`;
       info.appendChild(el("div", "skill-meta", `${skill.sourceLabel} · ${skill.specificUse} · ${usage}${skill.lastUsedAt ? ` · 最近 ${skill.lastUsedAt}` : ""}`));
@@ -547,7 +685,7 @@
     function renderGroups() {
       ui.groups.replaceChildren(); const skills = filteredSkills();
       ui.inventoryLabel.textContent = `Inventory / ${skills.length} of ${inventory.skills.length}`;
-      if (!skills.length) { ui.groups.appendChild(el("div", "empty", "当前筛选条件没有匹配项。")); return; }
+      if (!skills.length) { ui.groups.appendChild(el("div", "empty", "当前筛选条件没有匹配项。")); updateBatchState(); return; }
       const grouped = new Map(); skills.forEach(skill => { if (!grouped.has(skill.sourceGroup)) grouped.set(skill.sourceGroup, []); grouped.get(skill.sourceGroup).push(skill); });
       [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b, "zh-CN")).forEach(([source, groupSkills], index) => {
         const details = el("details", "source-group"); details.open = index < 2;
@@ -555,12 +693,15 @@
         const title = el("div", "source-title"); title.append(el("strong", "", source), el("span", "", [...new Set(groupSkills.map(skill => skill.category))].slice(0, 4).join(" · "))); summary.append(title, el("span", "source-count", groupSkills.length)); details.appendChild(summary);
         const body = el("div", "group-body"); groupSkills.sort((a, b) => a.name.localeCompare(b.name, "zh-CN")).forEach(skill => body.appendChild(buildSkillCard(skill))); details.appendChild(body); ui.groups.appendChild(details);
       });
+      updateBatchState();
     }
 
     function renderProjects() {
       ui.projectList.replaceChildren();
       if (!state.projectCatalog.length) ui.projectList.appendChild(el("span", "project-pill", "还没有项目；请添加后再选择项目级"));
       state.projectCatalog.forEach(project => ui.projectList.appendChild(el("span", "project-pill", `${project.name} · ${project.id}${project.location ? ` · ${project.location}` : ""}`)));
+      fillBatchProjectSelect();
+      updateBatchState();
     }
 
     function renderAll() { renderStats(); renderGroups(); renderProjects(); }
@@ -583,6 +724,20 @@
     }
 
     [ui.search, ui.source, ui.category, ui.host, ui.decision, ui.management].forEach(control => control.addEventListener("input", renderGroups));
+    document.querySelectorAll("select").forEach(select => select.addEventListener("wheel", event => event.preventDefault(), { passive: false }));
+
+    ui.quickFilters.addEventListener("click", event => {
+      const button = event.target.closest(".quick-filter-btn");
+      if (!button) return;
+      quickFilter = button.dataset.quick;
+      renderQuickFilters(); renderGroups();
+    });
+
+    ui.batchEnable.addEventListener("change", updateBatchState);
+    ui.batchProjectSelect.addEventListener("change", updateBatchState);
+    ui.batchGlobal.addEventListener("click", () => runBatchDecision("global"));
+    ui.batchProject.addEventListener("click", () => runBatchDecision("project"));
+    ui.batchTrigger.addEventListener("click", () => runBatchDecision("trigger"));
 
     document.getElementById("suggestions").addEventListener("click", () => {
       inventory.skills.forEach(skill => {
