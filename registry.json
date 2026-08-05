@@ -3,8 +3,8 @@
   "description": "Real-world AI workflows for creators.",
   "homepage": "https://github.com/LearnPrompt/carl-skills",
   "license": "MIT",
-  "version": "0.6.0",
-  "updated": "2026-08-04",
+  "version": "0.7.0",
+  "updated": "2026-08-05",
   "model": "catalog-first",
   "install_logic": "Carl Skills is the catalog. Each entry declares either a raw_skill_url or a folder-aware install_mode/install_command; collection-native skills are maintained directly under this repository's skills directory.",
   "catalog_order": [
