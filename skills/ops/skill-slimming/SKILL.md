@@ -132,7 +132,7 @@ python3 "$SKILL_DIR/scripts/review_server.py" serve \
 - 生成随机访问令牌，并自动打开黑绿色复审页；
 - 状态写入 `$HOME/.skill-slimming/profiles/<profile>/current.json`；
 - 状态目录权限为 `0700`，JSON 为 `0600`，原子写入并保留最近 50 个历史版本；
-- 页面支持搜索、来源/用途/宿主/决定/管理边界筛选、来源折叠、项目绑定、2–5 个触发词和 `RARE_CRITICAL` 二次确认、状态快速分段、决定分布条与筛选结果批量设置（`RARE_CRITICAL` 与托管项不进批量）；
+- 页面支持搜索、来源/用途/宿主/决定/管理边界筛选、来源折叠、项目绑定、2–5 个触发词和 `RARE_CRITICAL` 二次确认、状态快速分段、决定分布条与筛选结果批量设置（`RARE_CRITICAL` 与托管项不进批量）、执行回执只读回显（`serve --receipt`）与插件能力包折叠；
 - 页面关闭后状态仍存在；下一次对同一 `profile` 启动会恢复；
 - 新 inventory 出现时，只保留 `skillId + contentHash` 均未变化的决定；变化项和新增项回到待复审。
 
@@ -203,6 +203,8 @@ python3 "$SKILL_DIR/scripts/review_server.py" read \
 `delete` 只处理用户再次点名确认、观察已满、0 次触发、非关键、备份可读且恢复演练通过的目标。删除后说明删了什么、备份在哪里、能否恢复。
 
 任何安装、移动、归档、插件开关、MCP 变更或删除发生前，都必须向用户复述准确目标和当前授权阶段。
+
+`verification_receipt.json` 可通过 `serve --receipt` 在复审页只读回显，方便下轮复审对照。
 
 ## `recheck`：复查治理漂移
 

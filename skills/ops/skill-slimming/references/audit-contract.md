@@ -125,7 +125,8 @@ The local review runtime requires a JSON object with a `skills` array. This exam
       "triggerTerms": ["审查代码", "大型 review"],
       "appliedProjects": [],
       "hostOverrideState": "on",
-      "entryHealth": "ok"
+      "entryHealth": "ok",
+      "globalTier": "core"
     }
   ]
 }
@@ -136,6 +137,8 @@ The local review runtime requires a JSON object with a `skills` array. This exam
 ## Report artifacts
 
 `evidence.json` should record command, sanitized arguments, timestamp, exit code, evidence class, and omitted-sensitive-field note. It must not contain secret values or private content.
+
+The apply-phase `verification_receipt.json` may be passed to the review runtime via `serve --receipt` for read-only display; the runtime scrubs token/secret/cookie/password/authorization keys recursively before serving.
 
 `report.md` should include:
 
