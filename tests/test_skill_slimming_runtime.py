@@ -118,6 +118,45 @@ class RuntimeContractTests(unittest.TestCase):
         self.assertNotIn("token", inventory["plugins"][0])
         self.assertNotIn("env", inventory["mcps"][0])
 
+    def test_scrub_sensitive_removes_secret_keys(self) -> None:
+        nested = {
+            "token": "abc",
+            "keepMe": "value",
+            "nested": {
+                "Secret": "xyz",
+                "ok": 1,
+                "list": [
+                    {"password": "p", "fine": True},
+                    {"Authorization": "Bearer x", "name": "n"},
+                ],
+            },
+            "cookieJar": "should-be-removed-because-key-contains-cookie",
+        }
+        scrubbed = runtime.scrub_sensitive(nested)
+        self.assertNotIn("token", scrubbed)
+        self.assertNotIn("cookieJar", scrubbed)
+        self.assertEqual(scrubbed["keepMe"], "value")
+        self.assertNotIn("Secret", scrubbed["nested"])
+        self.assertEqual(scrubbed["nested"]["ok"], 1)
+        self.assertNotIn("password", scrubbed["nested"]["list"][0])
+        self.assertTrue(scrubbed["nested"]["list"][0]["fine"])
+        self.assertNotIn("Authorization", scrubbed["nested"]["list"][1])
+        self.assertEqual(scrubbed["nested"]["list"][1]["name"], "n")
+
+    def test_normalize_passes_through_global_tier(self) -> None:
+        raw = sample_inventory()
+        raw["skills"][0]["globalTier"] = "core"
+        raw["skills"][1]["globalTier"] = "conservative"
+        raw["skills"][2]["globalTier"] = "bogus"
+        inventory = runtime.normalize_inventory(raw)
+        writer = next(skill for skill in inventory["skills"] if skill["skillId"] == "writer")
+        deploy = next(skill for skill in inventory["skills"] if skill["skillId"] == "deploy")
+        builtin = next(skill for skill in inventory["skills"] if skill["skillId"] == "builtin")
+        self.assertEqual(writer["globalTier"], "core")
+        self.assertEqual(deploy["globalTier"], "conservative")
+        # Invalid values must fall back to unknown rather than being passed through.
+        self.assertEqual(builtin["globalTier"], "unknown")
+
     def test_normalize_passes_through_host_state(self) -> None:
         raw = sample_inventory()
         raw["skills"][0]["hostOverrideState"] = "off"
@@ -424,6 +463,56 @@ class LoopbackServerTests(unittest.TestCase):
         self.assertIn("宿主已禁用", html)
         self.assertIn("断链", html)
         self.assertIn("跨机路径", html)
+
+    def test_bootstrap_includes_scrubbed_receipt(self) -> None:
+        # No --receipt passed at all: bootstrap must echo receipt as null.
+        status, body, _ = self.request("/api/bootstrap", token=self.token)
+        self.assertEqual(status, 200)
+        self.assertIsNone(json.loads(body)["receipt"])
+
+        # With a receipt, bootstrap must echo it back scrubbed of sensitive keys.
+        with tempfile.TemporaryDirectory() as temp_dir:
+            receipt_store = runtime.StateStore(
+                Path(temp_dir),
+                "test-profile",
+                self.inventory,
+                receipt=runtime.scrub_sensitive(
+                    {
+                        "appliedAt": "2026-08-01T00:00:00Z",
+                        "token": "must-not-survive",
+                        "counts": {"deletions": 2},
+                    }
+                ),
+            )
+            server = runtime.ReviewServer(("127.0.0.1", 0), receipt_store, "receipt-token")
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                request = urllib.request.Request(
+                    f"http://127.0.0.1:{server.server_port}/api/bootstrap",
+                    headers={"X-Skill-Slimming-Token": "receipt-token"},
+                )
+                with urllib.request.urlopen(request, timeout=2) as response:
+                    payload = json.loads(response.read())
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=2)
+            self.assertIn("receipt", payload)
+            self.assertIsNotNone(payload["receipt"])
+            self.assertNotIn("token", payload["receipt"])
+            self.assertEqual(payload["receipt"]["counts"]["deletions"], 2)
+            self.assertEqual(payload["receipt"]["appliedAt"], "2026-08-01T00:00:00Z")
+
+    def test_review_html_has_receipt_tier_and_capability_pack_copy(self) -> None:
+        status, body, _ = self.request(f"/?token={self.token}")
+        html = body.decode("utf-8")
+        self.assertEqual(status, 200)
+        self.assertIn("当前治理状态已应用", html)
+        self.assertIn("查看归档与回滚入口", html)
+        self.assertIn("核心全局", html)
+        self.assertIn("保守全局", html)
+        self.assertIn("托管能力包", html)
 
 
 if __name__ == "__main__":

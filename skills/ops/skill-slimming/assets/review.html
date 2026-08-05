@@ -84,6 +84,24 @@
     .autosave { display: flex; align-items: center; gap: 8px; color: var(--cyan); font: .72rem var(--mono); }
     .autosave::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 14px currentColor; }
     .autosave.error { color: var(--coral); }
+    .receipt-section { margin: 0 0 48px; padding: 28px; border: 1px solid rgba(200, 243, 106, .28); background: var(--surface); }
+    .receipt-head { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .receipt-head h2 { margin: 8px 0 0; font: 500 clamp(1.8rem, 3vw, 2.6rem)/1 var(--display); letter-spacing: -.02em; }
+    .receipt-badge { padding: 6px 12px; border: 1px solid var(--acid); color: var(--acid); font: 700 .68rem var(--mono); letter-spacing: .06em; white-space: nowrap; }
+    .receipt-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; margin-top: 24px; border: 1px solid var(--line); background: var(--line); }
+    .receipt-count-card { padding: 16px; background: var(--surface-2); }
+    .receipt-count-card span { display: block; color: var(--muted); font: .66rem var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+    .receipt-count-card strong { display: block; margin-top: 8px; font: 500 1.7rem var(--display); }
+    .receipt-count-card small { display: block; margin-top: 4px; color: var(--dim); font-size: .68rem; }
+    .receipt-metrics { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .receipt-metric { padding: 10px 14px; border: 1px solid var(--line); background: #0a0e0b; }
+    .receipt-metric span { display: block; color: var(--muted); font-size: .68rem; }
+    .receipt-metric strong { display: block; margin-top: 4px; color: var(--cyan); font: 500 1.1rem var(--display); }
+    .receipt-metric small { display: block; margin-top: 4px; color: var(--dim); font-size: .66rem; }
+    .receipt-details { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .8rem; }
+    .receipt-details summary { cursor: pointer; color: var(--ink); font-size: .84rem; }
+    .receipt-backup-row, .receipt-rollback-row { margin-top: 10px; padding: 8px 10px; border: 1px solid var(--line); font: .72rem var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+    .receipt-footnote { margin-top: 14px; color: var(--dim); font-size: .7rem; }
     .stats {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -96,6 +114,7 @@
     .stat span { color: var(--muted); font: .68rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
     .stat strong { display: block; margin-top: 12px; font: 500 2.25rem var(--display); }
     .stat small { color: var(--dim); }
+    .stat small + small { display: block; margin-top: 4px; }
     .loading-model {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -158,13 +177,15 @@
     .decision-bar-wrap { grid-column: 1 / -1; padding: 18px 22px 22px; border-top: 1px solid var(--line); }
     .decision-bar { display: flex; height: 10px; border: 1px solid var(--line); overflow: hidden; background: rgba(111, 117, 109, .18); }
     .decision-bar span { display: block; height: 100%; }
-    .decision-bar .seg-global { background: var(--acid); }
+    .decision-bar .seg-coreGlobal { background: var(--acid); }
+    .decision-bar .seg-conservativeGlobal { background: color-mix(in srgb, var(--acid) 45%, transparent); }
     .decision-bar .seg-project { background: var(--cyan); }
     .decision-bar .seg-trigger { background: var(--amber); }
     .decision-bar .seg-undecided { background: var(--dim); opacity: .55; }
     .decision-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; color: var(--muted); font-size: .74rem; }
     .decision-legend i { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; }
-    .decision-legend .seg-global-dot { background: var(--acid); }
+    .decision-legend .seg-coreGlobal-dot { background: var(--acid); }
+    .decision-legend .seg-conservativeGlobal-dot { background: color-mix(in srgb, var(--acid) 45%, transparent); }
     .decision-legend .seg-project-dot { background: var(--cyan); }
     .decision-legend .seg-trigger-dot { background: var(--amber); }
     .decision-legend .seg-undecided-dot { background: var(--dim); opacity: .7; }
@@ -180,8 +201,14 @@
     .source-index { color: var(--acid); font: .66rem var(--mono); letter-spacing: .12em; }
     .source-title strong { display: block; font: 500 1.8rem var(--display); }
     .source-title span { color: var(--muted); font-size: .78rem; }
+    .source-title .tag { margin-left: 10px; font-size: .62rem; }
     .source-count { font: 500 2.4rem var(--display); }
     .group-body { padding: 0 10px 10px; border-top: 1px solid rgba(200, 243, 106, .28); }
+    .capability-pack-summary { padding: 14px 12px; color: var(--muted); font-size: .76rem; border-bottom: 1px solid var(--line); }
+    .capability-pack-list { display: grid; gap: 1px; margin-top: 10px; border: 1px solid var(--line); background: var(--line); }
+    .capability-pack-row { display: grid; grid-template-columns: minmax(140px, .8fr) minmax(0, 2fr) auto; gap: 14px; align-items: center; padding: 10px 12px; background: var(--surface-2); font-size: .78rem; color: var(--ink); }
+    .capability-pack-row span:nth-child(2) { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+    .capability-pack-row span:last-child { color: var(--dim); font: .68rem var(--mono); text-align: right; }
     .skill-card {
       display: grid;
       grid-template-columns: minmax(300px, 1.3fr) minmax(210px, .55fr) minmax(350px, .8fr);
@@ -275,6 +302,8 @@
       </aside>
     </section>
 
+    <div id="receipt-mount"></div>
+
     <section id="stats" class="stats" aria-label="审计摘要"></section>
 
     <section class="loading-model" aria-label="上下文加载模型">
@@ -357,6 +386,7 @@
 
     const ui = {
       autosave: document.getElementById("autosave"), stats: document.getElementById("stats"),
+      receiptMount: document.getElementById("receipt-mount"),
       groups: document.getElementById("groups"), toast: document.getElementById("toast"),
       inventoryLabel: document.getElementById("inventory-label"), projectList: document.getElementById("project-list"),
       search: document.getElementById("search"), source: document.getElementById("source-filter"),
@@ -374,6 +404,7 @@
     let saveTimer = null;
     let toastTimer = null;
     let quickFilter = "all";
+    let payloadReceipt = null;
 
     function el(tag, className, text) {
       const node = document.createElement(tag);
@@ -554,6 +585,12 @@
       showToast(`批量${kindLabel}：成功 ${success} 项，跳过 ${skipTotal} 项（RARE_CRITICAL ${skipped.rareCritical} · 托管 ${skipped.managed} · 触发词不足 ${skipped.triggerShort}）。`);
     }
 
+    function globalTierOf(skill) {
+      if (skill.globalTier === "core" || skill.globalTier === "conservative") return skill.globalTier;
+      const weakSource = !["verified", "strong"].includes(skill.sourceConfidence);
+      return (skill.rareCritical || weakSource) ? "conservative" : "core";
+    }
+
     function renderStats() {
       ui.stats.replaceChildren();
       const all = inventory.skills;
@@ -564,22 +601,33 @@
         if (record.decision === "trigger") return sum + Number(skill.shellStartupTokens || 0);
         return sum;
       }, 0);
-      const counts = { global: 0, project: 0, trigger: 0, undecided: 0 };
-      all.forEach(skill => { if (skill.managementPolicy === "reviewable") counts[decisionFor(skill.skillId).decision]++; });
+      const counts = { coreGlobal: 0, conservativeGlobal: 0, project: 0, trigger: 0, undecided: 0 };
+      all.forEach(skill => {
+        if (skill.managementPolicy !== "reviewable") return;
+        const decision = decisionFor(skill.skillId).decision;
+        if (decision === "global") {
+          counts[globalTierOf(skill) === "conservative" ? "conservativeGlobal" : "coreGlobal"]++;
+        } else {
+          counts[decision]++;
+        }
+      });
+      const totalGlobal = counts.coreGlobal + counts.conservativeGlobal;
       const values = [
         ["Skills / 精确值", inventory.counts.skills, `${inventory.counts.reviewable} 可复审 · ${inventory.counts.managed} 托管`],
         ["插件 / MCP", `${inventory.counts.plugins} / ${inventory.counts.mcps}`, "清单值；是否精确见审计证据"],
-        ["全局 / 项目", `${counts.global} / ${counts.project}`, "当前浏览器决定"],
+        ["全局 / 项目", `${totalGlobal} / ${counts.project}`, "当前浏览器决定", `全局 = 核心 ${counts.coreGlobal} + 保守 ${counts.conservativeGlobal}`],
         ["触发 / 用户待定", `${counts.trigger} / ${counts.undecided}`, `${inventory.counts.rareCritical} 个 RARE_CRITICAL`],
         ["全局入口估算", `${formatNumber(baseline)} → ${formatNumber(projected)}`, baseline >= projected ? `估算减少 ${formatNumber(baseline - projected)} token / 会话` : `估算反增 ${formatNumber(projected - baseline)} token / 会话`]
       ];
-      values.forEach(([label, value, note]) => {
-        const card = el("article", "stat"); card.append(el("span", "", label), el("strong", "", value), el("small", "", note)); ui.stats.appendChild(card);
+      values.forEach(([label, value, note, extra]) => {
+        const card = el("article", "stat"); card.append(el("span", "", label), el("strong", "", value), el("small", "", note));
+        if (extra) card.appendChild(el("small", "", extra));
+        ui.stats.appendChild(card);
       });
       const barWrap = el("div", "decision-bar-wrap");
       const barTrack = el("div", "decision-bar");
-      const segments = [["global", counts.global], ["project", counts.project], ["trigger", counts.trigger], ["undecided", counts.undecided]];
-      const labels = { global: "全局", project: "项目", trigger: "触发", undecided: "待定" };
+      const segments = [["coreGlobal", counts.coreGlobal], ["conservativeGlobal", counts.conservativeGlobal], ["project", counts.project], ["trigger", counts.trigger], ["undecided", counts.undecided]];
+      const labels = { coreGlobal: "核心全局", conservativeGlobal: "保守全局", project: "项目", trigger: "触发", undecided: "待定" };
       segments.forEach(([key, count]) => { const seg = el("span", `seg-${key}`); seg.style.flexGrow = String(count); barTrack.appendChild(seg); });
       barWrap.appendChild(barTrack);
       const legend = el("div", "decision-legend");
@@ -587,6 +635,81 @@
       barWrap.appendChild(legend);
       ui.stats.appendChild(barWrap);
       renderQuickFilters();
+    }
+
+    function receiptCountValue(raw) {
+      if (raw && typeof raw === "object" && !Array.isArray(raw)) return { value: raw.value, measurement: raw.measurement };
+      return { value: raw, measurement: undefined };
+    }
+
+    function receiptCountCard(label, raw) {
+      const { value, measurement } = receiptCountValue(raw);
+      const card = el("article", "receipt-count-card");
+      card.append(el("span", "", label), el("strong", "", formatNumber(value)));
+      if (measurement) card.appendChild(el("small", "", measurement));
+      return card;
+    }
+
+    const RECEIPT_KNOWN_COUNT_LABELS = {
+      reversibleArchives: "可逆归档", triggerShells: "触发空壳", projectLinks: "项目链接",
+      dedupeMoves: "去重移动", deletions: "删除"
+    };
+
+    function renderReceipt() {
+      ui.receiptMount.replaceChildren();
+      const receipt = payloadReceipt;
+      if (!receipt) return;
+
+      const section = el("section", "receipt-section");
+      section.setAttribute("aria-label", "执行回执");
+
+      const head = el("div", "receipt-head");
+      const heading = el("div");
+      heading.append(el("span", "eyebrow", "Execution receipt / read-only"), el("h2", "", "当前治理状态已应用"));
+      const appliedRaw = receipt.appliedAt || receipt.generatedAt;
+      const appliedDate = appliedRaw ? String(appliedRaw).slice(0, 10) : "未知时间";
+      head.append(heading, el("span", "receipt-badge", `APPLIED · ${appliedDate}`));
+      section.appendChild(head);
+
+      const counts = receipt.counts && typeof receipt.counts === "object" ? receipt.counts : {};
+      const countsGrid = el("div", "receipt-counts");
+      const renderedKeys = new Set();
+      Object.entries(RECEIPT_KNOWN_COUNT_LABELS).forEach(([key, label]) => {
+        if (!(key in counts)) return;
+        renderedKeys.add(key);
+        countsGrid.appendChild(receiptCountCard(label, counts[key]));
+      });
+      Object.entries(counts).forEach(([key, raw]) => {
+        if (renderedKeys.has(key)) return;
+        countsGrid.appendChild(receiptCountCard(key, raw));
+      });
+      if (countsGrid.children.length) section.appendChild(countsGrid);
+
+      if (Array.isArray(receipt.metrics) && receipt.metrics.length) {
+        const metricsRow = el("div", "receipt-metrics");
+        receipt.metrics.forEach(metric => {
+          if (!metric || typeof metric !== "object" || !metric.label) return;
+          const item = el("div", "receipt-metric");
+          item.append(el("span", "", metric.label), el("strong", "", metric.value !== undefined && metric.value !== null ? metric.value : "—"));
+          if (metric.note) item.appendChild(el("small", "", metric.note));
+          metricsRow.appendChild(item);
+        });
+        if (metricsRow.children.length) section.appendChild(metricsRow);
+      }
+
+      const details = el("details", "receipt-details");
+      details.appendChild(el("summary", "", "查看归档与回滚入口"));
+      if (receipt.backupRoot) details.appendChild(el("div", "receipt-backup-row", `归档根目录：${receipt.backupRoot}`));
+      if (Array.isArray(receipt.rollback) && receipt.rollback.length) {
+        receipt.rollback.forEach(item => {
+          if (!item || typeof item !== "object") return;
+          details.appendChild(el("div", "receipt-rollback-row", `${item.name || "—"} · ${item.path || "—"}`));
+        });
+      }
+      details.appendChild(el("p", "receipt-footnote", "回执为只读展示；回滚需在新的 apply/delete 授权下由 Agent 执行。"));
+      section.appendChild(details);
+
+      ui.receiptMount.appendChild(section);
     }
 
     function tag(text, className = "") { return el("span", `tag ${className}`.trim(), text); }
@@ -690,8 +813,27 @@
       [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b, "zh-CN")).forEach(([source, groupSkills], index) => {
         const details = el("details", "source-group"); details.open = index < 2;
         const summary = el("summary"); summary.append(el("span", "source-index", `SOURCE / ${String(index + 1).padStart(2, "0")}`));
-        const title = el("div", "source-title"); title.append(el("strong", "", source), el("span", "", [...new Set(groupSkills.map(skill => skill.category))].slice(0, 4).join(" · "))); summary.append(title, el("span", "source-count", groupSkills.length)); details.appendChild(summary);
-        const body = el("div", "group-body"); groupSkills.sort((a, b) => a.name.localeCompare(b.name, "zh-CN")).forEach(skill => body.appendChild(buildSkillCard(skill))); details.appendChild(body); ui.groups.appendChild(details);
+        const title = el("div", "source-title"); title.append(el("strong", "", source), el("span", "", [...new Set(groupSkills.map(skill => skill.category))].slice(0, 4).join(" · ")));
+        const isCapabilityPack = groupSkills.every(skill => skill.managementPolicy !== "reviewable");
+        if (isCapabilityPack) title.appendChild(tag("托管能力包", "dim"));
+        summary.append(title, el("span", "source-count", groupSkills.length)); details.appendChild(summary);
+        const body = el("div", "group-body");
+        groupSkills.sort((a, b) => a.name.localeCompare(b.name, "zh-CN"));
+        if (isCapabilityPack) {
+          const totalTokens = groupSkills.reduce((sum, skill) => sum + Number(skill.currentStartupTokens || 0), 0);
+          body.appendChild(el("div", "capability-pack-summary", `子项 ${groupSkills.length} 个 · 合计入口 ≈ ${formatNumber(totalTokens)} token · 托管只读，插件级管理请使用宿主控制面`));
+          const list = el("div", "capability-pack-list");
+          groupSkills.forEach(skill => {
+            const row = el("div", "capability-pack-row");
+            const summaryText = (skill.summary || "").length > 60 ? `${skill.summary.slice(0, 60)}…` : skill.summary;
+            row.append(el("span", "", skill.name), el("span", "", summaryText), el("span", "", formatNumber(skill.currentStartupTokens)));
+            list.appendChild(row);
+          });
+          body.appendChild(list);
+        } else {
+          groupSkills.forEach(skill => body.appendChild(buildSkillCard(skill)));
+        }
+        details.appendChild(body); ui.groups.appendChild(details);
       });
       updateBatchState();
     }
@@ -716,6 +858,7 @@
       if (!token) { setSaveStatus("链接缺少本地访问令牌", true); return; }
       try {
         const payload = await api("/api/bootstrap"); inventory = payload.inventory; state = payload.state;
+        payloadReceipt = payload.receipt || null; renderReceipt();
         decisions = new Map(state.decisions.map(item => [item.skillId, item])); fillSelects(); renderAll();
         const reconciliation = state.reconciliation || {};
         if (reconciliation.resetBecauseChanged) showToast(`${reconciliation.resetBecauseChanged} 个 Skill 内容已变化，相关决定已重置为待复审。`);

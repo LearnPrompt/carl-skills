@@ -102,6 +102,31 @@ def first_present(source: dict[str, Any], *keys: str, default: Any = None) -> An
     return default
 
 
+SENSITIVE_KEY_MARKERS = ("token", "secret", "cookie", "password", "authorization")
+
+
+def _is_sensitive_key(key: Any) -> bool:
+    return any(marker in str(key).casefold() for marker in SENSITIVE_KEY_MARKERS)
+
+
+def scrub_sensitive(value: Any) -> Any:
+    """Recursively strip any dict key whose casefolded name contains a sensitive marker.
+
+    Mirrors the allowlist-style redaction normalize_component() already applies to
+    plugins/mcps (only known-safe fields survive), but as a generic recursive pass
+    usable for arbitrary external JSON such as a verification receipt.
+    """
+    if isinstance(value, dict):
+        return {
+            key: scrub_sensitive(item)
+            for key, item in value.items()
+            if not _is_sensitive_key(key)
+        }
+    if isinstance(value, list):
+        return [scrub_sensitive(item) for item in value]
+    return value
+
+
 def normalize_project(raw: Any, index: int) -> dict[str, str]:
     if isinstance(raw, str):
         raw = {"id": raw, "name": raw}
@@ -178,6 +203,10 @@ def normalize_skill(raw: Any, index: int) -> dict[str, Any]:
     if entry_health not in {"ok", "broken-symlink", "cross-machine-path", "unknown"}:
         entry_health = "unknown"
 
+    global_tier = as_text(first_present(raw, "globalTier"), "unknown")
+    if global_tier not in {"core", "conservative", "unknown"}:
+        global_tier = "unknown"
+
     return {
         "skillId": skill_id,
         "name": name,
@@ -207,6 +236,7 @@ def normalize_skill(raw: Any, index: int) -> dict[str, Any]:
         "appliedProjects": as_text_list(first_present(raw, "appliedProjects", "projects")),
         "hostOverrideState": host_override_state,
         "entryHealth": entry_health,
+        "globalTier": global_tier,
     }
 
 
@@ -318,6 +348,28 @@ def load_inventory(path: Path, profile: str | None = None) -> dict[str, Any]:
     except json.JSONDecodeError as exc:
         raise ValidationError(f"inventory 不是有效 JSON：{exc}") from exc
     return normalize_inventory(raw, profile)
+
+
+def load_receipt(path: Path) -> dict[str, Any] | None:
+    """Read-only, best-effort load of an apply-phase verification_receipt.json.
+
+    Never raises: a missing file or invalid JSON is a warning, not a fatal error,
+    since the receipt is purely for read-only display in the review page. The
+    returned object (if any) has all token/secret/cookie/password/authorization
+    keys stripped recursively before it is ever handed to the HTTP layer.
+    """
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        sys.stderr.write(f"[skill-slimming] 警告：回执文件不存在，已忽略：{path}\n")
+        return None
+    except json.JSONDecodeError as exc:
+        sys.stderr.write(f"[skill-slimming] 警告：回执文件不是合法 JSON，已忽略：{path}（{exc}）\n")
+        return None
+    if not isinstance(raw, dict):
+        sys.stderr.write(f"[skill-slimming] 警告：回执顶层必须是 JSON 对象，已忽略：{path}\n")
+        return None
+    return scrub_sensitive(raw)
 
 
 def default_decision(skill: dict[str, Any]) -> dict[str, Any]:
@@ -435,10 +487,17 @@ def atomic_write_json(path: Path, value: Any) -> None:
 
 
 class StateStore:
-    def __init__(self, root: Path, profile: str, inventory: dict[str, Any]):
+    def __init__(
+        self,
+        root: Path,
+        profile: str,
+        inventory: dict[str, Any],
+        receipt: dict[str, Any] | None = None,
+    ):
         self.root = root.expanduser().resolve()
         self.profile = safe_profile_name(profile)
         self.inventory = inventory
+        self.receipt = receipt
         self.profile_dir = self.root / "profiles" / self.profile
         self.current_path = self.profile_dir / "current.json"
         self.history_dir = self.profile_dir / "history"
@@ -479,7 +538,7 @@ class StateStore:
 
     def bootstrap(self) -> dict[str, Any]:
         with self.lock:
-            return {"inventory": self.inventory, "state": self.state}
+            return {"inventory": self.inventory, "state": self.state, "receipt": self.receipt}
 
     def save(self, raw_state: Any) -> dict[str, Any]:
         with self.lock:
@@ -923,7 +982,8 @@ def command_serve(args: argparse.Namespace) -> int:
     inventory = load_inventory(Path(args.inventory), args.profile)
     root = resolve_state_root(args.state_root)
     profile = inventory["environmentId"]
-    store = StateStore(root, profile, inventory)
+    receipt = load_receipt(Path(args.receipt).expanduser()) if args.receipt else None
+    store = StateStore(root, profile, inventory, receipt=receipt)
     token = secrets.token_urlsafe(32)
     server = ReviewServer(("127.0.0.1", args.port), store, token)
     url = f"http://127.0.0.1:{server.server_port}/?token={token}"
@@ -974,6 +1034,10 @@ def build_parser() -> argparse.ArgumentParser:
     serve_parser.add_argument("--port", type=int, default=0, help="默认自动选择空闲端口。")
     serve_parser.add_argument("--no-open", action="store_true", help="不自动打开浏览器。")
     serve_parser.add_argument("--ready-file", help="把启动信息写入指定 JSON，便于自动化验收。")
+    serve_parser.add_argument(
+        "--receipt",
+        help="apply 阶段 verification_receipt.json 路径；只读回显于复审页，不参与任何校验。",
+    )
     serve_parser.set_defaults(func=command_serve)
 
     for name, help_text, func in (
