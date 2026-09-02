@@ -19,7 +19,8 @@
   "platform": "darwin",                  // sys.platform 原样
   "home_token": "$HOME",                 // Windows 上是 %USERPROFILE%
   "system": { ... },
-  "disks": [ ... ],
+  "disks": [ ... ],                      // 只有数据卷和真外接盘
+  "system_volumes": [ ... ],             // 被折叠掉的系统卷与假挂载，只做记录
   "groups": { "<组名>": [ 条目, ... ] },
   "top_files": [ 大文件, ... ],
   "denied": [ 读不到的目录, ... ],
@@ -44,11 +45,16 @@
 
 ### disks
 
-macOS 解析 `df -k`，只保留设备名以 `/dev/` 开头的卷；解析失败退回 `shutil.disk_usage("/")`。
-Windows 用 `ctypes.windll.kernel32.GetLogicalDrives()` 拿盘符位图，逐个 `shutil.disk_usage`。
+macOS 解析 `df -k`，只保留设备名以 `/dev/` 开头的卷，然后再筛一道：**`disks` 里只留有意义的卷**，也就是装着用户数据的 `/System/Volumes/Data`（标 `primary`，名字写成「Macintosh HD 数据卷」），加上真挂上来的外接盘。其余的全部收进 `system_volumes` 只做记录，不进正文。解析失败退回 `shutil.disk_usage("/")`。
+
+一个 `/Volumes/*` 下的挂载点要算外接盘，得同时满足两条：名字不是 `com.apple.TimeMachine`、`Recovery`、`Preboot`、`VM`、`Update`、`xarts`、`iSCPreboot`、`Hardware` 里的任何一个（本地快照的 `com.apple.TimeMachine.localsnapshots` 也照样被挡下），并且 `total_bytes` 不小于 1 GiB。后面这条门槛是给脚本挂上来的临时镜像和 RAM 盘准备的，那种十来兆的假挂载一台机器上能有七八个，列出来只会把真该看的那一行淹掉；真外接盘没有小于 1 GiB 的。
+
+Windows 用 `ctypes.windll.kernel32.GetLogicalDrives()` 拿盘符位图，逐个 `shutil.disk_usage`，不做这道筛。
 
 ```jsonc
 {
+  "name": "Macintosh HD 数据卷",           // 外接盘用卷名，其余用挂载点末段
+  "primary": true,                         // 用户数据落在哪个卷
   "mount": "/System/Volumes/Data",
   "device": "/dev/disk3s5",
   "total_bytes": 245107195904,
@@ -64,6 +70,8 @@ Windows 用 `ctypes.windll.kernel32.GetLogicalDrives()` 拿盘符位图，逐个
 ```
 
 `flags` 就是判断口径：`high_usage` 表示进清理优先区，`low_free` 表示多开几个 agent 加浏览器就会紧。
+
+`system_volumes` 跟 `disks` 里的条目同一个形状，装的是被折叠掉的系统卷和假挂载。它存在只是为了让人能回头查一句「那个卷去哪了」，页面不渲染它。
 
 ### groups
 
@@ -217,6 +225,10 @@ Agent 读完 `storage-scan.json` 之后写这一份。**每一条的路径都必
   ]
 }
 ```
+
+### top5 的顺序
+
+`top5` 是最大的五项。写的时候顺序随意，**渲染时会重排**：`build_report.py` 拿到之后先按 `size_bytes` 从大到小排一遍再取前五，页面上那张表永远按体积降序。`rank` 只当注释看，页面不读它。
 
 ### items 的字段
 

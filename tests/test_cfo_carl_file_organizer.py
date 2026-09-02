@@ -12,7 +12,7 @@ from carl_file_organizer.classifier import classify
 from carl_file_organizer.config import resolve_config
 from carl_file_organizer.executor import PlanError, apply_approved_plan
 from carl_file_organizer.planner import build_plan
-from carl_file_organizer.report import render_report
+from carl_file_organizer.render import render
 
 # The safety net has nowhere to look in these tests: no launch agents, no
 # symlink scan roots, no lsof.  Behaviour must not depend on the machine.
@@ -131,7 +131,7 @@ class CarlFileOrganizerTests(unittest.TestCase):
             root = Path(temporary)
             (root / "paper.pdf").write_text("document", encoding="utf-8")
             plan = plan_for(root)
-            html = render_report(plan)
+            html = render(plan, mode="static")
             self.assertIn("paper.pdf", html)
             self.assertIn(json.dumps(plan["schema_version"]), html)
 

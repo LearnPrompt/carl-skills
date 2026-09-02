@@ -49,6 +49,32 @@ GROUP_MIN_SIZE_OVERRIDE = {
 
 GB = 1024 ** 3
 
+# ---------------------------------------------------------------- 卷的取舍
+
+#: macOS 的 df 会把一台机器的全部卷都摊出来：只读的系统卷、Preboot、VM、
+#: Recovery、每个挂上来的磁盘镜像。它们跟人要腾的空间没关系，列出来只会把
+#: 真正该看的那一行淹掉。所以磁盘列表只留两种卷：装着用户数据的那一个，和
+#: 真外接上来的盘。其余的收进 system_volumes 里存个底，不进正文。
+PRIMARY_DATA_MOUNT = "/System/Volumes/Data"
+PRIMARY_DATA_NAME = "Macintosh HD 数据卷"
+EXTERNAL_MOUNT_PREFIX = "/Volumes/"
+
+#: 名字长这样的都是系统自己的卷或者本地快照，哪怕挂在 /Volumes 下也不算外接盘。
+SYSTEM_VOLUME_NAMES = (
+    "com.apple.timemachine",
+    "recovery",
+    "preboot",
+    "vm",
+    "update",
+    "xarts",
+    "iscpreboot",
+    "hardware",
+)
+
+#: 比这还小的挂载点不是能放东西的盘，是脚本挂上来的临时镜像或者 RAM 盘。
+#: 真的外接盘没有小于 1 GiB 的，所以这条门槛只会误伤假挂载。
+MIN_EXTERNAL_VOLUME_BYTES = GB
+
 # ---------------------------------------------------------------- 分类词表
 
 REGENERABLE_DIR_NAMES = (
@@ -249,6 +275,7 @@ class StorageScanner(object):
         self._tick = 0
         self._abort = False
         self.dropped_small = 0
+        self._system_volumes = []
 
     # -------------------------------------------------- 路径
 
@@ -821,8 +848,25 @@ class StorageScanner(object):
             return self.collect_disks_windows()
         return self.collect_disks_macos()
 
+    @staticmethod
+    def volume_role(mount, total_bytes):
+        """一个挂载点是 primary（数据卷）、external（外接盘），还是 system。"""
+        if mount == PRIMARY_DATA_MOUNT:
+            return "primary"
+        if not mount.startswith(EXTERNAL_MOUNT_PREFIX):
+            return "system"
+        name = mount[len(EXTERNAL_MOUNT_PREFIX):].split("/")[0]
+        low = name.lower()
+        for marker in SYSTEM_VOLUME_NAMES:
+            if low == marker or low.startswith(marker + "."):
+                return "system"
+        if total_bytes < MIN_EXTERNAL_VOLUME_BYTES:
+            return "system"
+        return "external"
+
     def collect_disks_macos(self):
         disks = []
+        system_volumes = []
         output = run_cmd(["df", "-k"])
         for line in output.splitlines()[1:]:
             parts = line.split(None, 8)
@@ -839,7 +883,18 @@ class StorageScanner(object):
                 free_b = int(avail) * 1024
             except ValueError:
                 continue
-            disks.append(self.make_disk(mount, device, total_b, used_b, free_b, "df"))
+            role = self.volume_role(mount, total_b)
+            disk = self.make_disk(
+                mount, device, total_b, used_b, free_b, "df",
+                name=PRIMARY_DATA_NAME if role == "primary" else None,
+                primary=role == "primary",
+            )
+            if role == "system":
+                system_volumes.append(disk)
+            else:
+                disks.append(disk)
+        disks.sort(key=lambda entry: (not entry["primary"], entry["mount"]))
+        self._system_volumes = system_volumes
         if not disks:
             fallback = self.fallback_disk("/")
             if fallback:
@@ -870,7 +925,8 @@ class StorageScanner(object):
             return None
         return self.make_disk(root, root, total, used, free, "shutil.disk_usage")
 
-    def make_disk(self, mount, device, total, used, free, source):
+    def make_disk(self, mount, device, total, used, free, source,
+                  name=None, primary=False):
         capacity = 0.0
         if used + free > 0:
             capacity = round(100.0 * used / float(used + free), 1)
@@ -880,6 +936,8 @@ class StorageScanner(object):
         if free < 30 * GB:
             flags.append("low_free")
         return {
+            "name": name or os.path.basename(mount.rstrip("/\\")) or mount,
+            "primary": bool(primary),
             "mount": mount,
             "device": device,
             "total_bytes": total,
@@ -984,6 +1042,7 @@ class StorageScanner(object):
             "home_token": self.home_token,
             "system": system,
             "disks": disks,
+            "system_volumes": self._system_volumes,
             "groups": groups,
             "top_files": top,
             "denied": denied,

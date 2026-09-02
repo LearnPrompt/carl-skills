@@ -365,6 +365,94 @@ class StorageScanWindowsPathTest(unittest.TestCase):
         self.assertIsInstance(disks, list)
 
 
+DF_NOISE = """Filesystem     1024-blocks      Used Available Capacity iused     ifree %iused  Mounted on
+/dev/disk3s1s1   239362496  15832136  21770672    43%  458734 217706720    0%   /
+devfs                  240       240         0   100%     832         0  100%   /dev
+/dev/disk3s6     239362496   6291900  21770672    23%       6 217706720    0%   /System/Volumes/VM
+/dev/disk3s2     239362496  17537476  21770672    45%    2134 217706720    0%   /System/Volumes/Preboot
+/dev/disk3s4     239362496    751320  21770672     4%     464 217706720    0%   /System/Volumes/Update
+/dev/disk1s2        512000      6164    494308     2%       1   4943080    0%   /System/Volumes/xarts
+/dev/disk1s1        512000      6120    494308     2%      37   4943080    0%   /System/Volumes/iSCPreboot
+/dev/disk1s3        512000       548    494308     1%      74   4943080    0%   /System/Volumes/Hardware
+/dev/disk3s5     239362496 174542392  21770672    89% 2486382 217706720    1%   /System/Volumes/Data
+map auto_home            0         0         0   100%       0         0     -   /System/Volumes/Data/home
+/dev/disk3s1     239362496  15832136  21770672    43%  458732 217706720    0%   /System/Volumes/Update/mnt1
+/dev/disk5s1         10236        20      9872     1%       2     98720    0%   /Volumes/probe-payload-25539
+/dev/disk7s1         10236        20      9872     1%       2     98720    0%   /Volumes/probe-payload-62171
+/dev/disk8s1      41943040  20971520  20971520    50%       9    999999    0%   /Volumes/com.apple.TimeMachine.localsnapshots
+"""
+
+DF_WITH_EXTERNAL = DF_NOISE + (
+    "/dev/disk9s1    1953458176 900000000 1053458176    47%      42    999999"
+    "    0%   /Volumes/Field Drive\n"
+)
+
+
+class MacDiskListTest(unittest.TestCase):
+    """磁盘列表只留有意义的卷，其余的收进 system_volumes 只做记录。"""
+
+    def setUp(self):
+        self.real_run_cmd = storage_scan.run_cmd
+        self.addCleanup(setattr, storage_scan, "run_cmd", self.real_run_cmd)
+
+    def scanner(self, df_output):
+        storage_scan.run_cmd = lambda args, timeout=None: (
+            df_output if list(args)[:1] == ["df"] else ""
+        )
+        return storage_scan.StorageScanner(
+            home="/tmp/nowhere", platform_name="darwin", with_system=False
+        )
+
+    def test_only_the_data_volume_survives_the_noise(self):
+        scanner = self.scanner(DF_NOISE)
+        disks = scanner.collect_disks()
+        self.assertEqual([d["mount"] for d in disks], ["/System/Volumes/Data"])
+        self.assertTrue(disks[0]["primary"])
+        self.assertEqual(disks[0]["name"], storage_scan.PRIMARY_DATA_NAME)
+        self.assertEqual(disks[0]["total_bytes"], 239362496 * 1024)
+
+        folded = [d["mount"] for d in scanner._system_volumes]
+        for mount in (
+            "/",
+            "/System/Volumes/VM",
+            "/System/Volumes/Preboot",
+            "/System/Volumes/Update",
+            "/System/Volumes/xarts",
+            "/System/Volumes/iSCPreboot",
+            "/System/Volumes/Hardware",
+            "/Volumes/probe-payload-25539",
+            "/Volumes/com.apple.TimeMachine.localsnapshots",
+        ):
+            self.assertIn(mount, folded)
+
+    def test_a_real_external_drive_is_kept_after_the_data_volume(self):
+        scanner = self.scanner(DF_WITH_EXTERNAL)
+        disks = scanner.collect_disks()
+        self.assertEqual(
+            [d["mount"] for d in disks],
+            ["/System/Volumes/Data", "/Volumes/Field Drive"],
+        )
+        self.assertFalse(disks[1]["primary"])
+        self.assertEqual(disks[1]["name"], "Field Drive")
+
+    def test_the_scan_envelope_carries_the_folded_volumes(self):
+        self.scanner(DF_NOISE)
+        data = storage_scan.run_scan(
+            home="/tmp/nowhere", platform_name="darwin", budget_seconds=5,
+            min_size_bytes=0, with_system=True,
+        )
+        self.assertEqual([d["mount"] for d in data["disks"]], ["/System/Volumes/Data"])
+        self.assertTrue(data["system_volumes"])
+
+    def test_volume_role_rules(self):
+        role = storage_scan.StorageScanner.volume_role
+        self.assertEqual(role("/System/Volumes/Data", 1), "primary")
+        self.assertEqual(role("/", 10 * storage_scan.GB), "system")
+        self.assertEqual(role("/Volumes/Backup", 0), "system")
+        self.assertEqual(role("/Volumes/Recovery", 200 * storage_scan.GB), "system")
+        self.assertEqual(role("/Volumes/Backup", 200 * storage_scan.GB), "external")
+
+
 class StorageScanCliTest(unittest.TestCase):
     """命令行入口：确认能落盘、能读回、只读。"""
 

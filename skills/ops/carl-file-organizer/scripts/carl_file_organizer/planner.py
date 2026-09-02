@@ -1413,12 +1413,14 @@ def run(args: Any) -> int:
     print(i18n.t("cli_plan_written", cfg.lang, path=where.plan))
 
     try:
-        from .report import write_report
+        from . import render
 
-        write_report(plan, where.report)
+        where.report.write_text(
+            render.render(plan, mode="static", lang=cfg.lang), encoding="utf-8"
+        )
     except Exception as error:  # noqa: BLE001 - the plan itself is the deliverable
         print(
-            i18n.t("cli_report_skipped", cfg.lang, module="carl_file_organizer.report")
+            i18n.t("cli_report_skipped", cfg.lang, module="build_report.py")
             + " ({0})".format(error)
         )
     else:

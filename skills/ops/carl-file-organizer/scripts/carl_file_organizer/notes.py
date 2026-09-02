@@ -269,13 +269,15 @@ def run(args: Any) -> int:
 
     if bool(getattr(args, "report", False)):
         try:
-            from .report import write_report
+            from . import render
 
             report_path = output.parent / "report.html"
-            write_report(merged, report_path)
+            report_path.write_text(
+                render.render(merged, mode="static", lang=lang), encoding="utf-8"
+            )
         except Exception as error:  # noqa: BLE001 - the plan is the deliverable
             print(
-                i18n.t("cli_report_skipped", lang, module="carl_file_organizer.report")
+                i18n.t("cli_report_skipped", lang, module="build_report.py")
                 + " ({0})".format(error)
             )
         else:

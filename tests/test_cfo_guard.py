@@ -99,6 +99,37 @@ class OpenHandleTests(unittest.TestCase):
             self.assertFalse(result.handles)
             self.assertEqual(result.status, "ok")
 
+    def test_finder_preview_daemons_are_observers_too(self) -> None:
+        # lsof cuts its COMMAND column off, so the QuickLook thumbnail agent
+        # usually arrives under a truncated name.  Both spellings, and the rest
+        # of the Finder preview and iCloud crowd, only look at the file.
+        for command in (
+            "com.apple.quicklook.ThumbnailsAgent",
+            "com.apple.quicklook.ThumbnailsA",
+            "QuickLookUIService",
+            "Finder",
+            "mds_stores",
+            "suggestd",
+            "photoanalysisd",
+            "cloudd",
+            "bird",
+        ):
+            self.assertTrue(guard.is_observer(command), command)
+        self.assertFalse(guard.is_observer("Preview"))
+
+    def test_a_truncated_quicklook_handle_is_not_a_user(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            target = write(Path(temporary) / "poster.png")
+            result = open_handles(
+                target,
+                5.0,
+                lsof_runner=fake_lsof(
+                    {"poster.png": "com.apple.quicklook.ThumbnailsA,71204"}
+                ),
+            )
+            self.assertFalse(result.handles)
+            self.assertEqual(result.status, "ok")
+
     def test_batched_probe_attributes_each_hit_to_its_own_path(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

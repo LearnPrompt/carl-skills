@@ -47,16 +47,32 @@ LAUNCH_DIRS_ABSOLUTE = ("/Library/LaunchAgents", "/Library/LaunchDaemons")
 #: a download folder within seconds, so without this list a fresh download is
 #: always "in use" and the plan proposes nothing at all.  These processes read,
 #: index or preview; none of them breaks when a path changes.
+#:
+#: Finder is on the list for the same reason: selecting a file in a Finder window
+#: hands it to the QuickLook thumbnail agent, and a folder the user is looking at
+#: while the plan is built would otherwise come back held open by the very act of
+#: looking.  Names are matched as prefixes because lsof truncates its COMMAND
+#: column somewhere between nine and fifteen characters, so the thumbnail agent
+#: arrives as ``com.apple.quicklook.ThumbnailsA`` more often than under its full
+#: name.
 OBSERVER_COMMANDS = (
     "mdworker",
     "mds",
+    "mds_stores",
     "mdimport",
     "mdsync",
     "mdbulkimport",
     "quicklookd",
     "qlmanage",
     "QuickLookUIService",
+    "com.apple.quicklook.ThumbnailsAgent",
+    "com.apple.quicklook.ThumbnailsA",
+    "Finder",
     "Spotlight",
+    "suggestd",
+    "photoanalysisd",
+    "cloudd",
+    "bird",
     "fseventsd",
     "backupd",
     "XProtect",
@@ -65,14 +81,22 @@ OBSERVER_COMMANDS = (
     "distnoted",
 )
 
+#: The same list, folded once, so the per-handle check stays a plain lookup.
+_OBSERVER_PREFIXES = tuple(sorted({name.casefold() for name in OBSERVER_COMMANDS}))
+
 
 def is_observer(command: str) -> bool:
-    """True for a daemon that only reads the file and never owns its path."""
+    """True for a daemon that only reads the file and never owns its path.
+
+    The match is on the prefix: lsof gives its COMMAND column a fixed width and
+    cuts long names off, so a truncated ``com.apple.quicklook.ThumbnailsA`` has
+    to read the same as the whole name.
+    """
 
     folded = str(command or "").casefold()
     if not folded:
         return False
-    return any(folded.startswith(name.casefold()) for name in OBSERVER_COMMANDS)
+    return folded.startswith(_OBSERVER_PREFIXES)
 
 
 MAX_REFERENCE_FILES = 400

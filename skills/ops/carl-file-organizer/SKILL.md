@@ -110,6 +110,8 @@ python3 <skill>/scripts/storage_scan.py --out storage-scan.json --budget-seconds
 
 只量大小，不动文件。macOS 和 Windows 都能跑，六十秒预算，超时的条目标成 `partial`，体积是下限。输出里 `disks` 是各卷的容量，`groups` 是按位置分的条目，`top_files` 是顺手捡到的大文件，`denied` 是没权限读的目录。macOS 上隐私保护会挡住一批目录，一次出现上百个读不到很正常，这句话要写给用户，因为总量因此偏小。
 
+storage-scan.json 里全是这台机器的绝对路径，它只给本机自己用，别当结论发出去。用户要把盘点结果给别人看，发 report.html，那份渲染时已经把家目录换成 `$HOME` 了。
+
 ### 定色，写人话
 
 读扫描结果，对照 `<skill>/references/macos.md` 或 `windows.md` 给每一项定色。绿是纯缓存和构建产物，删了会自己长回来。黄是里面有用户数据或者只是暂时没用的，Application Support、Containers、安装包、Backups、agent 的会话日志都算，要用户自己看一眼。红是碰不得的，虚拟机镜像、浏览器的用户数据、钥匙串、邮件和信息的主数据、照片图库、iCloud 本地副本、活跃仓库的 `.git`。脚本给的 `suggested_color` 是起点，你可以改，改了要在 `what` 里说一句为什么。

@@ -73,8 +73,12 @@ def load_template(path: Optional[Union[str, Path]] = None) -> str:
     return _TEMPLATE_CACHE[key]
 
 
-def template_text(template: Optional[str] = None) -> Dict[str, Dict[str, str]]:
-    """The ``TEXT`` table at the top of the template, so copy lives in one place."""
+def template_text(template: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
+    """The ``TEXT`` table at the top of the template, so copy lives in one place.
+
+    Values are strings, with one exception: ``badge`` holds a nested table of
+    tier and kind tokens, read through :meth:`_T.badge`.
+    """
 
     html = template if template is not None else load_template()
     match = re.search(r'<script id="report-text" type="application/json">(.*?)</script>', html, re.S)
@@ -91,9 +95,29 @@ def _lang_of(data: Dict[str, Any], lang: Optional[str]) -> str:
 class _T(object):
     """``t("key", n=3)`` with fallback to English and then the key itself."""
 
-    def __init__(self, text: Dict[str, Dict[str, str]], lang: str) -> None:
+    def __init__(self, text: Dict[str, Dict[str, Any]], lang: str) -> None:
         self.text = text
         self.lang = lang
+
+    def badge(self, token: Any) -> str:
+        """The reader's word for a tier or a kind, from the template's badge table.
+
+        Cards used to print the raw token, so a page in Chinese still said
+        ``aging``, ``in use`` and ``build_artifact`` on its own badges.  A token
+        the table does not know falls through unchanged, which is the only way a
+        plan written by a newer planner still renders.
+        """
+
+        key = str(token or "")
+        if not key:
+            return ""
+        for lang in (self.lang, "en"):
+            table = (self.text.get(lang) or {}).get("badge")
+            if isinstance(table, dict):
+                label = table.get(key)
+                if label:
+                    return str(label)
+        return key
 
     def __call__(self, key: str, **kw: Any) -> str:
         table = self.text.get(self.lang) or {}
@@ -153,6 +177,31 @@ def _display_time(value: Any) -> str:
     if len(text) >= 16 and text[10] == "T":
         short = text[:10] + " " + text[11:16]
     return '<span title="{0}">{1}</span>'.format(_e(text), _e(short))
+
+
+#: ``2026-09-04T11:56:03.412870+09:00`` -> the year, month, day, hour, minute.
+_ISO_HEAD = re.compile(r"^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})")
+
+_MONTHS_EN = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def format_ready_at(value: Any, lang: str) -> str:
+    """A settling deadline the way a person says it: ``9 月 4 日 11:56``.
+
+    The planner stores an ISO timestamp with microseconds and an offset, which
+    is the right thing to store and the wrong thing to read.  The template does
+    no date arithmetic; the whole conversion happens here, and anything that is
+    not an ISO stamp is handed through untouched.
+    """
+
+    text = str(value or "")
+    match = _ISO_HEAD.match(text)
+    if not match:
+        return text
+    _year, month, day, hour, minute = match.groups()
+    if lang == "zh":
+        return "{0} 月 {1} 日 {2}:{3}".format(int(month), int(day), hour, minute)
+    return "{0} {1}, {2}:{3}".format(_MONTHS_EN[int(month) - 1], int(day), hour, minute)
 
 
 def _color(value: Any, fallback: str) -> str:
@@ -480,7 +529,7 @@ def _guard_lines(action: Dict[str, Any], lang: str, t: _T) -> List[str]:
     lines: List[str] = []
     hold = action.get("hold_reason")
     if isinstance(hold, dict) and hold.get("ready_at"):
-        lines.append(_e(t("ready_at", time=hold.get("ready_at"))))
+        lines.append(_e(t("ready_at", time=format_ready_at(hold.get("ready_at"), lang))))
     if isinstance(hold, dict) and hold.get("label"):
         lines.append('<span class="mono">{0}</span>'.format(_e(hold.get("label"))))
     open_by = guard.get("open_by") or []
@@ -512,9 +561,9 @@ def _guard_lines(action: Dict[str, Any], lang: str, t: _T) -> List[str]:
 def _action_badges(action: Dict[str, Any], t: _T) -> List[str]:
     badges = []
     if action.get("subject_kind") == "dir":
-        badges.append('<span class="badge">{0}</span>'.format(t("dir_label")))
+        badges.append('<span class="badge">{0}</span>'.format(_e(t.badge("dir"))))
     if action.get("tier") == "sensitive":
-        badges.append('<span class="badge yellow">{0}</span>'.format(t("sensitive_label")))
+        badges.append('<span class="badge yellow">{0}</span>'.format(_e(t.badge("sensitive"))))
     return badges
 
 
@@ -663,7 +712,7 @@ def _card_hold(action: Dict[str, Any], color: str, notes: Dict[str, Any], lang: 
     badges = _action_badges(action, t)
     tier = str(action.get("tier") or "")
     if tier:
-        badges.append('<span class="badge red">{0}</span>'.format(_e(tier.replace("_", " "))))
+        badges.append('<span class="badge red">{0}</span>'.format(_e(t.badge(tier))))
     head_extra = '<span class="sub">{0}</span>'.format(_e(what)) if what else ""
     return _card(
         ids=[aid], subject=str(action.get("subject_id", "")), color=color, name=str(action.get("filename") or ""),
@@ -736,7 +785,7 @@ def _card_group(
     if options_html:
         pick = '<input type="checkbox" class="gn-adopt" aria-label="{0}">'.format(t("adopt_group"))
     potential = group.get("potential_bytes") or 0
-    badges = ['<span class="badge">{0}</span>'.format(_e(str(group.get("kind") or "group")))]
+    badges = ['<span class="badge">{0}</span>'.format(_e(t.badge(group.get("kind") or "group")))]
     if potential:
         badges.append('<span class="badge {0}">{1}</span>'.format(color, _e(t("potential", bytes=format_bytes(potential)))))
     reason = _pick(group.get("reason"), lang)
@@ -897,7 +946,17 @@ def _organize_longterm(plan: Dict[str, Any], lang: str, t: _T) -> str:
             continue
         hold = a.get("hold_reason") if isinstance(a.get("hold_reason"), dict) else {}
         if hold.get("ready_at"):
-            aging.append("<li>{0}</li>".format(_e(t("aging_line", name=a.get("filename"), time=hold.get("ready_at")))))
+            aging.append(
+                "<li>{0}</li>".format(
+                    _e(
+                        t(
+                            "aging_line",
+                            name=a.get("filename"),
+                            time=format_ready_at(hold.get("ready_at"), lang),
+                        )
+                    )
+                )
+            )
     aging_html = ""
     if aging:
         aging_html = "<h3>{0}</h3><ul>{1}</ul>".format(t("aging_title"), "".join(aging))
@@ -981,9 +1040,15 @@ def item_color(item: Dict[str, Any]) -> str:
 
 
 def _kind_label(kind: Any, t: _T) -> str:
-    key = "kind_" + str(kind or "other")
+    """The badge table first, the older ``kind_*`` keys second, the token last."""
+
+    token = str(kind or "other")
+    badge = t.badge(token)
+    if badge != token:
+        return badge
+    key = "kind_" + token
     label = t(key)
-    return str(kind) if label == key else label
+    return token if label == key else label
 
 
 def _card_item(item: Dict[str, Any], color: str, notes: Dict[str, Any], lang: str, mode: str, t: _T, *, delete_offered: bool) -> str:
@@ -1181,6 +1246,14 @@ def _storage_top5(data: Dict[str, Any], lang: str, t: _T) -> str:
     if not top:
         return ""
     by_id = {str(i.get("id")): i for i in (data.get("items") or []) if isinstance(i, dict)}
+
+    def _size(entry: Dict[str, Any]) -> int:
+        item = by_id.get(str(entry.get("id")), {})
+        return int(entry.get("size_bytes") or item.get("size_bytes") or 0)
+
+    # The written order is whatever the Agent typed; the table promises the five
+    # largest, so it is sorted here rather than trusted.
+    top = sorted(top, key=_size, reverse=True)
     rows = []
     for entry in top[:5]:
         item = by_id.get(str(entry.get("id")), {})

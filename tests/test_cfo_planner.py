@@ -492,6 +492,27 @@ class GuardChainTests(unittest.TestCase):
             self.assertEqual(hold["guard"]["open_by"][0]["pid"], 48213)
             self.assertIn("python3", hold["reason"]["zh"])
 
+    def test_a_file_the_finder_is_previewing_is_not_held(self) -> None:
+        # Clicking a file in a Finder window hands it to the QuickLook thumbnail
+        # agent, and lsof reports that agent under a truncated name.  Reading it
+        # as a user would hold back everything the user happens to be looking at.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            age(write(root / "poster.png", "png\n"), hours=100)
+            plan = plan_for(
+                root,
+                guard_options=guard_with(
+                    lsof_enabled=True,
+                    lsof_runner=fake_lsof(
+                        {"poster.png": "com.apple.quicklook.ThumbnailsA,71204"}
+                    ),
+                ),
+            )
+
+            kinds = {a["kind"] for a in plan["actions"] if a["filename"] == "poster.png"}
+            self.assertNotIn("hold", kinds)
+            self.assertNotEqual(action_for(plan, "poster.png")["tier"], "in_use")
+
     def test_a_referenced_script_is_held_with_the_line_number(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             home = Path(temporary)

@@ -265,6 +265,193 @@ class NotesAndFallbackTests(unittest.TestCase):
         self.assertIn("What it is", body)
 
 
+class EscapingTests(unittest.TestCase):
+    """A filename is data.  It never becomes markup, in the body or in the JSON."""
+
+    def setUp(self) -> None:
+        self.plan = _load(PLAN)
+
+    def test_plan_strings_are_escaped_in_the_body(self) -> None:
+        plan = copy.deepcopy(self.plan)
+        plan["actions"][0]["filename"] = '<img src=x onerror="alert(1)">.pdf'
+        plan["actions"][0]["reason"]["zh"] = "含 <script> 的理由"
+        html = build_report.render(plan, mode="static")
+        self.assertNotIn('<img src=x onerror="alert(1)">', html)
+        self.assertIn("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;.pdf", html)
+        self.assertNotIn("含 <script>", html)
+
+    def test_embedded_data_has_no_raw_angle_brackets(self) -> None:
+        plan = copy.deepcopy(self.plan)
+        plan["actions"][0]["filename"] = "</script><b>x</b>.pdf"
+        for mode in ("static", "serve"):
+            html = build_report.render(plan, mode=mode, token="t")
+            block = re.search(
+                r'<script id="report-data" type="application/json">(.*?)</script>', html, re.S
+            ).group(1)
+            self.assertNotIn("<", block)
+            self.assertNotIn(">", block)
+            round_trip = json.loads(
+                block.replace("\\u003c", "<").replace("\\u003e", ">").replace("\\u0026", "&")
+            )
+            self.assertEqual(round_trip["actions"][0]["filename"], "</script><b>x</b>.pdf")
+            self.assertEqual(round_trip["schema_version"], 2)
+
+    def test_render_does_not_mutate_the_caller_s_plan(self) -> None:
+        plan = _load(PLAN)
+        build_report.render(plan, mode="static")
+        self.assertEqual(plan["source_root"], self.plan["source_root"])
+        self.assertEqual(plan["actions"][0]["source"], self.plan["actions"][0]["source"])
+        self.assertTrue(Path(plan["source_root"]).is_absolute())
+
+    def test_every_approvable_action_is_reachable(self) -> None:
+        html = build_report.render(self.plan, mode="static")
+        for action in self.plan["actions"]:
+            if not action["approvable"]:
+                continue
+            self.assertIn(action["id"], html, "approvable id missing: " + action["id"])
+
+    def test_a_referenced_form_is_rewritten_too(self) -> None:
+        # form is the literal text found in someone's config file; it used to be
+        # exempt from the $HOME rewrite and no longer is.
+        plan = copy.deepcopy(self.plan)
+        home = str(Path(plan["source_root"]).parent)
+        absolute_form = home + "/Downloads/backup-tool.sh"
+        plan["actions"][0].setdefault("guard", {})["referenced_in"] = [
+            {"file": home + "/.zshrc", "line": 7, "form": absolute_form}
+        ]
+        html = build_report.render(plan, mode="static")
+        self.assertNotIn(absolute_form, html)
+        self.assertIn("$HOME/Downloads/backup-tool.sh", html)
+
+    def test_static_carries_no_server_wiring(self) -> None:
+        # One template serves both modes, so the fetch code is in the file
+        # either way; what a static page must not carry is a token or a live
+        # endpoint it could actually post to.
+        html = build_report.render(self.plan, mode="static", token="should-not-leak")
+        self.assertNotIn("should-not-leak", html)
+        self.assertEqual(_embedded(html, "report-config")["token"], "")
+        self.assertEqual(_embedded(html, "report-config")["mode"], "static")
+
+
+class CopyTests(unittest.TestCase):
+    def test_the_two_languages_carry_the_same_keys(self) -> None:
+        text = build_report.template_text()
+        self.assertEqual(set(text["zh"]), set(text["en"]))
+        self.assertEqual(set(text["zh"]["badge"]), set(text["en"]["badge"]))
+
+    def test_zh_copy_has_no_straight_double_quotes(self) -> None:
+        for key, value in build_report.template_text()["zh"].items():
+            if isinstance(value, dict):
+                for token, label in value.items():
+                    self.assertNotIn('"', label, "{0}.{1}".format(key, token))
+            else:
+                self.assertNotIn('"', value, key)
+
+
+class BadgeTests(unittest.TestCase):
+    """Cards say 静置中, not aging.  A badge is copy, not a token dump."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.plan = _load(PLAN)
+        cls.analysis = _load(ANALYSIS)
+        cls.zh = build_report.render(cls.plan, mode="static")
+        cls.storage_zh = build_report.render(cls.analysis, mode="static")
+
+    def _badges(self, html: str) -> list:
+        return re.findall(r'<span class="badge[^"]*">([^<]*)</span>', html)
+
+    def test_no_english_token_reaches_a_chinese_badge(self) -> None:
+        for name, html in (("organize", self.zh), ("storage", self.storage_zh)):
+            found = self._badges(html)
+            self.assertTrue(found, name)
+            for label in found:
+                for token in (
+                    "aging", "in use", "in_use", "referenced", "forbidden", "pinned",
+                    "dev_cache", "app_data", "build_artifact", "regenerable",
+                    "duplicate", "pair", "unknown",
+                ):
+                    self.assertNotIn(token, label, "{0}: {1}".format(name, label))
+
+    def test_the_settling_tier_reads_as_chinese(self) -> None:
+        self.assertIn(">静置中<", self.zh)
+        self.assertIn(">被占用<", self.zh)
+
+    def test_english_badges_come_from_the_english_table(self) -> None:
+        html = build_report.render(self.plan, mode="static", lang="en")
+        self.assertIn(">settling<", html)
+        self.assertIn(">in use<", html)
+
+    def test_an_unknown_token_falls_through_unchanged(self) -> None:
+        t = build_report._T(build_report.template_text(), "zh")
+        self.assertEqual(t.badge("aging"), "静置中")
+        self.assertEqual(t.badge("brand_new_tier"), "brand_new_tier")
+        self.assertEqual(t.badge(""), "")
+
+
+class ReadyAtTests(unittest.TestCase):
+    def test_an_iso_stamp_becomes_a_readable_time(self) -> None:
+        self.assertEqual(
+            build_report.format_ready_at("2026-09-04T11:56:03.412870+09:00", "zh"),
+            "9 月 4 日 11:56",
+        )
+        self.assertEqual(
+            build_report.format_ready_at("2026-09-04T11:56:03.412870+09:00", "en"),
+            "Sep 4, 11:56",
+        )
+
+    def test_anything_that_is_not_a_stamp_is_handed_through(self) -> None:
+        self.assertEqual(build_report.format_ready_at("", "zh"), "")
+        self.assertEqual(build_report.format_ready_at("soon", "zh"), "soon")
+
+    def test_the_page_shows_the_readable_form_and_not_the_iso_one(self) -> None:
+        plan = _load(PLAN)
+        html = build_report.render(plan, mode="static")
+        self.assertNotIn("2026-09-07T19:15:00", html.split('id="report-data"')[0])
+        self.assertIn("9 月 7 日 19:15", html)
+        english = build_report.render(plan, mode="static", lang="en")
+        self.assertIn("Sep 7, 19:15", english)
+
+
+class TopFiveTests(unittest.TestCase):
+    def test_the_table_is_sorted_by_size_whatever_the_analysis_says(self) -> None:
+        analysis = _load(ANALYSIS)
+        analysis["top5"] = list(reversed(analysis["top5"]))
+        html = build_report.render(analysis, mode="static")
+        sizes = re.findall(r'<tr><td class="c">.*?<td class="size">([^<]+)</td>', html, re.S)
+        self.assertEqual(len(sizes), 5)
+
+        def as_bytes(text: str) -> float:
+            number, unit = text.split()
+            return float(number) * {"B": 1, "KB": 1024, "MB": 1024 ** 2, "GB": 1024 ** 3, "TB": 1024 ** 4}[unit]
+
+        values = [as_bytes(x) for x in sizes]
+        self.assertEqual(values, sorted(values, reverse=True))
+
+
+class StaticEntranceTests(unittest.TestCase):
+    """``plan`` and ``build --report`` write the same page the server serves."""
+
+    def test_build_report_writes_the_shared_template(self) -> None:
+        import tempfile
+
+        from carl_file_organizer.cli import main
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            plan_path = root / "plan.json"
+            plan_path.write_text(PLAN.read_text(encoding="utf-8"), encoding="utf-8")
+            self.assertEqual(main(["build", str(plan_path), "--report"]), 0)
+            html = (root / "report.html").read_text(encoding="utf-8")
+            self.assertIn('<body data-kind="organize" data-mode="static"', html)
+            self.assertIn('<script id="report-config" type="application/json">', html)
+            self.assertNotIn("/Users/", _strip_comments(html))
+
+    def test_the_old_report_module_is_gone(self) -> None:
+        with self.assertRaises(ImportError):
+            __import__("carl_file_organizer.report")
+
+
 class SanitizeTests(unittest.TestCase):
     def test_home_rewritten_everywhere(self) -> None:
         data = {

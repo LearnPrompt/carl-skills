@@ -12,6 +12,7 @@ import cfo_path  # noqa: F401 - puts the skill's scripts dir on sys.path
 
 import json
 import os
+import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
@@ -247,6 +248,10 @@ class PathRuleTests(DisposeCase):
         self.assertEqual(self.status_of(report, "green-climb"), ["refused"])
         self.assertTrue(outside.is_dir())
 
+    @unittest.skipUnless(
+        sys.platform != "win32",
+        "creating a symlink on Windows needs administrator rights",
+    )
     def test_a_symlink_segment_is_refused(self):
         real = self.make_dir("Library/Caches/real-cache")
         link = self.home / "Library" / "Caches" / "linked"
