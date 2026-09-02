@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.9", "3.12"]
+        exclude:
+          # macos-latest is arm64, and setup-python only resolves 3.9 from
+          # 3.9.13 onward there, sometimes failing to find a build at all.
+          # The ubuntu 3.9 leg already guards the syntax floor.
+          - os: macos-latest
+            python-version: "3.9"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      # Everything is stdlib on purpose, so there is nothing to install and the
+      # 3.9 leg is a real floor rather than a formality.
+      - name: Compile check
+        run: python -m compileall -q skills tests
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+  hygiene:
+    name: hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: no private paths, borrowed vocabulary or private product names
+        run: bash skills/ops/carl-file-organizer/scripts/hygiene.sh

@@ -1,0 +1,1230 @@
+{
+  "schema_version": 2,
+  "generator": {
+    "name": "carl-file-organizer",
+    "version": "0.3.0"
+  },
+  "created_at": "2026-09-02T10:15:00+09:00",
+  "now": "2026-09-02T10:15:00+09:00",
+  "lang": "zh",
+  "lang_source": "existing-dirs",
+  "profile": {
+    "name": "tiered",
+    "source": "builtin+dotfile",
+    "dotfile": "$HOME/Downloads/.carl-file-organizer.json",
+    "hash": "3f9a1c0e2b77"
+  },
+  "source_root": "/Users/example/Downloads",
+  "source_root_portable": "$HOME/Downloads",
+  "managed_dir": "/Users/example/Downloads/00_下载目录管理",
+  "managed_dir_portable": "$HOME/Downloads/00_下载目录管理",
+  "names": {
+    "inbox": "00_收件箱",
+    "inbox.pending": "00_收件箱/待判断",
+    "inbox.by_tag": "00_收件箱/按标签",
+    "inbox.dup": "00_收件箱/重复待确认",
+    "work": "10_工作区",
+    "work.tools": "10_工作区/工具与导出",
+    "work.tools.scripts": "10_工作区/工具与导出/脚本",
+    "library": "20_知识库",
+    "library.docs": "20_知识库/文档资料",
+    "library.docs.pdf": "20_知识库/文档资料/PDF",
+    "library.docs.txt": "20_知识库/文档资料/TXT",
+    "sensitive": "60_敏感信息",
+    "sensitive.pending": "60_敏感信息/待转移",
+    "sensitive.dup": "60_敏感信息/重复待确认",
+    "archive": "90_归档",
+    "archive.zip": "90_归档/压缩包",
+    "archive.zip.zip": "90_归档/压缩包/ZIP",
+    "archive.installers": "90_归档/安装包",
+    "archive.installers.dmg": "90_归档/安装包/DMG"
+  },
+  "capabilities": {
+    "trash_backend": "finder",
+    "finder_tags": true,
+    "permanent_delete_offered": true
+  },
+  "scan_policy": {
+    "depth": 1,
+    "hidden_files": "ignored",
+    "symlinks": "ignored",
+    "managed_partitions": "skipped",
+    "regenerable_scan_depth": 3,
+    "dir_size_limit": {
+      "max_entries": 50000,
+      "time_budget_s": 1.5
+    },
+    "hash_duplicates": true,
+    "hash_max_bytes": 2147483648,
+    "allow_referenced": false
+  },
+  "disk": {
+    "total_bytes": 994662584320,
+    "used_bytes": 815394881536,
+    "free_bytes": 179267702784,
+    "used_percent": 81.98,
+    "target_percent": 90.0,
+    "bytes_to_remove_for_target": 0,
+    "note": "Moves on this volume reclaim 0 bytes."
+  },
+  "mess": {
+    "score": 52,
+    "color": "yellow",
+    "color_source": "rule",
+    "counts": {
+      "loose": 12,
+      "aging": 1,
+      "pending": 2,
+      "groups": 3,
+      "top_dirs": 3
+    },
+    "reason": {
+      "zh": "散件 12 件，其中 2 件要你看一眼，还没到失控的地步",
+      "en": "12 loose items, 2 of them want a look from you; not out of hand yet"
+    }
+  },
+  "summary": {
+    "entries": 12,
+    "files": 9,
+    "dirs": 3,
+    "bytes": 49115218011,
+    "by_tier": {
+      "aging": 1,
+      "duplicate": 9,
+      "forbidden": 1,
+      "in_use": 1,
+      "referenced": 1,
+      "regenerable": 2,
+      "routine": 3,
+      "sensitive": 1
+    },
+    "by_kind": {
+      "delete": 2,
+      "hold": 4,
+      "move": 8,
+      "trash": 5
+    },
+    "by_color": {
+      "green": {
+        "actions": 8,
+        "bytes": 419153355
+      },
+      "yellow": {
+        "actions": 7,
+        "bytes": 277336072
+      },
+      "red": {
+        "actions": 4,
+        "bytes": 48844385348
+      }
+    },
+    "by_destination": {
+      "00_收件箱/待判断": 2,
+      "00_收件箱/待判断/Archive": 2,
+      "20_知识库/文档资料/PDF": 3,
+      "60_敏感信息/待转移": 1
+    },
+    "groups": {
+      "pair": 1,
+      "duplicate": 1,
+      "regenerable": 1
+    },
+    "potential_reclaimable_bytes": 218429399,
+    "proposed_reclaimed_bytes": 0
+  },
+  "pinned": [
+    "carl-file-organizer-*.json"
+  ],
+  "actions": [
+    {
+      "id": "9c1f0a7b2d3e4f55",
+      "subject_id": "1a2b3c4d5e6f7a8b",
+      "kind": "move",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/report.pdf",
+      "source_portable": "$HOME/Downloads/report.pdf",
+      "filename": "report.pdf",
+      "destination": "/Users/example/Downloads/20_知识库/文档资料/PDF/report.pdf",
+      "destination_portable": "$HOME/Downloads/20_知识库/文档资料/PDF/report.pdf",
+      "destination_key": "library.docs.pdf",
+      "size_bytes": 2411008,
+      "modified_ns": 1756700000000000000,
+      "age_hours": 71,
+      "rule": "ext:.pdf",
+      "reason": {
+        "zh": "文档按类型归档到 20_知识库/文档资料/PDF",
+        "en": "Document filed by type into 20_知识库/文档资料/PDF"
+      },
+      "detail": {
+        "zh": "静置 71 小时，已满 48 小时",
+        "en": "aged 71h, past the 48h threshold"
+      },
+      "confidence": 0.98,
+      "tier": "routine",
+      "group_id": null,
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": {
+        "zh": "mv \"$HOME/Downloads/20_知识库/文档资料/PDF/report.pdf\" \"$HOME/Downloads/\"",
+        "en": "mv \"$HOME/Downloads/20_知识库/文档资料/PDF/report.pdf\" \"$HOME/Downloads/\""
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "green"
+    },
+    {
+      "id": "0b7e4411aa93c2d1",
+      "subject_id": "2b3c4d5e6f7a8b9c",
+      "kind": "move",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/api-key-backup.txt",
+      "source_portable": "$HOME/Downloads/api-key-backup.txt",
+      "filename": "api-key-backup.txt",
+      "destination": "/Users/example/Downloads/60_敏感信息/待转移/api-key-backup.txt",
+      "destination_portable": "$HOME/Downloads/60_敏感信息/待转移/api-key-backup.txt",
+      "destination_key": "sensitive.pending",
+      "size_bytes": 1204,
+      "modified_ns": 1756500000000000000,
+      "age_hours": 126,
+      "rule": "sensitive:marker",
+      "reason": {
+        "zh": "名字看着像凭证，先单独隔离，未读取内容",
+        "en": "The name looks like a credential, so it is isolated; contents were never read"
+      },
+      "detail": {
+        "zh": "命中敏感词 api-key，不看静置期",
+        "en": "matched marker api-key; the settling period is skipped"
+      },
+      "confidence": 0.9,
+      "tier": "sensitive",
+      "group_id": null,
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": {
+        "zh": "mv \"$HOME/Downloads/60_敏感信息/待转移/api-key-backup.txt\" \"$HOME/Downloads/\"",
+        "en": "mv \"$HOME/Downloads/60_敏感信息/待转移/api-key-backup.txt\" \"$HOME/Downloads/\""
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "green"
+    },
+    {
+      "id": "a1b2c30d4e5f6071",
+      "subject_id": "3c4d5e6f7a8b9c0d",
+      "kind": "move",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/Archive.zip",
+      "source_portable": "$HOME/Downloads/Archive.zip",
+      "filename": "Archive.zip",
+      "destination": "/Users/example/Downloads/00_收件箱/待判断/Archive/Archive.zip",
+      "destination_portable": "$HOME/Downloads/00_收件箱/待判断/Archive/Archive.zip",
+      "destination_key": "inbox.pending",
+      "size_bytes": 8915621,
+      "modified_ns": 1756100000000000000,
+      "age_hours": 240,
+      "rule": "pair",
+      "reason": {
+        "zh": "压缩包和解压目录是一对，默认建议留目录",
+        "en": "Archive and extracted folder are a pair; keeping the folder is suggested"
+      },
+      "detail": null,
+      "confidence": 0.8,
+      "tier": "duplicate",
+      "group_id": "pair-7d2c1e9f",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": {
+        "zh": "mv \"$HOME/Downloads/00_收件箱/待判断/Archive/Archive.zip\" \"$HOME/Downloads/\"",
+        "en": "mv \"$HOME/Downloads/00_收件箱/待判断/Archive/Archive.zip\" \"$HOME/Downloads/\""
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "green"
+    },
+    {
+      "id": "b2c3d40e5f607182",
+      "subject_id": "3c4d5e6f7a8b9c0d",
+      "kind": "trash",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/Archive.zip",
+      "source_portable": "$HOME/Downloads/Archive.zip",
+      "filename": "Archive.zip",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 8915621,
+      "modified_ns": 1756100000000000000,
+      "age_hours": 240,
+      "rule": "pair",
+      "reason": {
+        "zh": "压缩包和解压目录是一对，默认建议留目录",
+        "en": "Archive and extracted folder are a pair; keeping the folder is suggested"
+      },
+      "detail": null,
+      "confidence": 0.8,
+      "tier": "duplicate",
+      "group_id": "pair-7d2c1e9f",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 8915621,
+      "restore_method": {
+        "zh": "在废纸篓里选放回原处",
+        "en": "Put Back from the Trash"
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "yellow"
+    },
+    {
+      "id": "c3d4e50f60718293",
+      "subject_id": "3c4d5e6f7a8b9c0d",
+      "kind": "delete",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/Archive.zip",
+      "source_portable": "$HOME/Downloads/Archive.zip",
+      "filename": "Archive.zip",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 8915621,
+      "modified_ns": 1756100000000000000,
+      "age_hours": 240,
+      "rule": "pair",
+      "reason": {
+        "zh": "压缩包和解压目录是一对，默认建议留目录",
+        "en": "Archive and extracted folder are a pair; keeping the folder is suggested"
+      },
+      "detail": null,
+      "confidence": 0.8,
+      "tier": "duplicate",
+      "group_id": "pair-7d2c1e9f",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [
+        "allow-permanent-delete"
+      ],
+      "reclaims_bytes": 8915621,
+      "restore_method": {
+        "zh": "删掉就没了，只对可再生的构建产物用这一项",
+        "en": "Permanent; only use this for regenerable build output"
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "yellow"
+    },
+    {
+      "id": "d4e5f60718293a4b",
+      "subject_id": "4d5e6f7a8b9c0d1e",
+      "kind": "move",
+      "subject_kind": "dir",
+      "source": "/Users/example/Downloads/Archive",
+      "source_portable": "$HOME/Downloads/Archive",
+      "filename": "Archive",
+      "destination": "/Users/example/Downloads/00_收件箱/待判断/Archive/Archive",
+      "destination_portable": "$HOME/Downloads/00_收件箱/待判断/Archive/Archive",
+      "destination_key": "inbox.pending",
+      "size_bytes": 9104882,
+      "modified_ns": 1756110000000000000,
+      "age_hours": 237,
+      "rule": "pair",
+      "reason": {
+        "zh": "压缩包和解压目录是一对，默认建议留目录",
+        "en": "Archive and extracted folder are a pair; keeping the folder is suggested"
+      },
+      "detail": null,
+      "confidence": 0.8,
+      "tier": "duplicate",
+      "group_id": "pair-7d2c1e9f",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": {
+        "zh": "mv \"$HOME/Downloads/00_收件箱/待判断/Archive/Archive\" \"$HOME/Downloads/\"",
+        "en": "mv \"$HOME/Downloads/00_收件箱/待判断/Archive/Archive\" \"$HOME/Downloads/\""
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": {
+        "files": 42,
+        "bytes": 9104882,
+        "truncated": false
+      },
+      "color": "green"
+    },
+    {
+      "id": "e5f60718293a4b5c",
+      "subject_id": "4d5e6f7a8b9c0d1e",
+      "kind": "trash",
+      "subject_kind": "dir",
+      "source": "/Users/example/Downloads/Archive",
+      "source_portable": "$HOME/Downloads/Archive",
+      "filename": "Archive",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 9104882,
+      "modified_ns": 1756110000000000000,
+      "age_hours": 237,
+      "rule": "pair",
+      "reason": {
+        "zh": "压缩包和解压目录是一对，默认建议留目录",
+        "en": "Archive and extracted folder are a pair; keeping the folder is suggested"
+      },
+      "detail": null,
+      "confidence": 0.8,
+      "tier": "duplicate",
+      "group_id": "pair-7d2c1e9f",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 9104882,
+      "restore_method": {
+        "zh": "在废纸篓里选放回原处",
+        "en": "Put Back from the Trash"
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": {
+        "files": 42,
+        "bytes": 9104882,
+        "truncated": false
+      },
+      "color": "yellow"
+    },
+    {
+      "id": "f60718293a4b5c6d",
+      "subject_id": "5e6f7a8b9c0d1e2f",
+      "kind": "move",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/guide.pdf",
+      "source_portable": "$HOME/Downloads/guide.pdf",
+      "filename": "guide.pdf",
+      "destination": "/Users/example/Downloads/20_知识库/文档资料/PDF/guide.pdf",
+      "destination_portable": "$HOME/Downloads/20_知识库/文档资料/PDF/guide.pdf",
+      "destination_key": "library.docs.pdf",
+      "size_bytes": 1048576,
+      "modified_ns": 1756300000000000000,
+      "age_hours": 160,
+      "rule": "dup:sha256",
+      "reason": {
+        "zh": "内容完全相同（sha256 一致），留一份就够",
+        "en": "Byte-identical (same sha256); one copy is enough"
+      },
+      "detail": null,
+      "confidence": 0.95,
+      "tier": "duplicate",
+      "group_id": "dup-3ba91c04",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": {
+        "zh": "mv \"$HOME/Downloads/20_知识库/文档资料/PDF/guide.pdf\" \"$HOME/Downloads/\"",
+        "en": "mv \"$HOME/Downloads/20_知识库/文档资料/PDF/guide.pdf\" \"$HOME/Downloads/\""
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "green"
+    },
+    {
+      "id": "0718293a4b5c6d7e",
+      "subject_id": "5e6f7a8b9c0d1e2f",
+      "kind": "trash",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/guide.pdf",
+      "source_portable": "$HOME/Downloads/guide.pdf",
+      "filename": "guide.pdf",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 1048576,
+      "modified_ns": 1756300000000000000,
+      "age_hours": 160,
+      "rule": "dup:sha256",
+      "reason": {
+        "zh": "内容完全相同（sha256 一致），留一份就够",
+        "en": "Byte-identical (same sha256); one copy is enough"
+      },
+      "detail": null,
+      "confidence": 0.95,
+      "tier": "duplicate",
+      "group_id": "dup-3ba91c04",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 1048576,
+      "restore_method": {
+        "zh": "在废纸篓里选放回原处",
+        "en": "Put Back from the Trash"
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "yellow"
+    },
+    {
+      "id": "18293a4b5c6d7e8f",
+      "subject_id": "6f7a8b9c0d1e2f30",
+      "kind": "move",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/guide (1).pdf",
+      "source_portable": "$HOME/Downloads/guide (1).pdf",
+      "filename": "guide (1).pdf",
+      "destination": "/Users/example/Downloads/20_知识库/文档资料/PDF/guide (1).pdf",
+      "destination_portable": "$HOME/Downloads/20_知识库/文档资料/PDF/guide (1).pdf",
+      "destination_key": "library.docs.pdf",
+      "size_bytes": 1048576,
+      "modified_ns": 1756310000000000000,
+      "age_hours": 157,
+      "rule": "dup:sha256",
+      "reason": {
+        "zh": "内容完全相同（sha256 一致），留一份就够",
+        "en": "Byte-identical (same sha256); one copy is enough"
+      },
+      "detail": null,
+      "confidence": 0.95,
+      "tier": "duplicate",
+      "group_id": "dup-3ba91c04",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": {
+        "zh": "mv \"$HOME/Downloads/20_知识库/文档资料/PDF/guide (1).pdf\" \"$HOME/Downloads/\"",
+        "en": "mv \"$HOME/Downloads/20_知识库/文档资料/PDF/guide (1).pdf\" \"$HOME/Downloads/\""
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "green"
+    },
+    {
+      "id": "293a4b5c6d7e8f90",
+      "subject_id": "6f7a8b9c0d1e2f30",
+      "kind": "trash",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/guide (1).pdf",
+      "source_portable": "$HOME/Downloads/guide (1).pdf",
+      "filename": "guide (1).pdf",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 1048576,
+      "modified_ns": 1756310000000000000,
+      "age_hours": 157,
+      "rule": "dup:sha256",
+      "reason": {
+        "zh": "内容完全相同（sha256 一致），留一份就够",
+        "en": "Byte-identical (same sha256); one copy is enough"
+      },
+      "detail": null,
+      "confidence": 0.95,
+      "tier": "duplicate",
+      "group_id": "dup-3ba91c04",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 1048576,
+      "restore_method": {
+        "zh": "在废纸篓里选放回原处",
+        "en": "Put Back from the Trash"
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "yellow"
+    },
+    {
+      "id": "3a4b5c6d7e8f9001",
+      "subject_id": "7a8b9c0d1e2f3041",
+      "kind": "move",
+      "subject_kind": "dir",
+      "source": "/Users/example/Downloads/web-prototype",
+      "source_portable": "$HOME/Downloads/web-prototype",
+      "filename": "web-prototype",
+      "destination": "/Users/example/Downloads/00_收件箱/待判断/web-prototype",
+      "destination_portable": "$HOME/Downloads/00_收件箱/待判断/web-prototype",
+      "destination_key": "inbox.pending",
+      "size_bytes": 214748364,
+      "modified_ns": 1756400000000000000,
+      "age_hours": 132,
+      "rule": "dir:pending",
+      "reason": {
+        "zh": "整个目录保留原名，先进待判断",
+        "en": "Whole folder keeps its name and waits in Pending"
+      },
+      "detail": null,
+      "confidence": 0.6,
+      "tier": "routine",
+      "group_id": null,
+      "approvable": true,
+      "reroutable": true,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": {
+        "zh": "mv \"$HOME/Downloads/00_收件箱/待判断/web-prototype\" \"$HOME/Downloads/\"",
+        "en": "mv \"$HOME/Downloads/00_收件箱/待判断/web-prototype\" \"$HOME/Downloads/\""
+      },
+      "tags": [],
+      "hints": [
+        "git-repo"
+      ],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": [
+          "git-dir",
+          "node-project"
+        ]
+      },
+      "dir_stats": {
+        "files": 18422,
+        "bytes": 214748364,
+        "truncated": false
+      },
+      "color": "yellow"
+    },
+    {
+      "id": "4b5c6d7e8f900112",
+      "subject_id": "8b9c0d1e2f304152",
+      "kind": "trash",
+      "subject_kind": "dir",
+      "source": "/Users/example/Downloads/web-prototype/node_modules",
+      "source_portable": "$HOME/Downloads/web-prototype/node_modules",
+      "filename": "node_modules",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 198311744,
+      "modified_ns": 1756400000000000000,
+      "age_hours": 132,
+      "rule": "regenerable:node_modules",
+      "reason": {
+        "zh": "构建产物，删掉还能再生成（重新 npm/pnpm/bun install）",
+        "en": "Build output; it can be regenerated (re-run npm/pnpm/bun install)"
+      },
+      "detail": null,
+      "confidence": 0.99,
+      "tier": "regenerable",
+      "group_id": "regen-5c1d77ab",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 198311744,
+      "restore_method": {
+        "zh": "在废纸篓里选放回原处",
+        "en": "Put Back from the Trash"
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": {
+        "files": 18120,
+        "bytes": 198311744,
+        "truncated": false
+      },
+      "color": "green"
+    },
+    {
+      "id": "5c6d7e8f90011223",
+      "subject_id": "8b9c0d1e2f304152",
+      "kind": "delete",
+      "subject_kind": "dir",
+      "source": "/Users/example/Downloads/web-prototype/node_modules",
+      "source_portable": "$HOME/Downloads/web-prototype/node_modules",
+      "filename": "node_modules",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 198311744,
+      "modified_ns": 1756400000000000000,
+      "age_hours": 132,
+      "rule": "regenerable:node_modules",
+      "reason": {
+        "zh": "构建产物，删掉还能再生成（重新 npm/pnpm/bun install）",
+        "en": "Build output; it can be regenerated (re-run npm/pnpm/bun install)"
+      },
+      "detail": null,
+      "confidence": 0.99,
+      "tier": "regenerable",
+      "group_id": "regen-5c1d77ab",
+      "approvable": true,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [
+        "allow-permanent-delete"
+      ],
+      "reclaims_bytes": 198311744,
+      "restore_method": {
+        "zh": "删掉就没了，只对可再生的构建产物用这一项",
+        "en": "Permanent; only use this for regenerable build output"
+      },
+      "tags": [],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": {
+        "files": 18120,
+        "bytes": 198311744,
+        "truncated": false
+      },
+      "color": "green"
+    },
+    {
+      "id": "6d7e8f9001122334",
+      "subject_id": "9c0d1e2f30415263",
+      "kind": "hold",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/installer-2026.dmg",
+      "source_portable": "$HOME/Downloads/installer-2026.dmg",
+      "filename": "installer-2026.dmg",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 612368384,
+      "modified_ns": 1756750000000000000,
+      "age_hours": 57,
+      "rule": "hold:aging",
+      "reason": {
+        "zh": "还在静置期，已放 57 小时，满 168 小时再动",
+        "en": "Still settling: 57h of the required 168h"
+      },
+      "detail": null,
+      "confidence": 1.0,
+      "tier": "aging",
+      "group_id": null,
+      "approvable": false,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": null,
+      "tags": [],
+      "hints": [],
+      "hold_reason": {
+        "zh": "还在静置期，已放 57 小时，满 168 小时再动",
+        "en": "Still settling: 57h of the required 168h",
+        "ready_at": "2026-09-07T19:15:00+09:00"
+      },
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "red"
+    },
+    {
+      "id": "7e8f900112233445",
+      "subject_id": "0d1e2f3041526374",
+      "kind": "hold",
+      "subject_kind": "dir",
+      "source": "/Users/example/Downloads/Photos Library.photoslibrary",
+      "source_portable": "$HOME/Downloads/Photos Library.photoslibrary",
+      "filename": "Photos Library.photoslibrary",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 48231923712,
+      "modified_ns": 1756600000000000000,
+      "age_hours": 98,
+      "rule": "hold:forbidden",
+      "reason": {
+        "zh": "禁刀区，只展示不处理（forbidden:suffix:.photoslibrary）",
+        "en": "No-go zone, shown but never touched (forbidden:suffix:.photoslibrary)"
+      },
+      "detail": null,
+      "confidence": 1.0,
+      "tier": "forbidden",
+      "group_id": null,
+      "approvable": false,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": null,
+      "tags": [],
+      "hints": [],
+      "hold_reason": {
+        "zh": "系统媒体库，任何情况下都不动",
+        "en": "A system media library; never touched",
+        "label": "forbidden:suffix:.photoslibrary"
+      },
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": {
+        "files": 0,
+        "bytes": 48231923712,
+        "truncated": true
+      },
+      "color": "red"
+    },
+    {
+      "id": "8f90011223344556",
+      "subject_id": "1e2f304152637485",
+      "kind": "hold",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/session.log",
+      "source_portable": "$HOME/Downloads/session.log",
+      "filename": "session.log",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 91204,
+      "modified_ns": 1756790000000000000,
+      "age_hours": 6,
+      "rule": "hold:in_use",
+      "reason": {
+        "zh": "现在有进程开着它：tail(48213)，先不动",
+        "en": "A process still has it open: tail(48213)"
+      },
+      "detail": null,
+      "confidence": 1.0,
+      "tier": "in_use",
+      "group_id": null,
+      "approvable": false,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": null,
+      "tags": [],
+      "hints": [],
+      "hold_reason": {
+        "zh": "进程 tail 正在读它，等它退出再整理",
+        "en": "tail is reading it; tidy up after it exits"
+      },
+      "guard": {
+        "open_by": [
+          {
+            "command": "tail",
+            "pid": 48213
+          }
+        ],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "red"
+    },
+    {
+      "id": "900112233445566a",
+      "subject_id": "2f30415263748596",
+      "kind": "hold",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/backup-tool.sh",
+      "source_portable": "$HOME/Downloads/backup-tool.sh",
+      "filename": "backup-tool.sh",
+      "destination": null,
+      "destination_portable": null,
+      "destination_key": null,
+      "size_bytes": 2048,
+      "modified_ns": 1756200000000000000,
+      "age_hours": 210,
+      "rule": "hold:referenced",
+      "reason": {
+        "zh": "有配置或脚本引用了这个路径：$HOME/Library/LaunchAgents/com.example.backup.plist:14，动它之前先改引用",
+        "en": "A config or script references this path: $HOME/Library/LaunchAgents/com.example.backup.plist:14; fix the reference first"
+      },
+      "detail": null,
+      "confidence": 1.0,
+      "tier": "referenced",
+      "group_id": null,
+      "approvable": false,
+      "reroutable": false,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": null,
+      "tags": [],
+      "hints": [],
+      "hold_reason": {
+        "zh": "一个 launchd 任务写死了这个路径",
+        "en": "A launchd job hard-codes this path"
+      },
+      "guard": {
+        "open_by": [],
+        "referenced_in": [
+          {
+            "file": "$HOME/Library/LaunchAgents/com.example.backup.plist",
+            "line": 14,
+            "form": "$HOME/Downloads/backup-tool.sh"
+          },
+          {
+            "file": "$HOME/.zshrc",
+            "line": 82,
+            "form": "~/Downloads/backup-tool.sh"
+          }
+        ],
+        "incoming_symlinks": [
+          "$HOME/.local/bin/backup-tool"
+        ],
+        "shape": [
+          "executable",
+          "shebang"
+        ]
+      },
+      "dir_stats": null,
+      "color": "red"
+    },
+    {
+      "id": "0112233445566a7b",
+      "subject_id": "30415263748596a7",
+      "kind": "move",
+      "subject_kind": "file",
+      "source": "/Users/example/Downloads/dataset.parquet",
+      "source_portable": "$HOME/Downloads/dataset.parquet",
+      "filename": "dataset.parquet",
+      "destination": "/Users/example/Downloads/00_收件箱/待判断/dataset.parquet",
+      "destination_portable": "$HOME/Downloads/00_收件箱/待判断/dataset.parquet",
+      "destination_key": "inbox.pending",
+      "size_bytes": 33554432,
+      "modified_ns": 1756450000000000000,
+      "age_hours": 118,
+      "rule": "unknown-ext",
+      "reason": {
+        "zh": "扩展名不在规则表里，先进待判断，可以在页面上改去向",
+        "en": "Extension is not in the rule table; it waits in Pending and can be rerouted"
+      },
+      "detail": null,
+      "confidence": 0.55,
+      "tier": "routine",
+      "group_id": null,
+      "approvable": true,
+      "reroutable": true,
+      "default_selected": false,
+      "requires": [],
+      "reclaims_bytes": 0,
+      "restore_method": {
+        "zh": "mv \"$HOME/Downloads/00_收件箱/待判断/dataset.parquet\" \"$HOME/Downloads/\"",
+        "en": "mv \"$HOME/Downloads/00_收件箱/待判断/dataset.parquet\" \"$HOME/Downloads/\""
+      },
+      "tags": [
+        "数据"
+      ],
+      "hints": [],
+      "hold_reason": null,
+      "guard": {
+        "open_by": [],
+        "referenced_in": [],
+        "incoming_symlinks": [],
+        "shape": []
+      },
+      "dir_stats": null,
+      "color": "yellow"
+    }
+  ],
+  "groups": [
+    {
+      "group_id": "pair-7d2c1e9f",
+      "kind": "pair",
+      "tier": "duplicate",
+      "stem": "archive",
+      "evidence": "name",
+      "sha256": null,
+      "members": [
+        "4d5e6f7a8b9c0d1e",
+        "3c4d5e6f7a8b9c0d"
+      ],
+      "member_labels": {
+        "4d5e6f7a8b9c0d1e": "Archive/",
+        "3c4d5e6f7a8b9c0d": "Archive.zip"
+      },
+      "reason": {
+        "zh": "压缩包和解压目录是一对，默认建议留目录",
+        "en": "Archive and extracted folder are a pair; keeping the folder is suggested"
+      },
+      "options": [
+        {
+          "key": "keep_all",
+          "label": {
+            "zh": "都保留，一起搬进待判断",
+            "en": "Keep both, move them together"
+          },
+          "action_ids": [
+            "d4e5f60718293a4b",
+            "a1b2c30d4e5f6071"
+          ],
+          "requires": []
+        },
+        {
+          "key": "keep:4d5e6f7a8b9c0d1e",
+          "label": {
+            "zh": "留目录，压缩包进废纸篓",
+            "en": "Keep the folder, trash the archive"
+          },
+          "action_ids": [
+            "d4e5f60718293a4b",
+            "b2c3d40e5f607182"
+          ],
+          "requires": []
+        },
+        {
+          "key": "keep:3c4d5e6f7a8b9c0d",
+          "label": {
+            "zh": "留压缩包，目录进废纸篓",
+            "en": "Keep the archive, trash the folder"
+          },
+          "action_ids": [
+            "a1b2c30d4e5f6071",
+            "e5f60718293a4b5c"
+          ],
+          "requires": []
+        },
+        {
+          "key": "keep:4d5e6f7a8b9c0d1e:delete",
+          "label": {
+            "zh": "留目录，压缩包永久删除",
+            "en": "Keep the folder, permanently delete the archive"
+          },
+          "action_ids": [
+            "d4e5f60718293a4b",
+            "c3d4e50f60718293"
+          ],
+          "requires": [
+            "allow-permanent-delete"
+          ]
+        }
+      ],
+      "default_choice": "keep:4d5e6f7a8b9c0d1e",
+      "potential_bytes": 8915621,
+      "color": "yellow"
+    },
+    {
+      "group_id": "dup-3ba91c04",
+      "kind": "duplicate",
+      "tier": "duplicate",
+      "stem": "guide.pdf",
+      "evidence": "sha256",
+      "sha256": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+      "members": [
+        "5e6f7a8b9c0d1e2f",
+        "6f7a8b9c0d1e2f30"
+      ],
+      "member_labels": {
+        "5e6f7a8b9c0d1e2f": "guide.pdf",
+        "6f7a8b9c0d1e2f30": "guide (1).pdf"
+      },
+      "reason": {
+        "zh": "内容完全相同（sha256 一致），留一份就够",
+        "en": "Byte-identical (same sha256); one copy is enough"
+      },
+      "options": [
+        {
+          "key": "keep_all",
+          "label": {
+            "zh": "都保留",
+            "en": "Keep both"
+          },
+          "action_ids": [
+            "f60718293a4b5c6d",
+            "18293a4b5c6d7e8f"
+          ],
+          "requires": []
+        },
+        {
+          "key": "keep:5e6f7a8b9c0d1e2f",
+          "label": {
+            "zh": "留 guide.pdf，另一份进废纸篓",
+            "en": "Keep guide.pdf, trash the other"
+          },
+          "action_ids": [
+            "f60718293a4b5c6d",
+            "293a4b5c6d7e8f90"
+          ],
+          "requires": []
+        },
+        {
+          "key": "keep:6f7a8b9c0d1e2f30",
+          "label": {
+            "zh": "留 guide (1).pdf，另一份进废纸篓",
+            "en": "Keep guide (1).pdf, trash the other"
+          },
+          "action_ids": [
+            "18293a4b5c6d7e8f",
+            "0718293a4b5c6d7e"
+          ],
+          "requires": []
+        }
+      ],
+      "default_choice": "keep:5e6f7a8b9c0d1e2f",
+      "potential_bytes": 1048576,
+      "color": "yellow"
+    },
+    {
+      "group_id": "regen-5c1d77ab",
+      "kind": "regenerable",
+      "tier": "regenerable",
+      "stem": "node_modules",
+      "evidence": "basename",
+      "sha256": null,
+      "members": [
+        "8b9c0d1e2f304152"
+      ],
+      "member_labels": {
+        "8b9c0d1e2f304152": "web-prototype/node_modules"
+      },
+      "reason": {
+        "zh": "构建产物，删掉还能再生成（重新 npm/pnpm/bun install）",
+        "en": "Build output; it can be regenerated (re-run npm/pnpm/bun install)"
+      },
+      "options": [
+        {
+          "key": "trash_all",
+          "label": {
+            "zh": "全部进废纸篓",
+            "en": "Trash all of them"
+          },
+          "action_ids": [
+            "4b5c6d7e8f900112"
+          ],
+          "requires": []
+        },
+        {
+          "key": "delete_all",
+          "label": {
+            "zh": "全部永久删除",
+            "en": "Permanently delete all of them"
+          },
+          "action_ids": [
+            "5c6d7e8f90011223"
+          ],
+          "requires": [
+            "allow-permanent-delete"
+          ]
+        }
+      ],
+      "default_choice": "trash_all",
+      "potential_bytes": 198311744,
+      "color": "yellow"
+    }
+  ],
+  "notes": null,
+  "approved_action_ids": [],
+  "overrides": [],
+  "approved_at": null,
+  "approved_by": null
+}
