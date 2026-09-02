@@ -283,21 +283,35 @@ class PathGuardTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temporary:
             outside = Path(temporary)
+            # The home is injected rather than borrowed from the machine,
+            # because a temporary directory is not reliably outside the real
+            # one: on Windows it sits under the account's own AppData.  Being
+            # outside the home directory is the thing under test, so it gets
+            # arranged instead of assumed.
+            fake_home = outside / "home"
+            (fake_home / "Downloads").mkdir(parents=True)
+            elsewhere = outside / "elsewhere"
+            elsewhere.mkdir()
+
             with self.assertRaises(ValueError):
-                paths.refuse_root(outside)
+                paths.refuse_root(elsewhere, home=fake_home)
             self.assertEqual(
-                paths.refuse_root(outside, allow_outside_home=True),
-                paths.realpath(outside),
+                paths.refuse_root(elsewhere, allow_outside_home=True, home=fake_home),
+                paths.realpath(elsewhere),
             )
 
             linked = outside / "link"
-            os.symlink(str(outside), str(linked))
-            with self.assertRaises(ValueError):
-                paths.refuse_root(linked, allow_outside_home=True)
+            try:
+                os.symlink(str(elsewhere), str(linked), target_is_directory=True)
+            except OSError:
+                # Windows refuses this without the symlink privilege; the rule
+                # it would prove is checked on the platforms that can make one.
+                pass
+            else:
+                with self.assertRaises(ValueError):
+                    paths.refuse_root(linked, allow_outside_home=True, home=fake_home)
 
             # a folder inside a fake home is accepted
-            fake_home = outside / "home"
-            (fake_home / "Downloads").mkdir(parents=True)
             self.assertEqual(
                 paths.refuse_root(fake_home / "Downloads", home=fake_home),
                 paths.realpath(fake_home / "Downloads"),
@@ -421,11 +435,20 @@ class PlanPrivacyTests(unittest.TestCase):
         stripped = paths.strip_absolute(self._plan())
         back = paths.hydrate_absolute(stripped, Path(self.OTHER))
 
-        self.assertEqual(back["source_root"], self.OTHER + "/Downloads")
-        self.assertEqual(back["managed_dir"], self.OTHER + "/Downloads/00_File_Organizer")
-        self.assertEqual(back["actions"][0]["source"], self.OTHER + "/Downloads/report.pdf")
+        # Rebuilt paths are spelled the way the machine doing the applying
+        # spells them, which on Windows means backslashes, so the comparison
+        # is made on paths rather than on strings.
+        other = Path(self.OTHER)
+        self.assertEqual(Path(back["source_root"]), other / "Downloads")
         self.assertEqual(
-            back["actions"][0]["destination"], self.OTHER + "/Downloads/PDF/report.pdf"
+            Path(back["managed_dir"]), other / "Downloads" / "00_File_Organizer"
+        )
+        self.assertEqual(
+            Path(back["actions"][0]["source"]), other / "Downloads" / "report.pdf"
+        )
+        self.assertEqual(
+            Path(back["actions"][0]["destination"]),
+            other / "Downloads" / "PDF" / "report.pdf",
         )
         self.assertIsNone(back["actions"][1]["destination"])
 

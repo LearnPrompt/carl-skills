@@ -281,6 +281,11 @@ def refuse_root(
     home_dir = _home(home)
     if str(resolved) in REFUSED_ABSOLUTE:
         raise ValueError("refused root: {0} is a system directory".format(resolved))
+    # The top of a filesystem, spelled whichever way this platform spells it:
+    # "/" on a Mac, "C:\\" or "D:\\" on Windows.  The list above only knows the
+    # first one, and a drive letter is not something to enumerate.
+    if str(resolved) == resolved.anchor:
+        raise ValueError("refused root: {0} is a system directory".format(resolved))
     if resolved == home_dir:
         raise ValueError("refused root: the home directory itself is out of scope")
     for sub in REFUSED_HOME_SUBDIRS:
@@ -330,15 +335,35 @@ def plan_home(plan: Any, home: Optional[Path] = None) -> Path:
     return Path.home()
 
 
+def _base_spellings(base: str) -> Tuple[str, ...]:
+    """The home directory as a plan may spell it, both separators.
+
+    Plans travel: one written on a Mac is read on Windows and the other way
+    round, so the strings inside a plan can use the other machine's separator
+    while the home directory recovered from it uses this one's.  Both spellings
+    name the same directory, and a privacy rule that only rewrites one of them
+    is a privacy rule with a hole in it.
+    """
+
+    if not base:
+        return ()
+    found = []
+    for spelling in (base, base.replace("\\", "/"), base.replace("/", "\\")):
+        if spelling in ("/", "\\", os.sep) or spelling in found:
+            continue
+        found.append(spelling)
+    return tuple(found)
+
+
 def _portable_text(text: str, base: str) -> str:
     """Rewrite every mention of the home directory, in either separator style."""
 
-    if not base or base in ("/", os.sep):
-        return text
-    if text == base:
+    spellings = _base_spellings(base)
+    if text in spellings:
         return HOME_TOKEN
-    for separator in dict.fromkeys(("/", os.sep)):
-        text = text.replace(base + separator, HOME_TOKEN + "/")
+    for spelling in spellings:
+        for separator in ("/", "\\"):
+            text = text.replace(spelling + separator, HOME_TOKEN + "/")
     return text
 
 

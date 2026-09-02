@@ -145,15 +145,19 @@ class OpenHandleTests(unittest.TestCase):
 class ReferenceTests(unittest.TestCase):
     def test_the_three_spellings_are_all_generated(self) -> None:
         home = Path("/home/example")
-        forms = path_forms(home / "Downloads" / "tool.sh", home)
-        self.assertEqual(
-            forms,
-            [
-                "/home/example/Downloads/tool.sh",
-                "~/Downloads/tool.sh",
-                "$HOME/Downloads/tool.sh",
-            ],
-        )
+        target = home / "Downloads" / "tool.sh"
+        forms = path_forms(target, home)
+
+        # The absolute path is spelled the way this platform spells it, and on
+        # Windows the forward-slash spelling comes along too: a config file
+        # there carries whichever one its author typed.
+        expected = [str(target)]
+        if str(target) != target.as_posix():
+            expected.append(target.as_posix())
+        expected += ["~/Downloads/tool.sh", "$HOME/Downloads/tool.sh"]
+
+        self.assertEqual(forms, expected)
+        self.assertIn("/home/example/Downloads/tool.sh", forms)
 
     def test_a_launch_agent_reference_reports_the_line_number(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -278,13 +282,20 @@ class ShapeTests(unittest.TestCase):
             self.assertIn("dotenv", labels)
             self.assertIn("node-project", labels)
 
-    def test_file_shape_sees_the_shebang_and_the_bit(self) -> None:
+    def test_file_shape_sees_the_shebang(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            script = write(Path(temporary) / "run.sh", "#!/bin/sh\necho hi\n")
+            self.assertIn("shebang", file_shape(script))
+
+    # Windows has no execute bit: os.chmod there only moves the read-only flag,
+    # and os.access(X_OK) answers from the file extension.  The label is a
+    # POSIX fact, so the test that pins it is a POSIX test.
+    @unittest.skipIf(os.name == "nt", "Windows 没有执行位")
+    def test_file_shape_sees_the_executable_bit(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             script = write(Path(temporary) / "run.sh", "#!/bin/sh\necho hi\n")
             os.chmod(str(script), 0o755)
-            labels = file_shape(script)
-            self.assertIn("executable", labels)
-            self.assertIn("shebang", labels)
+            self.assertIn("executable", file_shape(script))
 
 
 class RecentTests(unittest.TestCase):

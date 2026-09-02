@@ -23,6 +23,11 @@ import storage_scan  # noqa: E402
 
 MB = 1024 * 1024
 
+#: 能不能把一个目录锁到自己都读不进去。要两个条件：这台机器有 POSIX 权限位
+#: （Windows 上 chmod 000 只改只读标志，照样读得进去），以及跑测试的不是
+#: root（root 无视权限位）。不满足就没有"读不到的目录"可造，相关用例跳过。
+CAN_LOCK_A_DIR = hasattr(os, "geteuid") and os.geteuid() != 0
+
 
 def write_file(path, size_bytes=1024):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -80,7 +85,7 @@ class StorageScanMacTest(unittest.TestCase):
         os.makedirs(cls.locked)
         write_file(os.path.join(cls.locked, "secret.bin"), 2048)
         cls.locked_applied = False
-        if os.geteuid() != 0:
+        if CAN_LOCK_A_DIR:
             os.chmod(cls.locked, 0o000)
             cls.locked_applied = True
         cls.data = storage_scan.run_scan(
@@ -236,7 +241,7 @@ class StorageScanMacTest(unittest.TestCase):
                 if item["name"] == ".trash":
                     self.assertIn("不可恢复", item["restore_hint"])
 
-    @unittest.skipIf(os.geteuid() == 0, "root 读得动 chmod 000 的目录")
+    @unittest.skipUnless(CAN_LOCK_A_DIR, "这里造不出一个自己读不到的目录")
     def test_denied_recorded(self):
         denied_paths = {entry["path"] for entry in self.data["denied"]}
         self.assertIn(self.locked, denied_paths)

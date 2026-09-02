@@ -8,7 +8,7 @@ import copy
 import json
 import re
 import unittest
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import build_report
 
@@ -346,7 +346,10 @@ class CombinedPageTests(unittest.TestCase):
         build_report.render({"plan": plan, "analysis": analysis}, mode="static")
         self.assertEqual(plan["source_root"], self.plan["source_root"])
         self.assertEqual(analysis["items"][0]["id"], self.analysis["items"][0]["id"])
-        self.assertTrue(Path(plan["source_root"]).is_absolute())
+        # The fixture is a plan written on a Mac, so its absoluteness is a
+        # POSIX question: on Windows Path("/Users/x/Downloads").is_absolute()
+        # is False for want of a drive, and that says nothing about render.
+        self.assertTrue(PurePosixPath(plan["source_root"]).is_absolute())
 
 
 class NotesAndFallbackTests(unittest.TestCase):
@@ -454,7 +457,10 @@ class EscapingTests(unittest.TestCase):
         build_report.render(plan, mode="static")
         self.assertEqual(plan["source_root"], self.plan["source_root"])
         self.assertEqual(plan["actions"][0]["source"], self.plan["actions"][0]["source"])
-        self.assertTrue(Path(plan["source_root"]).is_absolute())
+        # The fixture is a plan written on a Mac, so its absoluteness is a
+        # POSIX question: on Windows Path("/Users/x/Downloads").is_absolute()
+        # is False for want of a drive, and that says nothing about render.
+        self.assertTrue(PurePosixPath(plan["source_root"]).is_absolute())
 
     def test_every_approvable_action_is_reachable(self) -> None:
         html = build_report.render(self.plan, mode="static")

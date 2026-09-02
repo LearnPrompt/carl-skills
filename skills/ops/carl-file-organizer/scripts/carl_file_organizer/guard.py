@@ -291,11 +291,23 @@ def probe_open_handles(
 
 
 def path_forms(path: Path, home: Optional[Path] = None) -> List[str]:
-    """The three spellings a config file might use for the same path."""
+    """The spellings a config file might use for the same path.
+
+    Three everywhere: the absolute path, ``~/...`` and ``$HOME/...``.  On
+    Windows there are four, because the absolute path has two spellings there
+    and a config file carries whichever one its author typed: a ``.gitconfig``
+    or a shell profile written under Git Bash or WSL says ``C:/Users/...``,
+    while a PowerShell profile says ``C:\\Users\\...``.  Missing the other one
+    means missing the reference, and a missed reference is a moved file that
+    breaks something silently.
+    """
 
     base = Path(home) if home is not None else Path.home()
     absolute = str(path)
     forms = [absolute]
+    slashed = Path(absolute).as_posix()
+    if slashed != absolute:
+        forms.append(slashed)
     try:
         relative = Path(absolute).relative_to(base)
     except ValueError:

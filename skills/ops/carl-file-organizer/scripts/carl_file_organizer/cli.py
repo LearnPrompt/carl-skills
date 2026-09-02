@@ -279,6 +279,27 @@ def _module_run(module_name: str) -> Optional[Callable[[Any], int]]:
     return run if callable(run) else None
 
 
+def _forgiving_console() -> None:
+    """Never let a code page turn a finished job into a failure.
+
+    Every line this tool prints can carry Chinese, and on Windows a redirected
+    stdout is a legacy code page rather than UTF-8: ``print`` then raises
+    UnicodeEncodeError, the CLI boundary below catches it, and a build that
+    wrote its plan correctly reports exit code 2.  The text is the report, not
+    the deliverable, so unrepresentable characters get escaped and the run goes
+    on.  A console that can spell them is untouched.
+    """
+
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:  # a stream somebody replaced, in a test or a host
+            continue
+        try:
+            reconfigure(errors="backslashreplace")
+        except (ValueError, OSError):
+            continue
+
+
 def _not_implemented(command: str, module_name: str, lang: str) -> int:
     print(
         "error: "
@@ -309,6 +330,7 @@ def _prepare_config(args: argparse.Namespace) -> Any:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    _forgiving_console()
     parser = build_parser()
     args = parser.parse_args(argv)
     command = args.command

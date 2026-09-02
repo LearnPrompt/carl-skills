@@ -77,6 +77,10 @@ class MoveToTrashTests(unittest.TestCase):
             self.assertTrue(target.exists())
             self.assertEqual(runner.calls, [])
 
+    # The name is the point: a quote and a backslash are what AppleScript
+    # escaping has to survive, and Windows will not let a file be called that.
+    # The escaping itself is pure string work and is pinned right below.
+    @unittest.skipIf(os.name == "nt", "Windows 的文件名不能带引号")
     def test_finder_command_escaping_and_no_shell(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             target = Path(temporary) / 'weird " name \\ here.txt'

@@ -302,6 +302,26 @@ class StorageScanner(object):
             return path
         return self.home_token + self.sep + rel.replace(os.sep, self.sep)
 
+    def scoped(self, path):
+        """分类只看 home 以下的那一段。
+
+        词表里的每一条都是从 home 数起的：``library/caches/pip``、
+        ``appdata/local/temp``、``.trash``。可 home 上面还有别的目录名，而它
+        们不该说话——一个 home 造在 ``/tmp`` 底下，整台机器就会因为路径里有
+        一个 ``tmp`` 段被判成缓存，三色一起塌成 green。所以匹配前先把 home
+        之上的部分减掉。home 以外的路径（外接盘、系统目录）原样返回，那里
+        本来就没有 home 相对口径可言。
+        """
+        try:
+            rel = os.path.relpath(path, self.home)
+        except ValueError:
+            return path
+        if rel == os.curdir:
+            return ""
+        if rel == os.pardir or rel.startswith(os.pardir + os.sep):
+            return path
+        return rel.replace(os.sep, "/").replace("\\", "/")
+
     # -------------------------------------------------- 预算
 
     def time_left(self):
@@ -457,12 +477,13 @@ class StorageScanner(object):
     # -------------------------------------------------- 分类
 
     def guess_kind(self, path, is_dir=True):
-        segs = path_segments(path)
+        inside = self.scoped(path)
+        segs = path_segments(inside)
         name = segs[-1] if segs else ""
 
         if is_dir and name in REGENERABLE_DIR_NAMES:
             return "build_artifact"
-        if matches_any(path, DEV_CACHE_PATHS):
+        if matches_any(inside, DEV_CACHE_PATHS):
             return "dev_cache"
         if not is_dir:
             for ext in INSTALLER_EXTS:
@@ -492,12 +513,12 @@ class StorageScanner(object):
         return "unknown"
 
     def is_red(self, path):
-        segs = path_segments(path)
-        for seg in segs:
+        inside = self.scoped(path)
+        for seg in path_segments(inside):
             for suffix in RED_SUFFIXES:
                 if seg.endswith(suffix):
                     return True
-        if matches_any(path, RED_PATHS):
+        if matches_any(inside, RED_PATHS):
             return True
         # 目录里有 .obsidian 就是知识库主库，别碰。
         try:
@@ -1102,7 +1123,25 @@ def format_summary(data):
     return "\n".join(lines)
 
 
+def forgiving_console():
+    """摘要里全是中文，而 Windows 上重定向出去的 stdout 是老代码页。
+
+    不管它的话，一次量完的扫描会在打印摘要那一行抛 UnicodeEncodeError，
+    盘点结果明明已经落盘了，退出码却是 1。JSON 自己带 encoding="utf-8"，
+    从来不受影响；转义的只是给人看的那几行。
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(errors="backslashreplace")
+        except (ValueError, OSError):
+            continue
+
+
 def main(argv=None):
+    forgiving_console()
     parser = argparse.ArgumentParser(
         description="整机只读盘点扫描（macOS + Windows），只量大小，不动文件。"
     )
