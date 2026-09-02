@@ -96,7 +96,7 @@ Windows 的组：`dev_caches`、`downloads_installers`、`recycle_bin`、`appdat
 ```jsonc
 {
   "name": "ms-playwright",
-  "path": "/Users/…/Library/Caches/ms-playwright",   // 绝对路径，给执行器用
+  "path": "<家目录绝对路径>/Library/Caches/ms-playwright", // 给执行器用
   "path_portable": "$HOME/Library/Caches/ms-playwright", // 给人和报告看，不带用户名
   "size_bytes": 1932735283,
   "size_human": "1.8 GB",
