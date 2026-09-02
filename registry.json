@@ -314,7 +314,8 @@
       "canonical_branch": "main",
       "canonical_path": "skills/carl-file-organizer/SKILL.md",
       "installable": true,
-      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/carl-file-organizer/main/skills/carl-file-organizer/SKILL.md"
+      "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/carl-file-organizer/main/skills/carl-file-organizer/SKILL.md",
+      "source_commit": "fdfeb990343c2d81f5f7366bd26c55a37601a91f"
     },
     {
       "id": "afu-llm-todo",
