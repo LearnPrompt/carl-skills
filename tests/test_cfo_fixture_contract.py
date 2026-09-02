@@ -236,10 +236,13 @@ class PlanV2ContractTests(unittest.TestCase):
             if action["color"] == "red":
                 self.assertFalse(action["approvable"], action["id"])
 
-    def test_every_group_is_a_yellow_question(self) -> None:
+    def test_a_group_is_yellow_unless_it_is_only_build_output(self) -> None:
         self.assertTrue(self.plan["groups"])
+        kinds = {group["kind"] for group in self.plan["groups"]}
+        self.assertIn("regenerable", kinds)
         for group in self.plan["groups"]:
-            self.assertEqual(group["color"], "yellow", group["group_id"])
+            expected = "green" if group["kind"] == "regenerable" else "yellow"
+            self.assertEqual(group["color"], expected, group["group_id"])
 
     def test_mess_block_describes_the_whole_folder(self) -> None:
         mess = self.plan["mess"]

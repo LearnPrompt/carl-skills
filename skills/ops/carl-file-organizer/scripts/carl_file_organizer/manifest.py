@@ -138,6 +138,18 @@ def _atomic_write(path: Path, text: str) -> Path:
     return target
 
 
+def atomic_write(path: Path, text: str) -> Path:
+    """Write ``text`` to ``path`` through a temporary file and one ``fsync``.
+
+    The tidy-up manifests are not the only paper trail in this package: the
+    storage line writes a differently shaped table of its own.  Both want the
+    same guarantee, that a file which exists is a file that is complete, so the
+    primitive is public and there is only one of it.
+    """
+
+    return _atomic_write(path, text)
+
+
 # --------------------------------------------------------------------------
 # manifests
 # --------------------------------------------------------------------------

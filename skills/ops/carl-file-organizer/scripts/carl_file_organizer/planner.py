@@ -1254,10 +1254,13 @@ def build_plan(
     # every colour is settled here, once, on the finished list.
     for action in actions:
         action["color"] = action_color(action)
-    # A group is a question, and a question is always yellow: whichever option
-    # you pick, something gets disposed of that a rule alone would not touch.
+    # A group is a question, and most questions are yellow: whichever option you
+    # pick, something gets disposed of that a rule alone would not touch.  The
+    # regenerable group is the exception, and it follows its own members: build
+    # output rebuilds itself from source, so both of its options are green and
+    # colouring the question yellow would only ask for a look nobody needs.
     for group in groups:
-        group["color"] = YELLOW
+        group["color"] = GREEN if group.get("kind") == "regenerable" else YELLOW
 
     names: Dict[str, str] = {}
     for key in profile.get("names") or {}:

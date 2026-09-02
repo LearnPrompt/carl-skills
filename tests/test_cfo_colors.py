@@ -119,7 +119,7 @@ class ColorInAPlanTests(unittest.TestCase):
                 self.assertFalse(action["approvable"], action["id"])
                 self.assertEqual(action["kind"], "hold")
 
-    def test_a_group_is_always_a_yellow_question(self) -> None:
+    def test_a_pair_group_is_a_yellow_question(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             age(write(root / "release.zip", "PK\x03\x04"), hours=100)
@@ -129,12 +129,37 @@ class ColorInAPlanTests(unittest.TestCase):
 
             self.assertTrue(plan["groups"])
             for group in plan["groups"]:
+                self.assertEqual(group["kind"], "pair", group["group_id"])
                 self.assertEqual(group["color"], YELLOW, group["group_id"])
             # the moves inside the group stay green; only the disposals are yellow
             moves = [a for a in plan["actions"] if a["kind"] == "move" and a["group_id"]]
             self.assertTrue(moves)
             for action in moves:
                 self.assertEqual(action["color"], GREEN, action["id"])
+
+    def test_a_regenerable_group_is_green_like_its_own_options(self) -> None:
+        """Build output rebuilds itself, so the question does not need a look."""
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            age(write(root / "web-prototype" / "index.html"), hours=100)
+            age(write(root / "web-prototype" / "node_modules" / "left-pad" / "index.js"), hours=100)
+            age(root / "web-prototype" / "node_modules" / "left-pad", hours=100)
+            age(root / "web-prototype" / "node_modules", hours=100)
+            age(root / "web-prototype", hours=100)
+            plan = plan_for(root)
+
+            regen = [g for g in plan["groups"] if g["kind"] == "regenerable"]
+            self.assertTrue(regen)
+            for group in regen:
+                self.assertEqual(group["color"], GREEN, group["group_id"])
+                member_ids = set()
+                for option in group["options"]:
+                    member_ids.update(option["action_ids"])
+                self.assertTrue(member_ids)
+                for action in plan["actions"]:
+                    if action["id"] in member_ids:
+                        self.assertEqual(action["color"], GREEN, action["id"])
 
     def test_a_duplicate_head_keeps_its_colour_after_the_tier_is_rewritten(self) -> None:
         """build_plan rewrites the tier of a duplicate's move after the fact."""

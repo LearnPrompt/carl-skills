@@ -131,7 +131,7 @@ class RenderBothKindsTests(unittest.TestCase):
             self.assertTrue(any('data-action="trash"' in c for c in cards))
             self.assertTrue(any('data-action="delete"' in c and "needs-permanent" in c for c in cards))
             self.assertIn('id="gn-permanent"', _section(storage, "green"))
-        # The planner colours every group yellow; a green regenerable group shows the permanent option.
+        # A green regenerable group offers the permanent option; a yellow group never does.
         plan = copy.deepcopy(self.plan)
         for group in plan["groups"]:
             if group["kind"] == "regenerable":

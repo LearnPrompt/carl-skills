@@ -1,10 +1,16 @@
-"""review --serve: token, Host, Origin, body checks and the apply round trip."""
+"""``--serve``: token, Host, Origin, body checks, and both pages' round trips.
+
+The same server answers a plan.json with ``/api/apply`` and an analysis.json
+with ``/api/dispose``.  Neither endpoint exists on the other page, both pages
+share ``/api/reveal``, and no absolute path leaves either of them.
+"""
 
 from __future__ import annotations
 
 import cfo_path  # noqa: F401 - puts the skill's scripts dir on sys.path
 
 import json
+import tempfile
 import threading
 import unittest
 import urllib.error
@@ -15,17 +21,47 @@ from carl_file_organizer import paths
 from carl_file_organizer import server as server_module
 
 FIXTURE = Path(cfo_path.FIXTURES_DIR) / "plan-v2-sample.json"
+ANALYSIS = Path(cfo_path.FIXTURES_DIR) / "storage-analysis-sample.json"
 
 MOVE_ID = "9c1f0a7b2d3e4f55"
 MOVE_ID_2 = "0b7e4411aa93c2d1"
 DELETE_ID = "5c6d7e8f90011223"
 PENDING_ID = "0112233445566a7b"
 
+GREEN_ITEM = "st-pip-cache"
+GREEN_ITEM_2 = "st-brew-cache"
+YELLOW_ITEM = "st-dl-installers"
+RED_ITEM = "st-photos"
+
 
 class FakeReport:
     def __init__(self, results, run_id="test-run"):
         self.results = results
         self.run_id = run_id
+
+
+class StubDisposer:
+    """Records every call and answers with a fake DisposeReport."""
+
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, analysis, decisions, **kw):
+        self.calls.append({"analysis": analysis, "decisions": decisions, "kw": kw})
+        results = []
+        for item_id in decisions["item_ids"]:
+            action = decisions["actions"][item_id]
+            results.append(
+                {
+                    "item_id": item_id,
+                    "path": "$HOME/somewhere/" + item_id,
+                    "action": action,
+                    "status": "trashed" if action == "trash" else "deleted",
+                    "detail": "stub",
+                    "size_bytes": 1024,
+                }
+            )
+        return FakeReport(results)
 
 
 class StubExecutor:
@@ -52,10 +88,31 @@ class StubExecutor:
 
 
 class ServerHarness:
-    def __init__(self, *, allow_permanent_delete=False, stub=None):
+    def __init__(
+        self,
+        *,
+        allow_permanent_delete=False,
+        stub=None,
+        fixture=FIXTURE,
+        disposer=None,
+        reveal_fn=None,
+        home=None,
+    ):
         self.stub = stub or StubExecutor()
+        self.disposer = disposer or StubDisposer()
+        self.revealed = []
+
+        def _reveal(path):
+            self.revealed.append(str(path))
+            return True
+
         self.server, self.token = server_module.build_server(
-            FIXTURE, allow_permanent_delete=allow_permanent_delete, apply_fn=self.stub
+            fixture,
+            allow_permanent_delete=allow_permanent_delete,
+            apply_fn=self.stub,
+            dispose_fn=self.disposer,
+            reveal_fn=reveal_fn or _reveal,
+            home=home,
         )
         self.port = self.server.server_address[1]
         self.thread = threading.Thread(target=self.server.serve_forever, kwargs={"poll_interval": 0.05})
@@ -107,7 +164,8 @@ class ReviewServerTests(unittest.TestCase):
         self.assertEqual(status, 401)
         status, body, headers = self.h.request("/?t=" + self.h.token, token=False)
         self.assertEqual(status, 200)
-        self.assertIn('<body data-mode="serve"', body)
+        self.assertIn('data-kind="organize"', body)
+        self.assertIn('data-mode="serve"', body)
         self.assertIn("X-GN-Token", body)
         self.assertIn("Content-Security-Policy", headers)
         self.assertEqual(headers.get("Cache-Control"), "no-store")
@@ -278,6 +336,205 @@ class PermanentDeleteFlagTests(unittest.TestCase):
         self.assertEqual(status, 200, body)
         self.assertIs(h.stub.calls[0]["allow_permanent_delete"], True)
         self.assertEqual(json.loads(body)["results"][0]["status"], "deleted")
+
+
+class StoragePageTests(unittest.TestCase):
+    """The same server, handed an analysis.json instead of a plan.json."""
+
+    def setUp(self):
+        self.h = ServerHarness(fixture=ANALYSIS)
+        self.addCleanup(self.h.close)
+
+    def test_the_page_is_the_storage_page_and_names_no_account(self):
+        status, body, _ = self.h.request("/?t=" + self.h.token, token=False)
+        self.assertEqual(status, 200)
+        self.assertIn('data-kind="storage"', body)
+        self.assertIn('data-mode="serve"', body)
+        self.assertNotIn("/Users/", body)
+        self.assertNotIn(str(Path.home()), body)
+        self.assertIn("$HOME/Library/Caches/pip", body)
+
+    def test_api_plan_is_the_stripped_analysis_with_executed_ids(self):
+        status, body, _ = self.h.request("/api/plan")
+        self.assertEqual(status, 200)
+        data = json.loads(body)
+        self.assertEqual(data["schema"], "carl-file-organizer/storage-analysis")
+        self.assertEqual(data["executed_ids"], [])
+        self.assertNotIn("/Users/", body)
+        for item in data["items"]:
+            self.assertNotIn("path", item)
+
+    def test_dispose_rejects_missing_token_and_foreign_origin(self):
+        payload = {"item_ids": [GREEN_ITEM], "action": "trash"}
+        status, _, _ = self.h.request("/api/dispose", method="POST", body=payload, token=False)
+        self.assertEqual(status, 401)
+        status, _, _ = self.h.request("/api/dispose", method="POST", body=payload, origin="http://evil")
+        self.assertEqual(status, 403)
+        self.assertEqual(self.h.disposer.calls, [])
+
+    def test_dispose_rejects_a_bad_body(self):
+        for payload in ({"item_ids": "x"}, {"item_ids": []}, {"item_ids": [GREEN_ITEM], "action": "burn"}):
+            status, _, _ = self.h.request("/api/dispose", method="POST", body=payload)
+            self.assertEqual(status, 400, payload)
+        self.assertEqual(self.h.disposer.calls, [])
+
+    def test_permanent_delete_is_refused_before_the_engine_runs(self):
+        payload = {"item_ids": [GREEN_ITEM], "action": "delete"}
+        status, body, _ = self.h.request("/api/dispose", method="POST", body=payload)
+        self.assertEqual(status, 403)
+        self.assertIn("allow-permanent-delete", json.loads(body)["error"])
+        self.assertEqual(self.h.disposer.calls, [])
+
+    def test_dispose_round_trip_and_repeat_conflict(self):
+        payload = {"item_ids": [GREEN_ITEM, GREEN_ITEM_2], "action": "trash"}
+        status, body, _ = self.h.request("/api/dispose", method="POST", body=payload)
+        self.assertEqual(status, 200, body)
+        response = json.loads(body)
+        self.assertTrue(response["ok"])
+        self.assertIs(response["dry_run"], False)
+        self.assertEqual(response["action"], "trash")
+        self.assertEqual(sorted(response["executed_ids"]), sorted([GREEN_ITEM, GREEN_ITEM_2]))
+        self.assertEqual([r["status"] for r in response["results"]], ["trashed", "trashed"])
+
+        call = self.h.disposer.calls[0]
+        self.assertEqual(call["decisions"]["item_ids"], [GREEN_ITEM, GREEN_ITEM_2])
+        self.assertEqual(call["decisions"]["actions"], {GREEN_ITEM: "trash", GREEN_ITEM_2: "trash"})
+        self.assertEqual(call["decisions"]["decided_by"], "serve")
+        self.assertIs(call["kw"]["dry_run"], False)
+        self.assertIs(call["kw"]["allow_permanent_delete"], False)
+        self.assertEqual(call["kw"]["home"], Path.home())
+        # the engine gets the analysis as written, not the stripped copy
+        self.assertEqual(call["analysis"]["items"][0]["id"], "st-derived-data")
+
+        status, body, _ = self.h.request("/api/dispose", method="POST", body=payload)
+        self.assertEqual(status, 409)
+        self.assertEqual(sorted(json.loads(body)["item_ids"]), sorted([GREEN_ITEM, GREEN_ITEM_2]))
+        self.assertEqual(len(self.h.disposer.calls), 1)
+
+        status, body, _ = self.h.request("/api/plan")
+        self.assertEqual(sorted(json.loads(body)["executed_ids"]), sorted([GREEN_ITEM, GREEN_ITEM_2]))
+
+    def test_an_engine_refusal_becomes_422(self):
+        def boom(analysis, decisions, **kw):
+            raise ValueError("refused by the dispose gate")
+
+        h = ServerHarness(fixture=ANALYSIS, disposer=boom)
+        self.addCleanup(h.close)
+        status, body, _ = h.request(
+            "/api/dispose", method="POST", body={"item_ids": [RED_ITEM], "action": "trash"}
+        )
+        self.assertEqual(status, 422)
+        self.assertIn("refused by the dispose gate", json.loads(body)["error"])
+
+    def test_each_page_only_answers_its_own_endpoint(self):
+        status, _, _ = self.h.request(
+            "/api/apply", method="POST", body={"action_ids": [MOVE_ID], "overrides": [], "dry_run": True}
+        )
+        self.assertEqual(status, 404)
+        plan_page = ServerHarness()
+        self.addCleanup(plan_page.close)
+        status, _, _ = plan_page.request(
+            "/api/dispose", method="POST", body={"item_ids": [GREEN_ITEM], "action": "trash"}
+        )
+        self.assertEqual(status, 404)
+        self.assertEqual(plan_page.disposer.calls, [])
+
+    def test_delete_flag_reaches_the_engine(self):
+        h = ServerHarness(fixture=ANALYSIS, allow_permanent_delete=True)
+        self.addCleanup(h.close)
+        status, body, _ = h.request(
+            "/api/dispose", method="POST", body={"item_ids": [GREEN_ITEM], "action": "delete"}
+        )
+        self.assertEqual(status, 200, body)
+        self.assertIs(h.disposer.calls[0]["kw"]["allow_permanent_delete"], True)
+        self.assertEqual(json.loads(body)["results"][0]["status"], "deleted")
+
+
+class RevealTests(unittest.TestCase):
+    """Showing a folder is the one thing every colour is allowed."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.home = Path(self.tmp.name)
+        (self.home / "Library" / "Caches" / "pip").mkdir(parents=True)
+        self.h = ServerHarness(fixture=ANALYSIS, home=self.home)
+        self.addCleanup(self.h.close)
+
+    def test_a_path_inside_home_is_shown(self):
+        status, body, _ = self.h.request(
+            "/api/reveal", method="POST", body={"path_portable": "$HOME/Library/Caches/pip"}
+        )
+        self.assertEqual(status, 200, body)
+        self.assertIs(json.loads(body)["ok"], True)
+        self.assertEqual(self.h.revealed, [str(self.home / "Library" / "Caches" / "pip")])
+
+    def test_a_path_outside_home_is_refused(self):
+        for portable in ("/etc", "$HOME/../elsewhere", "/System/Library"):
+            status, body, _ = self.h.request(
+                "/api/reveal", method="POST", body={"path_portable": portable}
+            )
+            self.assertEqual(status, 403, portable)
+            self.assertIn("outside", json.loads(body)["error"])
+        self.assertEqual(self.h.revealed, [])
+
+    def test_a_path_that_is_gone_is_a_404_not_a_launch(self):
+        status, _, _ = self.h.request(
+            "/api/reveal", method="POST", body={"path_portable": "$HOME/Library/Caches/nothing-here"}
+        )
+        self.assertEqual(status, 404)
+        self.assertEqual(self.h.revealed, [])
+
+    def test_reveal_needs_the_token_and_a_string(self):
+        status, _, _ = self.h.request(
+            "/api/reveal", method="POST", body={"path_portable": "$HOME/Library"}, token=False
+        )
+        self.assertEqual(status, 401)
+        status, _, _ = self.h.request("/api/reveal", method="POST", body={"path_portable": ""})
+        self.assertEqual(status, 400)
+        self.assertEqual(self.h.revealed, [])
+
+    def test_the_plan_page_reveals_too(self):
+        plan_page = ServerHarness()
+        self.addCleanup(plan_page.close)
+        status, _, _ = plan_page.request(
+            "/api/reveal", method="POST", body={"path_portable": "$HOME/Downloads/report.pdf"}
+        )
+        # the fixture's home does not exist on this machine, so it stops at 404
+        # rather than at the boundary check
+        self.assertEqual(status, 404)
+        self.assertEqual(plan_page.revealed, [])
+
+
+class OneRendererTests(unittest.TestCase):
+    """``review --serve`` and ``build_report.py --mode serve`` are the same page."""
+
+    def test_the_server_renders_through_build_report_itself(self):
+        import build_report
+
+        from carl_file_organizer import render as render_module
+
+        for fixture in (FIXTURE, ANALYSIS):
+            data = json.loads(fixture.read_text(encoding="utf-8"))
+            direct = build_report.render(data, mode="serve", token="a-token")
+            through = render_module.render(data, mode="serve", token="a-token")
+            self.assertEqual(direct, through, str(fixture))
+
+    def test_the_served_page_is_that_renderer_with_the_live_token(self):
+        import build_report
+
+        h = ServerHarness(fixture=ANALYSIS)
+        self.addCleanup(h.close)
+        status, body, _ = h.request("/?t=" + h.token, token=False)
+        self.assertEqual(status, 200)
+        data = json.loads(ANALYSIS.read_text(encoding="utf-8"))
+        data["capabilities"] = dict(data.get("capabilities") or {})
+        data["capabilities"]["permanent_delete_enabled"] = False
+        data["executed_ids"] = []
+        expected = build_report.render(
+            data, mode="serve", token=h.token, kind="storage", home=Path.home()
+        )
+        self.assertEqual(body, expected)
 
 
 class BuildServerTests(unittest.TestCase):

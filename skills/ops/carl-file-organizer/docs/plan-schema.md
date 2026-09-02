@@ -149,7 +149,7 @@ lsof 报出来的 Spotlight 一类只读守护进程（`mdworker`、`quicklookd`
 | `member_labels` | subject_id → 给人看的名字。 |
 | `reason` | `{zh, en}`。 |
 | `options` | 选项数组，见下。 |
-| `color` | 恒为 `yellow`。组是一道选择题，不管选哪个都会有东西被处置，这就是需要人看一眼的定义。 |
+| `color` | `regenerable` 组是 `green`，`pair` 与 `duplicate` 组是 `yellow`。组是一道选择题，不管选哪个都会有东西被处置，所以默认要人看一眼；构建产物是例外，它的两个选项本身都是绿的，问一遍就够了，不用再要一次确认。 |
 | `default_choice` | 单选框的默认位置。压缩包配对默认留目录；名字像副本但内容没比对过的重复组默认都保留。 |
 | `potential_bytes` | 采纳默认选项能腾出的字节数。 |
 

@@ -4,13 +4,19 @@ Every subcommand resolves to ``<module>.run(args)``.  No business logic lives
 here, so the subcommands and their flag names are frozen from day zero and each
 work package only fills in its own module.
 
-    plan       -> carl_file_organizer.planner.run
-    build      -> carl_file_organizer.notes.run
-    apply      -> carl_file_organizer.executor.run
-    review     -> carl_file_organizer.server.run
-    undo       -> carl_file_organizer.undo.run
-    status     -> carl_file_organizer.status.run
-    clear-tags -> carl_file_organizer.tags.run
+    plan           -> carl_file_organizer.planner.run
+    build          -> carl_file_organizer.notes.run
+    apply          -> carl_file_organizer.executor.run
+    review         -> carl_file_organizer.server.run
+    undo           -> carl_file_organizer.undo.run
+    status         -> carl_file_organizer.status.run
+    clear-tags     -> carl_file_organizer.tags.run
+    storage-report -> carl_file_organizer.render.run
+    dispose        -> carl_file_organizer.dispose.run
+
+The last two belong to the second entrance, the whole-machine inventory:
+``storage-report`` turns an analysis.json into the same three-colour page (and
+optionally serves it), ``dispose`` acts on the decisions that page exports.
 
 A module that has no ``run`` yet produces a one-line message and exit code 2,
 never an ImportError traceback.
@@ -37,6 +43,8 @@ COMMAND_MODULES = {
     "undo": "undo",
     "status": "status",
     "clear-tags": "tags",
+    "storage-report": "render",
+    "dispose": "dispose",
 }
 
 
@@ -138,6 +146,45 @@ def build_parser() -> argparse.ArgumentParser:
     )
     status.add_argument("--lang", choices=["zh", "en"], default=None)
     status.add_argument("--allow-outside-home", action="store_true")
+
+    # -- storage-report -----------------------------------------------------
+    storage_report = subparsers.add_parser(
+        "storage-report", help="render the whole-machine page from an analysis.json"
+    )
+    storage_report.add_argument("analysis", type=Path, help="analysis.json written by the agent")
+    storage_report.add_argument(
+        "--notes",
+        type=Path,
+        default=None,
+        help="notes.json laid over the analysis before rendering",
+    )
+    storage_report.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=None,
+        help="where to write report.html (default: next to the analysis)",
+    )
+    storage_report.add_argument(
+        "--serve",
+        action="store_true",
+        help="serve the page on 127.0.0.1 with one-click disposal instead of writing a file",
+    )
+    storage_report.add_argument("--port", type=int, default=0)
+    storage_report.add_argument("--no-open", dest="open_browser", action="store_false")
+    storage_report.add_argument("--allow-permanent-delete", action="store_true")
+    storage_report.add_argument("--lang", choices=["zh", "en"], default=None)
+    storage_report.set_defaults(open_browser=True)
+
+    # -- dispose ------------------------------------------------------------
+    dispose = subparsers.add_parser(
+        "dispose", help="act on the decisions exported from the whole-machine page"
+    )
+    dispose.add_argument("analysis", type=Path, help="the analysis.json those decisions came from")
+    dispose.add_argument("decisions", type=Path, help="carl-file-organizer-decisions.json")
+    dispose.add_argument("--dry-run", action="store_true")
+    dispose.add_argument("--allow-permanent-delete", action="store_true")
+    dispose.add_argument("--lang", choices=["zh", "en"], default=None)
 
     # -- clear-tags ---------------------------------------------------------
     clear = subparsers.add_parser("clear-tags", help="remove the temporary Finder tag")

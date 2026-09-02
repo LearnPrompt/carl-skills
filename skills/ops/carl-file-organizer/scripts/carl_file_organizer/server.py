@@ -1,4 +1,11 @@
-"""``review --serve``: the review page on 127.0.0.1 with one-click apply.
+"""``review --serve`` and ``storage-report --serve``: the page on 127.0.0.1.
+
+One server, two pages.  Which one it is comes from the file it was handed: a
+plan.json turns into the tidy-up page and answers ``/api/apply``, an
+analysis.json turns into the whole-machine page and answers ``/api/dispose``.
+Everything else -- the page itself, the token, the checks, the reveal endpoint,
+the shutdown -- is the same on both, because there is one template and one set
+of rules about what may leave this process.
 
 Security model (see docs/review-page.md):
 
@@ -8,10 +15,11 @@ Security model (see docs/review-page.md):
 * every request checks the token with ``hmac.compare_digest``, the ``Host``
   header, and for POST the same-origin ``Origin`` header, JSON content type
   and a 1 MiB body cap;
-* the server validates nothing about the plan itself.  ``/api/apply`` copies
-  the plan, fills ``approved_action_ids`` / ``overrides`` and calls the very
-  same ``apply_approved_plan`` the CLI uses, so every safety check lives in
-  one place;
+* the server validates nothing about the plan or the analysis itself.
+  ``/api/apply`` fills ``approved_action_ids`` and calls the very same
+  ``apply_approved_plan`` the CLI uses; ``/api/dispose`` builds a decisions
+  document and calls the very same ``dispose.apply_decisions``.  Every safety
+  check lives in one place, and it is not this file;
 * single-threaded ``HTTPServer`` plus a lock: executions never overlap.
 """
 
@@ -20,6 +28,7 @@ from __future__ import annotations
 import copy
 import hmac
 import json
+import os
 import secrets
 import sys
 import threading
@@ -31,7 +40,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qs, urlsplit
 
 from . import paths
-from .report import render_report
+from . import render as render_module
 
 MAX_BODY_BYTES = 1024 * 1024
 DRAIN_LIMIT_BYTES = 8 * MAX_BODY_BYTES
@@ -39,7 +48,12 @@ TOKEN_HEADER = "X-GN-Token"
 EXECUTED_STATUSES = ("moved", "trashed", "deleted")
 JSON_TYPE = "application/json"
 
+ORGANIZE = "organize"
+STORAGE = "storage"
+
 ApplyFn = Callable[..., Any]
+DisposeFn = Callable[..., Any]
+RevealFn = Callable[..., bool]
 
 
 class ServerError(RuntimeError):
@@ -56,7 +70,25 @@ def _default_apply_fn() -> ApplyFn:
     return apply_approved_plan
 
 
+def _default_dispose_fn() -> DisposeFn:
+    try:
+        from .dispose import apply_decisions
+    except ImportError as error:  # pragma: no cover - depends on the dispose module
+        raise ServerError(
+            "dispose.apply_decisions is unavailable ({0}); the storage page needs it".format(error)
+        ) from error
+    return apply_decisions
+
+
+def _default_reveal_fn() -> RevealFn:
+    from .opener import reveal
+
+    return reveal
+
+
 def _load_plan(plan_path: Union[str, Path]) -> Dict[str, Any]:
+    """Read the plan.json or analysis.json this run is about."""
+
     path = Path(plan_path)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -69,6 +101,15 @@ def _load_plan(plan_path: Union[str, Path]) -> Dict[str, Any]:
     return data
 
 
+def detect_kind(data: Dict[str, Any]) -> str:
+    """Which page this document asks for, or a refusal saying it asks for neither."""
+
+    try:
+        return render_module.detect_kind(data)
+    except render_module.RenderError as error:
+        raise ServerError(str(error)) from error
+
+
 class ReviewState:
     """Everything the handler needs, shared through ``server.gn_state``."""
 
@@ -79,17 +120,36 @@ class ReviewState:
         token: str,
         allow_permanent_delete: bool,
         apply_fn: Optional[ApplyFn],
+        kind: Optional[str] = None,
+        home: Optional[Path] = None,
+        managed_dir: Optional[Path] = None,
+        dispose_fn: Optional[DisposeFn] = None,
+        reveal_fn: Optional[RevealFn] = None,
+        notes: Optional[Dict[str, Any]] = None,
+        lang: Optional[str] = None,
     ) -> None:
         self.plan = plan
+        self.kind = kind or detect_kind(plan)
         self.token = token
         self.allow_permanent_delete = allow_permanent_delete
         self._apply_fn = apply_fn
+        self._dispose_fn = dispose_fn
+        self._reveal_fn = reveal_fn
+        self.notes = notes
+        self.lang = lang
         self.lock = threading.Lock()
         self.executed_ids: List[str] = []
         self.port = 0
+        self.home = Path(home) if home is not None else self._home_of(plan)
+        self.managed_dir = Path(managed_dir) if managed_dir is not None else None
         caps = dict(plan.get("capabilities") or {})
         caps["permanent_delete_enabled"] = bool(allow_permanent_delete)
         self.plan["capabilities"] = caps
+
+    def _home_of(self, plan: Dict[str, Any]) -> Path:
+        if self.kind == ORGANIZE:
+            return Path(paths.plan_home(plan))
+        return Path.home()
 
     @property
     def apply_fn(self) -> ApplyFn:
@@ -97,17 +157,50 @@ class ReviewState:
             self._apply_fn = _default_apply_fn()
         return self._apply_fn
 
+    @property
+    def dispose_fn(self) -> DisposeFn:
+        if self._dispose_fn is None:
+            self._dispose_fn = _default_dispose_fn()
+        return self._dispose_fn
+
+    @property
+    def reveal_fn(self) -> RevealFn:
+        if self._reveal_fn is None:
+            self._reveal_fn = _default_reveal_fn()
+        return self._reveal_fn
+
     def public_plan(self) -> Dict[str, Any]:
-        """What leaves this process: the plan with every absolute path removed.
+        """What leaves this process: the document with every absolute path removed.
 
         Only the page and ``/api/plan`` get this.  ``self.plan`` keeps its
-        absolute paths and is what ``/api/apply`` hands to the executor, so
-        stripping here costs the apply path nothing.
+        absolute paths and is what ``/api/apply`` and ``/api/dispose`` hand to
+        the engine, so stripping here costs the acting path nothing.
         """
 
-        data = paths.strip_absolute(self.plan)
+        if self.kind == STORAGE:
+            data = render_module.sanitize(self.plan, self.home)
+        else:
+            data = paths.strip_absolute(self.plan)
         data["executed_ids"] = list(self.executed_ids)
         return data
+
+    def page(self) -> str:
+        """The rendered page, from the same renderer ``build_report.py`` uses."""
+
+        data = copy.deepcopy(self.plan)
+        data["executed_ids"] = list(self.executed_ids)
+        try:
+            return render_module.render(
+                data,
+                mode="serve",
+                token=self.token,
+                lang=self.lang,
+                notes=self.notes,
+                kind=self.kind,
+                home=self.home,
+            )
+        except render_module.RenderError as error:
+            raise ServerError(str(error)) from error
 
     def kinds_for(self, action_ids: List[str]) -> Dict[str, str]:
         index = {str(a.get("id")): str(a.get("kind", "")) for a in self.plan.get("actions") or [] if isinstance(a, dict)}
@@ -136,7 +229,7 @@ def _normalize_results(report: Any) -> List[Dict[str, Any]]:
 
 
 class ReviewHandler(BaseHTTPRequestHandler):
-    server_version = "CarlFileOrganizerReview/0.2"
+    server_version = "CarlFileOrganizerReview/0.3"
     sys_version = ""
     protocol_version = "HTTP/1.0"
 
@@ -206,7 +299,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 self._send_json(401, {"error": "missing or wrong token"})
                 return
             with self.state.lock:
-                html = render_report(self.state.public_plan(), mode="serve", token=self.state.token)
+                html = self.state.page()
             self._send_html(html)
             return
         if not self._token_ok(self.headers.get(TOKEN_HEADER)):
@@ -262,11 +355,20 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 break
             remaining -= len(chunk)
 
+    def _endpoints(self) -> Dict[str, Callable[[Dict[str, Any]], None]]:
+        table: Dict[str, Callable[[Dict[str, Any]], None]] = {"/api/reveal": self._reveal}
+        if self.state.kind == ORGANIZE:
+            table["/api/apply"] = self._apply
+        else:
+            table["/api/dispose"] = self._dispose
+        return table
+
     def do_POST(self) -> None:  # noqa: N802 - stdlib naming
         if not self._guard_common():
             return
         path = urlsplit(self.path).path
-        if path not in ("/api/apply", "/api/shutdown"):
+        table = self._endpoints()
+        if path not in table and path != "/api/shutdown":
             # keep the same checks for unknown paths so probing reveals nothing
             if self._read_json_body() is not None:
                 self._send_json(404, {"error": "not found"})
@@ -278,7 +380,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"ok": True, "shutting_down": True})
             threading.Thread(target=self.server.shutdown, daemon=True).start()
             return
-        self._apply(body)
+        table[path](body)
+
+    # -- the tidy-up page ---------------------------------------------------
 
     def _apply(self, body: Dict[str, Any]) -> None:
         action_ids = body.get("action_ids")
@@ -344,6 +448,101 @@ class ReviewHandler(BaseHTTPRequestHandler):
                     payload[key] = str(value)
             self._send_json(200, payload)
 
+    # -- the whole-machine page ---------------------------------------------
+
+    def _dispose(self, body: Dict[str, Any]) -> None:
+        item_ids = body.get("item_ids")
+        action = body.get("action", "trash")
+        if not isinstance(item_ids, list) or not all(isinstance(i, str) for i in item_ids):
+            self._send_json(400, {"error": "item_ids must be a list of strings"})
+            return
+        if not item_ids:
+            self._send_json(400, {"error": "item_ids is empty"})
+            return
+        if action not in ("trash", "delete"):
+            self._send_json(400, {"error": 'action must be "trash" or "delete"'})
+            return
+        state = self.state
+        with state.lock:
+            if action == "delete" and not state.allow_permanent_delete:
+                self._send_json(
+                    403,
+                    {
+                        "error": "permanent delete is off; restart with --allow-permanent-delete",
+                        "item_ids": sorted(item_ids),
+                    },
+                )
+                return
+            repeated = sorted(set(item_ids) & set(state.executed_ids))
+            if repeated:
+                self._send_json(409, {"error": "already executed", "item_ids": repeated})
+                return
+            decisions = {
+                "schema": "carl-file-organizer/storage-decisions",
+                "schema_version": 1,
+                "item_ids": list(item_ids),
+                "actions": {i: action for i in item_ids},
+                "decided_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
+                "decided_by": "serve",
+            }
+            try:
+                report = state.dispose_fn(
+                    copy.deepcopy(state.plan),
+                    decisions,
+                    dry_run=False,
+                    allow_permanent_delete=state.allow_permanent_delete,
+                    home=state.home,
+                    managed_dir=state.managed_dir,
+                )
+            except Exception as error:  # noqa: BLE001 - a refusal becomes one JSON line
+                self._send_json(422, {"error": "{0}: {1}".format(type(error).__name__, error)})
+                return
+            results = _normalize_results(report)
+            newly_done = []
+            for item in results:
+                if item.get("status") in EXECUTED_STATUSES and item.get("item_id"):
+                    iid = str(item["item_id"])
+                    if iid not in state.executed_ids:
+                        state.executed_ids.append(iid)
+                        newly_done.append(iid)
+            payload: Dict[str, Any] = {
+                "ok": True,
+                "dry_run": False,
+                "action": action,
+                "results": results,
+                "executed_ids": list(state.executed_ids),
+                "newly_executed": newly_done,
+            }
+            for key in ("run_id", "manifest", "audit"):
+                value = getattr(report, key, None)
+                if value is not None:
+                    payload[key] = str(value)
+            self._send_json(200, payload)
+
+    # -- both pages ---------------------------------------------------------
+
+    def _reveal(self, body: Dict[str, Any]) -> None:
+        """Put a folder on screen.  Reads nothing, writes nothing, moves nothing."""
+
+        portable = body.get("path_portable")
+        if not isinstance(portable, str) or not portable.strip():
+            self._send_json(400, {"error": "path_portable must be a non-empty string"})
+            return
+        state = self.state
+        target = paths.expand_portable(portable, state.home)
+        if not paths.inside_root(target, state.home):
+            self._send_json(403, {"error": "that path is outside the home directory"})
+            return
+        if not os.path.lexists(str(target)):
+            self._send_json(404, {"error": "that path is not there any more"})
+            return
+        try:
+            shown = bool(state.reveal_fn(target))
+        except Exception as error:  # noqa: BLE001 - a file manager is never worth a 500
+            self._send_json(200, {"ok": False, "error": str(error)})
+            return
+        self._send_json(200, {"ok": shown, "path_portable": portable})
+
 
 # --------------------------------------------------------------------------
 # public API
@@ -357,14 +556,29 @@ def build_server(
     port: int = 0,
     allow_permanent_delete: bool = False,
     apply_fn: Optional[ApplyFn] = None,
+    dispose_fn: Optional[DisposeFn] = None,
+    reveal_fn: Optional[RevealFn] = None,
     token: Optional[str] = None,
+    home: Optional[Path] = None,
+    managed_dir: Optional[Path] = None,
+    notes: Optional[Dict[str, Any]] = None,
+    lang: Optional[str] = None,
 ) -> Tuple[HTTPServer, str]:
     """Prepare (but do not run) the review server.  Returns ``(server, token)``."""
 
     data = _load_plan(plan) if not isinstance(plan, dict) else copy.deepcopy(plan)
     token = token or secrets.token_urlsafe(32)
     state = ReviewState(
-        data, token=token, allow_permanent_delete=allow_permanent_delete, apply_fn=apply_fn
+        data,
+        token=token,
+        allow_permanent_delete=allow_permanent_delete,
+        apply_fn=apply_fn,
+        dispose_fn=dispose_fn,
+        reveal_fn=reveal_fn,
+        home=home,
+        managed_dir=managed_dir,
+        notes=notes,
+        lang=lang,
     )
     server = HTTPServer((host, port), ReviewHandler)
     state.port = server.server_address[1]
@@ -380,6 +594,11 @@ def serve_review(
     allow_permanent_delete: bool = False,
     open_browser: bool = True,
     apply_fn: Optional[ApplyFn] = None,
+    dispose_fn: Optional[DisposeFn] = None,
+    home: Optional[Path] = None,
+    managed_dir: Optional[Path] = None,
+    notes: Optional[Dict[str, Any]] = None,
+    lang: Optional[str] = None,
 ) -> int:
     """Run the review server until Ctrl-C or ``POST /api/shutdown``."""
 
@@ -389,13 +608,23 @@ def serve_review(
         port=port,
         allow_permanent_delete=allow_permanent_delete,
         apply_fn=apply_fn,
+        dispose_fn=dispose_fn,
+        home=home,
+        managed_dir=managed_dir,
+        notes=notes,
+        lang=lang,
     )
-    if apply_fn is None:
-        # fail early with a clear line instead of a 422 on the first click
-        server.gn_state.apply_fn  # type: ignore[attr-defined]  # noqa: B018
+    state = server.gn_state  # type: ignore[attr-defined]
+    if state.kind == ORGANIZE:
+        if apply_fn is None:
+            # fail early with a clear line instead of a 422 on the first click
+            state.apply_fn  # noqa: B018
+    elif dispose_fn is None:
+        state.dispose_fn  # noqa: B018
     bound_port = server.server_address[1]
     url = "http://127.0.0.1:{0}/?t={1}".format(bound_port, token)
     sys.stderr.write("review page (token inside, only on this line): {0}\n".format(url))
+    sys.stderr.write("page kind: {0}\n".format(state.kind))
     if allow_permanent_delete:
         sys.stderr.write("permanent delete is ENABLED for this session\n")
     sys.stderr.write("press Ctrl-C to stop\n")

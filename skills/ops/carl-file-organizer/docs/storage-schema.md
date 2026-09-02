@@ -256,3 +256,37 @@ Agent 读完 `storage-scan.json` 之后写这一份。**每一条的路径都必
 | 🔴 red | 只有打开所在位置。不提供任何删除接口 |
 
 不管哪一色，每次点击都要浏览器二次确认，执行前复查占用，执行后写 manifest 和 audit。执行器只认 `analysis.json` 里算出来的 `id` 和白名单路径，报告页面传什么它都不认。
+
+---
+
+## 处置这一步落在哪儿
+
+`scripts/carl_file_organizer/dispose.py` 是盘点这条线上唯一会动文件的模块，入口有两个：命令行 `organize.py dispose <analysis.json> <decisions.json>`，和报告页 serve 模式下的 `POST /api/dispose`。两个入口走同一个函数，所以门禁只有一套。
+
+`decisions.json` 就是报告页 static 模式导出的那份：
+
+```jsonc
+{
+  "schema": "carl-file-organizer/storage-decisions",
+  "schema_version": 1,
+  "item_ids": ["playwright-cache", "pip-cache"],
+  "actions": { "playwright-cache": "trash", "pip-cache": "trash" }
+}
+```
+
+### 四道门，按顺序
+
+1. **对账与颜色**：id 必须在 `analysis.json` 里；红色一律拒绝；黄色只能 `trash`；绿色的 `delete` 还要 `--allow-permanent-delete`；`scanned` 为 false 的系统提示条目不参与任何动作；`trash_paths` 为空就没有可动的路径。
+2. **路径规矩**：只认 `trash_paths` 里的路径。每条展开后 realpath 必须落在家目录内，路径里不能有 symlink 段，不能命中禁刀区词表，也不能是家目录本身或它的一级子目录 —— 最后这条就是「不许图省事写父目录」的机器版。一条不合格，整个条目拒绝，不做部分执行。同一批里重复的路径只动一次。
+3. **动手前复查**：路径还在不在，以及有没有别的进程占着（`guard.open_handles`）。占着就拒绝；这台机器答不上来（没有 lsof）按 `unknown` 放行，但写进结果和 audit。
+4. **执行**：`trash` 走 `trash.move_to_trash`，`delete` 走 `os.unlink` / `shutil.rmtree`。废纸篓失败就是失败，绝不退回去永久删除。第一条 failed 之后这一批剩下的全部 skipped。
+
+### 落盘
+
+产物都在 `$HOME/.carl-file-organizer/storage/`，跟整理那条线的托管目录分开，免得 `undo` 读到一堆它放不回去的记录。
+
+- `storage-removals-<时间戳>.tsv`：七列 `action_at status path size_kib_before reason restore_method error`。**动手之前先写一遍**，那时候每行都是 `PLANNED`；跑完再整份重写成终态。中途断电，盘上仍有一页纸说明当时准备动什么。
+- `audit.jsonl`：每条路径处置完立刻追加一行，这才是断点之后的权威。`kind` 用 `trash` / `delete` 两个词，跟整理那条线一致，所以误用 `undo` 读它只会得到一句「去废纸篓里放回原处」，不会炸。
+- `--dry-run` 一个字节都不写，也不建目录。
+
+结果每条是 `{item_id, path, action, color, status, detail, size_bytes, open_check}`，`status` 取 `trashed / deleted / dry-run / skipped / refused / failed`，报告页按 `item_id` 回写状态。

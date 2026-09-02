@@ -18,8 +18,15 @@ Usage (run it with any Python 3.9 or newer; there are no dependencies):
     python3 organize.py clear-tags ~/Downloads
     python3 organize.py --version
 
-``plan`` only reads.  ``build`` only rewrites the plan's prose.  ``apply`` is the
-one that moves anything, and it moves only the ids you approved.
+The second entrance, the whole-machine inventory, shares the same engine:
+
+    python3 storage_scan.py --out storage-scan.json      # read only
+    python3 organize.py storage-report <analysis.json> [--serve]
+    python3 organize.py dispose <analysis.json> <decisions.json> --dry-run
+
+``plan``, ``status`` and ``storage-report`` only read.  ``build`` only rewrites
+the plan's prose.  ``apply`` and ``dispose`` are the two that touch anything, and
+they touch only the ids you approved.
 """
 
 import os
