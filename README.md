@@ -45,7 +45,7 @@
 | ✍️ [**x-article-publisher**](#x-article-publisher) | [![](https://img.shields.io/github/stars/LearnPrompt/x-article-publisher-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/x-article-publisher-skill) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
 | 🔁 [**skill-sync**](#skill-sync) | [![](https://img.shields.io/github/stars/LearnPrompt/skill-sync?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
 | 🧭 [**Skill 瘦身**](#skill-slimming) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-skills) | 把Agent能力整理成全局、项目和按需触发 | [collection-native](./skills/ops/skill-slimming/SKILL.md) |
-| 🗂️ [**文件整理 carl-file-organizer**](#carl-file-organizer) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-file-organizer?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-file-organizer) | 先看后动的下载目录整理器，只读扫出方案，网页勾选批准才移动，删除默认进废纸篓 | [canonical](https://github.com/LearnPrompt/carl-file-organizer) |
+| 🗂️ [**文件整理 carl-file-organizer**](#carl-file-organizer) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-skills) | 先看后动的文件整理与磁盘盘点，只读扫出方案，三色分级，网页上点头才动 | [collection-native](./skills/ops/carl-file-organizer/SKILL.md) |
 | 🏮 [**阿福 afu**](#afu-llm-todo) | [![](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/afu-llm-todo) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
 | 📜 [**蔡伦 cailun**](#cailun) | [![](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/cailun-skill) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
 | ⛰️ [**愚公 yugong**](#loop-engineering) | [![](https://img.shields.io/github/stars/LearnPrompt/loop-engineering?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/loop-engineering) | Loop工程方法论，把模糊目标改造成带验证门的自动循环 | [canonical](https://github.com/LearnPrompt/loop-engineering) |
@@ -65,7 +65,7 @@ npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
 
 这条命令会读取仓库目录来发现Skill，但只把`skill-slimming`这一个完整目录安装到Agent，不会把Carl Skills里的其他Skill一起启用。
 
-Skill 瘦身包含本地复审网页、状态服务和参考合同，不能只下载raw `SKILL.md`。因此它暂不支持Hermes的单文件raw安装；否则能看到提示词，却缺少实际运行层。
+Skill 瘦身包含本地复审网页、状态服务和参考合同，不能只下载raw `SKILL.md`。因此它暂不支持Hermes的单文件raw安装；否则能看到提示词，却缺少实际运行层。文件整理carl-file-organizer也是同一套装法，把`--skill`换成`carl-file-organizer`即可。
 
 ### 装这个目录里的全部可安装skill
 
@@ -495,28 +495,40 @@ npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
 
 ### 🗂️ 文件整理 carl-file-organizer
 
-> *"先站好队，再决定谁走，删谁都要你点头。"*
+> *整理文件夹和清磁盘这两件事，过去靠忍，或者靠一个看不懂你文件的软件，现在跟Agent说一句就够了。*
 
-它是一个零依赖的Python命令行工具，专门整理下载目录一类越堆越乱的文件夹。plan阶段只读扫描，给出一份整理方案；方案要在网页上逐条勾选批准，apply阶段才真正移动文件。目录按编号分区，00_收件箱、10_工作区、20_知识库、60_敏感信息、90_归档，中英文目录名都能用。
+随口跟Agent说一句「收拾一下Downloads」或者「磁盘满了」，它先只读扫一遍，再打开一份网页报告。整理页上看目录多乱、每个文件往哪走、压缩包和重复副本怎么配对；盘点页上看磁盘去哪了、最大的几项、清理优先级。每一项都写着这是什么、为什么这么判、动了会怎样，你在页面上勾、选、点，动作前都有二次确认，做完能一键撤回。
 
-判断一份文件该去哪，看的是静置期、敏感命名（只看名字不读内容）、成对压缩包、重复副本、可再生产物这些线索。删除动作默认进废纸篓，要永久删除得显式开关打开。真正动手前会先查一遍进程占用和配置引用，动完的每一步都能undo，Finder标签会打上「文件移动」方便复核。
+传统整理器按扩展名把文件搬走，回头想找一份合同却不知道去了哪；清理软件扫到几个G的目录只写一句用户缓存可删，你不知道里面装的是什么，也不知道删完哪些网站要重新登录。这个skill分两层，脚本先把大小、静置期、压缩包配对、重复副本、进程占用这些能用规则说清的判断做完，Agent再看一眼目录，把每一项翻译成人话。方案先给你看，你点头才动，删除默认进废纸篓，移动过的能原路放回。
+
+**三色分级是核心**
+
+| 颜色 | 能按什么 |
+|---|---|
+| 🟢 放心归位 / 可清 | 勾上就走，永久删除要你自己额外开开关 |
+| 🟡 你看一眼 | 只有打开所在位置和移到废纸篓，都可逆 |
+| 🔴 别动 | 只解释为什么不能动，最多打开所在位置 |
 
 **适合**
 
-- 下载目录已经乱成泥石流
+- 下载目录已经乱成泥石流，或者磁盘经常报警
 - 想让Agent帮忙整理，但不放心它直接删东西
-- 想给每一次整理留一份可审计的记录
+- 想给每一次整理和盘点留一份可审计的记录
 
 **不适合**
 
 - 想要全自动、无人值守地清理
-- 想清系统缓存和大盘空间，那不是它管的事
-- Windows用户（目前macOS功能齐全，Linux只有基本功能）
+- 只想清系统缓存和大盘空间，那不是它管的事
+- Windows第一次用留个心眼，代码测试过但没在真机上磨过，建议先只读看报告
 
-[![Repo](https://img.shields.io/badge/GitHub-carl--file--organizer-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-file-organizer)
-[![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/carl-file-organizer/main/skills/carl-file-organizer/SKILL.md)
+```bash
+npx skills add LearnPrompt/carl-skills --skill carl-file-organizer -g
+```
 
-→ [canonical repo](https://github.com/LearnPrompt/carl-file-organizer) · [raw SKILL.md](https://raw.githubusercontent.com/LearnPrompt/carl-file-organizer/main/skills/carl-file-organizer/SKILL.md)
+[![Repo](https://img.shields.io/badge/GitHub-carl--skills-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-skills)
+[![Install](https://img.shields.io/badge/Install-skill_folder-10B981?style=flat-square)](./skills/ops/carl-file-organizer/SKILL.md)
+
+→ [SKILL.md](./skills/ops/carl-file-organizer/SKILL.md) · [skill 目录](./skills/ops/carl-file-organizer/)
 
 </td></tr>
 </table>
