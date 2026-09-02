@@ -273,9 +273,9 @@ Agent 读完 `storage-scan.json` 之后写这一份。**每一条的路径都必
 
 ## 处置这一步落在哪儿
 
-`scripts/carl_file_organizer/dispose.py` 是盘点这条线上唯一会动文件的模块，入口有两个：命令行 `organize.py dispose <analysis.json> <decisions.json>`，和报告页 serve 模式下的 `POST /api/dispose`。两个入口走同一个函数，所以门禁只有一套。
+`scripts/carl_file_organizer/dispose.py` 是盘点这条线上唯一会动文件的模块，入口有三个：合并报告导出的那份决定清单走 `organize.py apply`，分步命令走 `organize.py dispose <analysis.json> <decisions.json>`，报告页 serve 模式走 `POST /api/dispose`。三个入口最后都落到同一个函数，所以门禁只有一套。
 
-`decisions.json` 就是报告页 static 模式导出的那份：
+合并报告导出的是一份 `carl-file-organizer/decisions`，盘点这一半在它的 `storage` 段里，字段含义见 `review-page.md`。分步命令收的仍是旧的那份：
 
 ```jsonc
 {
@@ -295,7 +295,11 @@ Agent 读完 `storage-scan.json` 之后写这一份。**每一条的路径都必
 
 ### 落盘
 
-产物都在 `$HOME/.carl-file-organizer/storage/`，跟整理那条线的托管目录分开，免得 `undo` 读到一堆它放不回去的记录。
+走 `organize.py apply` 或 `report --serve` 时，产物落在整理那条线同一个管理目录里，也就是 `<目录>/00_下载目录管理/`（英文是 `00_File_Organizer`）。一次盘点、一份报告、一份批准文件，纸面记录跟着走，人只用记一个地方。`--managed-dir` 能改。
+
+分步命令 `organize.py dispose` 不知道该往哪儿放，退回老位置 `$HOME/.carl-file-organizer/storage/`。
+
+清单文件名带 `storage-removals-` 前缀，跟整理那条线的 `moves-` 不会撞。`audit.jsonl` 是两边共用的一份，这是有意的：盘点写进去的 `kind` 用的就是 `trash` / `delete` 这两个词，`undo` 读到它们只会说一句去废纸篓里放回原处，不会当成移动去还原。
 
 - `storage-removals-<时间戳>.tsv`：七列 `action_at status path size_kib_before reason restore_method error`。**动手之前先写一遍**，那时候每行都是 `PLANNED`；跑完再整份重写成终态。中途断电，盘上仍有一页纸说明当时准备动什么。
 - `audit.jsonl`：每条路径处置完立刻追加一行，这才是断点之后的权威。`kind` 用 `trash` / `delete` 两个词，跟整理那条线一致，所以误用 `undo` 读它只会得到一句「去废纸篓里放回原处」，不会炸。

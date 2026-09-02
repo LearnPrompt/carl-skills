@@ -450,6 +450,87 @@ class StoragePageTests(unittest.TestCase):
         self.assertEqual(json.loads(body)["results"][0]["status"], "deleted")
 
 
+class CombinedPageTests(unittest.TestCase):
+    """The envelope with both halves: one page, one token, two engines."""
+
+    def setUp(self):
+        self.combined = {
+            "plan": json.loads(FIXTURE.read_text(encoding="utf-8")),
+            "analysis": json.loads(ANALYSIS.read_text(encoding="utf-8")),
+        }
+        self.h = ServerHarness(fixture=self.combined)
+        self.addCleanup(self.h.close)
+
+    def test_the_page_is_the_combined_page_and_names_no_account(self):
+        status, body, _ = self.h.request("/?t=" + self.h.token, token=False)
+        self.assertEqual(status, 200)
+        self.assertIn('data-kind="combined"', body)
+        self.assertNotIn("/Users/", body)
+        self.assertNotIn(str(Path.home()), body)
+        self.assertIn("$HOME/Library/Caches/pip", body)
+        self.assertIn("$HOME/Downloads", body)
+
+    def test_api_plan_returns_both_stripped_halves(self):
+        status, body, _ = self.h.request("/api/plan")
+        self.assertEqual(status, 200)
+        data = json.loads(body)
+        self.assertNotIn("/Users/", body)
+        self.assertEqual(data["executed_ids"], [])
+        self.assertNotIn("source_root", data["plan"])
+        for action in data["plan"]["actions"]:
+            self.assertNotIn("source", action)
+        for item in data["analysis"]["items"]:
+            self.assertNotIn("path", item)
+
+    def test_apply_sends_the_tidy_up_half_to_the_executor(self):
+        payload = {"action_ids": [MOVE_ID, MOVE_ID_2], "overrides": [], "dry_run": False}
+        status, body, _ = self.h.request("/api/apply", method="POST", body=payload)
+        self.assertEqual(status, 200, body)
+        response = json.loads(body)
+        self.assertEqual(sorted(response["executed_ids"]), sorted([MOVE_ID, MOVE_ID_2]))
+        self.assertEqual([r["status"] for r in response["results"]], ["moved", "moved"])
+        call = self.h.stub.calls[0]
+        self.assertEqual(call["plan"]["approved_action_ids"], [MOVE_ID, MOVE_ID_2])
+        self.assertEqual(call["plan"]["schema_version"], 2)
+        self.assertNotIn("analysis", call["plan"])
+        self.assertTrue(str(call["plan"]["source_root"]).endswith("Downloads"))
+        self.assertEqual(self.h.disposer.calls, [])
+
+    def test_dispose_sends_the_whole_machine_half_to_the_dispose_gate(self):
+        payload = {"item_ids": [GREEN_ITEM], "action": "trash"}
+        status, body, _ = self.h.request("/api/dispose", method="POST", body=payload)
+        self.assertEqual(status, 200, body)
+        response = json.loads(body)
+        self.assertEqual(response["executed_ids"], [GREEN_ITEM])
+        self.assertEqual([r["status"] for r in response["results"]], ["trashed"])
+        call = self.h.disposer.calls[0]
+        self.assertEqual(call["analysis"]["schema"], "carl-file-organizer/storage-analysis")
+        self.assertNotIn("plan", call["analysis"])
+        self.assertEqual(call["decisions"]["item_ids"], [GREEN_ITEM])
+        self.assertIs(call["kw"]["allow_permanent_delete"], False)
+        self.assertEqual(self.h.stub.calls, [])
+
+    def test_both_halves_share_one_executed_list(self):
+        self.h.request("/api/apply", method="POST", body={"action_ids": [MOVE_ID], "overrides": [], "dry_run": False})
+        self.h.request("/api/dispose", method="POST", body={"item_ids": [GREEN_ITEM], "action": "trash"})
+        status, body, _ = self.h.request("/api/plan")
+        self.assertEqual(status, 200)
+        self.assertEqual(sorted(json.loads(body)["executed_ids"]), sorted([MOVE_ID, GREEN_ITEM]))
+
+    def test_permanent_delete_is_still_gated_on_both_sides(self):
+        status, body, _ = self.h.request(
+            "/api/apply", method="POST", body={"action_ids": [DELETE_ID], "overrides": [], "dry_run": False}
+        )
+        self.assertEqual(status, 403)
+        self.assertIn("allow-permanent-delete", json.loads(body)["error"])
+        status, _, _ = self.h.request(
+            "/api/dispose", method="POST", body={"item_ids": [GREEN_ITEM], "action": "delete"}
+        )
+        self.assertEqual(status, 403)
+        self.assertEqual(self.h.stub.calls, [])
+        self.assertEqual(self.h.disposer.calls, [])
+
+
 class RevealTests(unittest.TestCase):
     """Showing a folder is the one thing every colour is allowed."""
 

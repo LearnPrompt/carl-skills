@@ -196,6 +196,159 @@ class RenderBothKindsTests(unittest.TestCase):
         self.assertNotIn("/Users/", json.dumps(data, ensure_ascii=False))
 
 
+class CombinedPageTests(unittest.TestCase):
+    """One page, one entrance, one approval file: cleanup, moves and the after picture."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.plan = _load(PLAN)
+        cls.analysis = _load(ANALYSIS)
+        cls.both = {"plan": cls.plan, "analysis": cls.analysis}
+        cls.pages = {
+            "static": build_report.render(cls.both, mode="static"),
+            "serve": build_report.render(cls.both, mode="serve", token="test-token-value"),
+        }
+
+    def test_the_envelope_is_detected_and_stamped(self) -> None:
+        self.assertEqual(build_report.detect_kind(self.both), "combined")
+        self.assertEqual(build_report.detect_kind({"plan": self.plan}), "combined")
+        self.assertEqual(build_report.detect_kind({"analysis": self.analysis}), "combined")
+        # a bare plan or analysis still means what it always meant
+        self.assertEqual(build_report.detect_kind(self.plan), "organize")
+        self.assertEqual(build_report.detect_kind(self.analysis), "storage")
+        for mode, html in self.pages.items():
+            self.assertIn('<body data-kind="combined" data-mode="{0}"'.format(mode), html)
+            self.assertNotRegex(html, r"__REPORT_[A-Z]+__")
+
+    def test_both_halves_are_on_the_page(self) -> None:
+        html = self.pages["static"]
+        # the tidy-up half
+        self.assertIn("文档按类型归档到 20_知识库/文档资料/PDF", html)
+        self.assertIn('<select class="gn-dest"', html)
+        self.assertIn('data-group-id="pair-7d2c1e9f"', html)
+        # the whole-machine half
+        self.assertIn('<div class="disk">', html)
+        self.assertIn('class="card top5"', html)
+        self.assertIn("$HOME/Library/Caches/pip", html)
+        # one numbered list holding the analysis priorities and the colour advice
+        self.assertIn("先清 Xcode DerivedData", html)
+        self.assertEqual(re.findall(r'<section class="sec" data-color="(\w+)"', html), ["green", "yellow", "red"])
+
+    def test_each_band_says_cleanup_first_and_moves_second(self) -> None:
+        text = build_report.template_text()["zh"]
+        green = _section(self.pages["static"], "green")
+        heads = re.findall(r'<h3 class="subhead">([^<]*)<', green)
+        self.assertEqual(heads, [text["sub_clean"], text["sub_move"]])
+        clean_at = green.index(text["sub_clean"])
+        move_at = green.index(text["sub_move"])
+        self.assertLess(clean_at, move_at)
+
+    def test_one_half_alone_still_renders_with_one_block_fewer(self) -> None:
+        only_plan = build_report.render({"plan": self.plan}, mode="static")
+        self.assertIn('<body data-kind="combined"', only_plan)
+        self.assertNotIn('<div class="disk">', only_plan)
+        self.assertNotIn('class="card top5"', only_plan)
+        self.assertIn("文档按类型归档到 20_知识库/文档资料/PDF", only_plan)
+
+        only_analysis = build_report.render({"analysis": self.analysis}, mode="static")
+        self.assertIn('<body data-kind="combined"', only_analysis)
+        self.assertIn('<div class="disk">', only_analysis)
+        self.assertNotIn('<select class="gn-dest"', only_analysis)
+        for html in (only_plan, only_analysis):
+            self.assertEqual(re.findall(r'<section class="sec" data-color="(\w+)"', html), ["green", "yellow", "red"])
+
+    def test_the_after_picture_is_there_exactly_once(self) -> None:
+        for html in self.pages.values():
+            self.assertEqual(html.count('id="cfo-preview"'), 1)
+            self.assertEqual(html.count('id="gn-preview"'), 1)
+            self.assertIn("cfo:selection", html)
+        text = build_report.template_text()["zh"]
+        self.assertIn(text["preview_title"], self.pages["static"])
+        self.assertIn(text["preview_note"], self.pages["static"])
+        # and only on this page kind
+        self.assertNotIn('id="cfo-preview"', build_report.render(self.plan, mode="static"))
+
+    def test_the_selection_event_reaches_the_picture(self) -> None:
+        html = self.pages["static"]
+        self.assertIn("new CustomEvent('cfo:selection'", html)
+        self.assertIn('window.addEventListener("cfo:selection"', html)
+
+    def test_one_decisions_file_carries_both_halves(self) -> None:
+        html = self.pages["static"]
+        self.assertIn("carl-file-organizer-decisions.json", html)
+        self.assertIn("carl-file-organizer/decisions", html)
+        self.assertIn("approved_action_ids", html)
+        self.assertIn("item_ids", html)
+        # exactly one main button, and it exports the combined file
+        self.assertEqual(html.count('id="gn-main"'), 1)
+        self.assertIn("if (C.kind === 'combined')", html)
+        self.assertEqual(_embedded(html, "report-config")["kind"], "combined")
+
+    def test_serve_posts_to_both_engines(self) -> None:
+        html = self.pages["serve"]
+        self.assertIn("/api/apply", html)
+        self.assertIn("/api/dispose", html)
+        self.assertIn("/api/reveal", html)
+        self.assertIn(build_report.template_text()["zh"]["btn_apply_all"], html)
+        self.assertIn('id="gn-dry"', html)
+        self.assertIn("test-token-value", html)
+
+    def test_button_permissions_still_follow_the_colour(self) -> None:
+        for html in self.pages.values():
+            for card in _cards(html, "red"):
+                self.assertNotIn("<input", card)
+                self.assertNotIn("<select", card)
+                self.assertNotRegex(card, r'data-action="(trash|delete)"')
+            for card in _cards(html, "yellow"):
+                self.assertNotRegex(card, r'data-kind="delete"')
+                self.assertNotIn("needs-permanent", card)
+            red = _section(html, "red")
+            self.assertNotIn("gn-toggle-all", red)
+            self.assertNotIn("gn-section-run", red)
+            self.assertEqual(html.count('id="gn-permanent"'), 1)
+
+    def test_nothing_on_the_page_names_an_account(self) -> None:
+        for mode, html in self.pages.items():
+            bare = _strip_comments(html)
+            self.assertNotIn("/Users/", bare, mode)
+            self.assertNotIn("http://", bare, mode)
+            self.assertNotIn("https://", bare, mode)
+            self.assertNotIn("<link", bare)
+            self.assertNotIn("<script src", bare)
+        data = _embedded(self.pages["static"], "report-data")
+        self.assertNotIn("source_root", data["plan"])
+        self.assertNotIn("managed_dir", data["plan"])
+        for item in data["analysis"]["items"]:
+            self.assertNotIn("path", item)
+        self.assertNotIn("/Users/", json.dumps(data, ensure_ascii=False))
+
+    def test_notes_reach_both_halves(self) -> None:
+        notes = {
+            "folder_line": "先把绿的一键清掉，剩下的慢慢看。",
+            "actions": {"9c1f0a7b2d3e4f55": {"what": "一份季度报告 PDF", "why": "扩展名规则命中", "if_removed": "只是搬家"}},
+            "items": {"st-pip-cache": {"what": "pip 下载来的轮子缓存", "why": "装过的包留下的", "if_removed": "下次装包慢一点"}},
+        }
+        html = build_report.render(self.both, mode="static", notes=notes)
+        self.assertIn("一份季度报告 PDF", html)
+        self.assertIn("pip 下载来的轮子缓存", html)
+        self.assertIn("先把绿的一键清掉", html)
+
+    def test_the_english_page(self) -> None:
+        html = build_report.render(self.both, mode="static", lang="en")
+        self.assertIn('<html lang="en">', html)
+        body = re.sub(r'<script id="report-text".*?</script>', "", html, flags=re.S)
+        self.assertIn(build_report.template_text()["en"]["sub_clean"], body)
+        self.assertIn(build_report.template_text()["en"]["preview_title"], body)
+
+    def test_render_does_not_mutate_either_half(self) -> None:
+        plan = _load(PLAN)
+        analysis = _load(ANALYSIS)
+        build_report.render({"plan": plan, "analysis": analysis}, mode="static")
+        self.assertEqual(plan["source_root"], self.plan["source_root"])
+        self.assertEqual(analysis["items"][0]["id"], self.analysis["items"][0]["id"])
+        self.assertTrue(Path(plan["source_root"]).is_absolute())
+
+
 class NotesAndFallbackTests(unittest.TestCase):
     def setUp(self) -> None:
         self.plan = _load(PLAN)

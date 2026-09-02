@@ -6,21 +6,37 @@
 <meta name="referrer" content="no-referrer">
 <title>__REPORT_TITLE__</title>
 <!--
-  carl-file-organizer v0.3 report template. One file, two entrances
-  (data-kind="organize" | "storage"), two modes (data-mode="static" | "serve").
+  carl-file-organizer v0.3 report template. One file, three shapes
+  (data-kind="combined" | "organize" | "storage"), two modes
+  (data-mode="static" | "serve"). "combined" is the one people see: cleanup and
+  moves in the same three colour bands, the after picture below them, and one
+  button at the foot that exports or runs the lot.
   build_report.py fills the __REPORT_*__ slots; the page loads nothing from the
   network, so it works from file:// with zero requests.
-  All copy lives in the TEXT block right below (zh + en). WP4 rewrites it there.
+  All copy lives in the TEXT block right below (zh + en).
 -->
 <script id="report-text" type="application/json">
 {
   "zh": {
     "title_organize": "整理方案",
     "title_storage": "整机盘点",
+    "title_combined": "整理与清理",
     "heading_organize": "这个目录，先看再动",
     "heading_storage": "这台机器的空间，谁能清谁不能",
+    "heading_combined": "该清的、该搬的、搬完长什么样",
     "lede_organize": "扫描只读，一个文件都没动。页面上每一项都要你亲手勾选、亲手确认，它才会执行。",
     "lede_storage": "扫描只读，一个文件都没动。绿的可以清，黄的你看一眼再定，红的别动。",
+    "lede_combined": "扫描只读，一个文件都没动。清理和搬动写在同一页，勾完在底下一次点掉，最后那张图是搬完的样子。",
+    "cb_green": "放心做，勾上就走",
+    "cb_green_desc": "缓存和构建产物删了会自己长回来，规则明确的移动只改路径不改内容。",
+    "cb_yellow": "你看一眼再定",
+    "cb_yellow_desc": "里面可能有你的数据，或者去向还没定。这里每一步都能撤回。",
+    "cb_red": "别动",
+    "cb_red_desc": "禁刀区、系统核心、正被占用、被别处引用、还在静置期。只说为什么，不给按钮。",
+    "sub_clean": "清理",
+    "sub_move": "搬动",
+    "preview_title": "整理后长这样",
+    "preview_note": "橙的会搬，空心的留下，右边是本机上待清的。",
     "bar_dir": "目录",
     "bar_machine": "机器",
     "bar_time": "扫描时间",
@@ -127,12 +143,14 @@
     "nothing_selected": "还什么都没勾。",
     "exported_note": "批准文件已下载，把它交给 organize.py apply。",
     "exported_decisions": "决定清单已下载，把它交给 organize.py dispose。",
+    "exported_all": "决定清单已下载，把它交给 organize.py apply，先预演再执行。",
     "empty": "这一组是空的。",
     "footer_count": "已选 {moves} 项移动 · {trash} 项进废纸篓 · {delete} 项永久删除 · 预计释放 {bytes}",
     "footer_count_storage": "已选 {trash} 项进废纸篓 · {delete} 项永久删除 · 预计释放 {bytes}",
     "btn_export": "导出批准文件",
     "btn_export_decisions": "导出决定清单",
     "btn_apply": "执行已选",
+    "btn_apply_all": "执行全部已选",
     "btn_dry": "先预演",
     "btn_section": "执行本组已选",
     "btn_select_all": "本组全选",
@@ -200,10 +218,23 @@
   "en": {
     "title_organize": "Tidy-up plan",
     "title_storage": "Storage check",
+    "title_combined": "Clear out and tidy up",
     "heading_organize": "Look first, then move",
     "heading_storage": "What on this machine can go, and what cannot",
+    "heading_combined": "What to clear, what to move, and how it ends up",
     "lede_organize": "The scan was read-only and nothing has been touched. Every item on this page runs only after you tick it and confirm.",
     "lede_storage": "The scan was read-only and nothing has been touched. Green can go, yellow deserves a look, red stays.",
+    "lede_combined": "The scan was read-only and nothing has been touched. Cleanup and moves share one page, one button at the bottom runs the lot, and the picture at the end is what you get.",
+    "cb_green": "Safe to do, tick and go",
+    "cb_green_desc": "Caches and build output grow back on their own; clear-cut moves change the path, never the contents.",
+    "cb_yellow": "Have a look first",
+    "cb_yellow_desc": "May hold your own data, or the destination is not settled yet. Every step here can be undone.",
+    "cb_red": "Leave it",
+    "cb_red_desc": "No-go zone, system core, in use, referenced elsewhere, still settling. Explained only, no buttons.",
+    "sub_clean": "Clear out",
+    "sub_move": "Move",
+    "preview_title": "How it ends up",
+    "preview_note": "Filled dots move, hollow ones stay, and the right-hand side is what gets cleared off this machine.",
     "bar_dir": "Folder",
     "bar_machine": "Machine",
     "bar_time": "Scanned",
@@ -310,12 +341,14 @@
     "nothing_selected": "Nothing ticked yet.",
     "exported_note": "The approval file was downloaded. Hand it to organize.py apply.",
     "exported_decisions": "The decisions file was downloaded. Hand it to organize.py dispose.",
+    "exported_all": "The decisions file was downloaded. Hand it to organize.py apply, dry run first.",
     "empty": "This group is empty.",
     "footer_count": "{moves} moves · {trash} to Trash · {delete} permanent deletes · about {bytes} reclaimed",
     "footer_count_storage": "{trash} to Trash · {delete} permanent deletes · about {bytes} reclaimed",
     "btn_export": "Export approved plan",
     "btn_export_decisions": "Export decisions",
     "btn_apply": "Apply ticked items",
+    "btn_apply_all": "Run everything ticked",
     "btn_dry": "Dry run first",
     "btn_section": "Apply this group",
     "btn_select_all": "Select all here",
@@ -483,6 +516,15 @@ td.c{width:24px;padding-right:0}
 .sec[data-color=yellow] .sec-head h2 .dot{background:var(--yellow)}
 .sec[data-color=red] .sec-head h2 .dot{background:var(--red)}
 .empty{padding:16px 24px;margin:0;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+.subhead{margin:18px 0 6px;padding:0 4px}
+.subhead:first-child{margin-top:4px}
+.subhead .n{margin-left:8px;font-weight:500;letter-spacing:0;font-variant-numeric:tabular-nums}
+
+/* combined page: the after picture */
+.preview-wrap{margin-top:32px}
+.preview-wrap .sec-head{padding-bottom:10px}
+.preview-wrap .cfo-preview{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.overview .block{margin-top:20px;padding-top:16px;border-top:1px solid var(--line-soft)}
 
 /* item cards */
 .item{position:relative;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-top:10px;overflow:hidden}
@@ -547,7 +589,7 @@ select.gn-dest{height:34px;border:1px solid var(--line);border-radius:var(--radi
 @media (max-width:860px){.grid2{grid-template-columns:1fr}}
 @media (max-width:640px){.wrap{padding:0 14px}.card{padding:16px}.mess .big{font-size:44px}.sec-head,.foot-row{flex-direction:column;align-items:stretch}.item-head{flex-wrap:wrap}.item-body dl{grid-template-columns:1fr}.item-body dt{margin-top:6px}}
 @media print{
-  .btn,.foot-buttons,.sec-tools,.switch,.chev,.controls,.serve-line{display:none!important}
+  .btn,.foot-buttons,.sec-tools,.switch,.chev,.controls,.serve-line,.preview-wrap{display:none!important}
   .bar,.foot{position:static;background:#fff;backdrop-filter:none}
   .item .item-body{display:block}
   .card,.item,.empty{box-shadow:none;border:1px solid var(--line)}
@@ -571,18 +613,25 @@ __REPORT_BODY__
     token: config.token || '',
     busy: false
   };
-  window.GN.plan = window.GN.data;
+  var D = window.GN.data;
+  // One page shape, three payloads: a bare plan, a bare analysis, or the
+  // combined envelope that carries both halves under their own keys.
+  window.GN.planDoc = D.plan || (D.actions ? D : null);
+  window.GN.analysisDoc = D.analysis || (D.items ? D : null);
+  window.GN.plan = window.GN.planDoc || D;
 })();
 </script>
 <script>
 (function () {
   var GN = window.GN, C = GN.config, T = GN.text, D = GN.data;
   var KIND = C.kind, MODE = C.mode;
+  var PLAN = GN.planDoc, ANALYSIS = GN.analysisDoc;
   var byId = {};
-  (D.actions || []).forEach(function (a) { byId[a.id] = a; });
-  (D.items || []).forEach(function (a) { byId[a.id] = a; });
+  ((PLAN && PLAN.actions) || []).forEach(function (a) { byId[a.id] = a; });
+  ((ANALYSIS && ANALYSIS.items) || []).forEach(function (a) { byId[a.id] = a; });
   var permanentOn = false;
   var executed = {};
+  var touched = false;
 
   function $(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
   function fmt(tpl, vars) { return String(tpl).replace(/\{(\w+)\}/g, function (m, k) { return vars[k] !== undefined ? vars[k] : m; }); }
@@ -643,6 +692,20 @@ __REPORT_BODY__
     });
     return t;
   }
+  /* Tell the after picture what is ticked right now.  It stays quiet until the
+     first real interaction, so the page still opens on the full after state. */
+  function announce(ids) {
+    if (!touched && !ids.length) return;
+    if (typeof window.CustomEvent !== 'function') return;
+    var detail = { action_ids: [], item_ids: [] };
+    ids.forEach(function (e) { if (typeof e === 'string') detail.action_ids.push(e); else detail.item_ids.push(e.id); });
+    window.dispatchEvent(new CustomEvent('cfo:selection', { detail: detail }));
+  }
+  function split(ids) {
+    var out = { actions: [], items: [] };
+    ids.forEach(function (e) { if (typeof e === 'string') out.actions.push(e); else out.items.push(e); });
+    return out;
+  }
   function refresh() {
     var ids = selection();
     var t = tally(ids);
@@ -650,6 +713,7 @@ __REPORT_BODY__
     if (count) count.textContent = KIND === 'storage'
       ? fmt(T.footer_count_storage, { trash: t.trash, delete: t.delete, bytes: fmtBytes(t.bytes) })
       : fmt(T.footer_count, { moves: t.move, trash: t.trash, delete: t.delete, bytes: fmtBytes(t.bytes) });
+    announce(ids);
     if (GN.busy) return;
     ['gn-main', 'gn-dry'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = ids.length === 0; });
   }
@@ -745,6 +809,7 @@ __REPORT_BODY__
   /* ---- events ---- */
   document.addEventListener('change', function (e) {
     var el = e.target;
+    touched = true;
     if (el.matches && el.matches('input[data-kind="delete"]') && el.checked) {
       if (!confirm(fmt(T.confirm_delete, { path: el.dataset.path || '', size: el.dataset.size || '' }))) fallbackChoice(el);
     }
@@ -761,6 +826,7 @@ __REPORT_BODY__
         var turnOn = boxes.some(function (b) { return !b.checked; });
         boxes.forEach(function (b) { b.checked = turnOn; });
         btn.textContent = turnOn ? btn.dataset.off : btn.dataset.on;
+        touched = true;
         refresh();
         return;
       }
@@ -777,6 +843,7 @@ __REPORT_BODY__
         if (g) {
           $('input.gn-pick, input.gn-adopt', g).forEach(function (b) { if (!b.disabled) b.checked = true; });
           g.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          touched = true;
           refresh();
         }
         return;
@@ -795,7 +862,7 @@ __REPORT_BODY__
     }
   });
 
-  GN.api = { $: $, fmt: fmt, fmtBytes: fmtBytes, selection: selection, overrides: overrides, tally: tally, refresh: refresh, message: message, markResults: markResults, markExecuted: markExecuted, setStatus: setStatus, headers: headers, byId: byId };
+  GN.api = { $: $, fmt: fmt, fmtBytes: fmtBytes, selection: selection, overrides: overrides, tally: tally, refresh: refresh, message: message, markResults: markResults, markExecuted: markExecuted, setStatus: setStatus, headers: headers, byId: byId, split: split };
   applyPermanent();
   markExecuted(D.executed_ids || []);
 })();
@@ -819,6 +886,27 @@ __REPORT_BODY__
     main.addEventListener('click', function () {
       var ids = A.selection();
       if (!ids.length) { alert(T.nothing_selected); return; }
+      if (C.kind === 'combined') {
+        /* One file for both halves: the tidy-up ids under plan, the cleanup ids
+           under storage, and each half's source document alongside them so
+           apply needs nothing but this file. */
+        var parts = A.split(ids);
+        var storageActions = {};
+        parts.items.forEach(function (e) { storageActions[e.id] = e.action; });
+        var payload = {
+          schema: 'carl-file-organizer/decisions',
+          schema_version: 1,
+          decided_at: new Date().toISOString(),
+          decided_by: 'html-static',
+          plan: { approved_action_ids: parts.actions, overrides: A.overrides() },
+          storage: { item_ids: parts.items.map(function (e) { return e.id; }), actions: storageActions }
+        };
+        if (GN.planDoc) payload.plan.document = GN.planDoc;
+        if (GN.analysisDoc) payload.storage.document = GN.analysisDoc;
+        download('carl-file-organizer-decisions.json', payload);
+        A.message(T.exported_all);
+        return;
+      }
       if (C.kind === 'storage') {
         var actions = {};
         ids.forEach(function (e) { actions[e.id] = e.action; });
@@ -889,13 +977,7 @@ __REPORT_BODY__
       .catch(function () { failAll(ids, T.network_failed); })
       .then(function () { busy(false); });
   }
-  function submitStorage(entries) {
-    if (!entries.length) { alert(T.nothing_selected); return; }
-    var t = A.tally(entries);
-    if (!confirm(A.fmt(T.confirm_dispose, { trash: t.trash, delete: t.delete, bytes: A.fmtBytes(t.bytes) }))) return;
-    A.message('');
-    idsOf(entries).forEach(function (id) { A.setStatus(id, 'working', T.status_working); });
-    busy(true);
+  function disposeChain(entries) {
     var buckets = { trash: [], delete: [] };
     entries.forEach(function (e) { (buckets[e.action] || buckets.trash).push(e.id); });
     var chain = Promise.resolve();
@@ -907,11 +989,54 @@ __REPORT_BODY__
           .catch(function () { failAll(buckets[action], T.network_failed); });
       });
     });
+    return chain;
+  }
+  function submitStorage(entries) {
+    if (!entries.length) { alert(T.nothing_selected); return; }
+    var t = A.tally(entries);
+    if (!confirm(A.fmt(T.confirm_dispose, { trash: t.trash, delete: t.delete, bytes: A.fmtBytes(t.bytes) }))) return;
+    A.message('');
+    idsOf(entries).forEach(function (id) { A.setStatus(id, 'working', T.status_working); });
+    busy(true);
+    disposeChain(entries).then(function () { busy(false); });
+  }
+  /* One button, two engines: the moves go through /api/apply first so nothing
+     is cleared out from under a file that was about to be filed, then the
+     cleanup goes through /api/dispose, trash before permanent delete. */
+  function submitCombined(entries, dryRun) {
+    if (!entries.length) { alert(T.nothing_selected); return; }
+    var parts = A.split(entries);
+    var t = A.tally(entries);
+    var text = dryRun ? A.fmt(T.confirm_dry, { n: entries.length })
+      : A.fmt(T.confirm_apply, { moves: t.move, trash: t.trash, delete: t.delete, bytes: A.fmtBytes(t.bytes) });
+    if (!confirm(text)) return;
+    A.message('');
+    idsOf(entries).forEach(function (id) { A.setStatus(id, 'working', T.status_working); });
+    busy(true);
+    var chain = Promise.resolve();
+    if (parts.actions.length) {
+      chain = chain.then(function () {
+        return post('/api/apply', { action_ids: parts.actions, overrides: A.overrides(), dry_run: !!dryRun })
+          .then(function (res) { handle(parts.actions, res); })
+          .catch(function () { failAll(parts.actions, T.network_failed); });
+      });
+    }
+    if (parts.items.length) {
+      if (dryRun) {
+        chain = chain.then(function () {
+          idsOf(parts.items).forEach(function (id) { A.setStatus(id, '', T.status_dry); });
+        });
+      } else {
+        chain = chain.then(function () { return disposeChain(parts.items); });
+      }
+    }
     chain.then(function () { busy(false); });
   }
   function submit(root, dryRun) {
     var sel = A.selection(root);
-    if (C.kind === 'storage') submitStorage(sel); else submitOrganize(sel, dryRun);
+    if (C.kind === 'combined') submitCombined(sel, dryRun);
+    else if (C.kind === 'storage') submitStorage(sel);
+    else submitOrganize(sel, dryRun);
   }
   main.addEventListener('click', function () { submit(null, false); });
   var dry = document.getElementById('gn-dry');
@@ -925,7 +1050,7 @@ __REPORT_BODY__
   A.$('.gn-section-run').forEach(function (btn) {
     btn.addEventListener('click', function () { submit(btn.closest('section'), false); });
   });
-  if (C.kind === 'organize') {
+  if (C.kind === 'organize' || C.kind === 'combined') {
     fetch('/api/plan', { headers: A.headers() })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (plan) {

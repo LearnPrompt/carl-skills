@@ -296,6 +296,48 @@ UI: Dict[str, Dict[str, str]] = {
         "zh": "扫到 {entries} 项，候选动作 {actions} 条，其中 {approvable} 条等你批准。",
         "en": "Scanned {entries} item(s), {actions} candidate action(s), {approvable} of them waiting on you.",
     },
+    "cli_storage_written": {
+        "zh": "整机盘点写在 {path}",
+        "en": "Whole-machine scan written to {path}",
+    },
+    "cli_storage_skipped": {
+        "zh": "这次跳过整机盘点，报告里就只有整理这一半。",
+        "en": "The whole-machine scan was skipped, so the report carries the tidy-up half only.",
+    },
+    "cli_storage_failed": {
+        "zh": "整机盘点没跑成（{error}），整理这一半照常。",
+        "en": "The whole-machine scan did not finish ({error}); the tidy-up half is unaffected.",
+    },
+    "cli_next_steps": {
+        "zh": "下一步，把每一项的人话写进 {notes}，把盘点定色写进 {analysis}，然后跑 report {managed}。",
+        "en": "Next: write the plain-language notes into {notes}, the colour calls into {analysis}, then run report {managed}.",
+    },
+    "cli_report_combined": {
+        "zh": "一份报告写在 {path}，清理、搬动和整理后预览都在里面。",
+        "en": "One report at {path}: the cleanup, the moves and the after picture together.",
+    },
+    "cli_nothing_to_report": {
+        "zh": "{managed} 里既没有 plan.json 也没有 analysis.json，先跑一次 scan。",
+        "en": "{managed} holds neither plan.json nor analysis.json; run scan first.",
+    },
+    "cli_decisions_plan": {"zh": "先搬动这一半", "en": "The moves first"},
+    "cli_decisions_storage": {"zh": "再清理这一半", "en": "The cleanup second"},
+    "cli_decisions_empty": {
+        "zh": "这份决定清单一项都没勾，什么都没做。",
+        "en": "Nothing is ticked in this decisions file, so nothing was done.",
+    },
+    "cli_decisions_summary": {
+        "zh": "两段合计，搬动这段返回 {plan}，清理这段返回 {storage}。",
+        "en": "Both halves done: the moves returned {plan}, the cleanup returned {storage}.",
+    },
+    "cli_decisions_no_analysis": {
+        "zh": "决定清单里没带 analysis.json，加 --analysis 指给我，或者改用 dispose 子命令。",
+        "en": "The decisions file carries no analysis.json; pass --analysis, or use the dispose subcommand.",
+    },
+    "cli_decisions_no_plan": {
+        "zh": "决定清单里没带 plan.json，加 --plan 指给我。",
+        "en": "The decisions file carries no plan.json; pass --plan.",
+    },
     "status_last_run": {"zh": "最后整理时间", "en": "Last tidy-up"},
     "status_dirty_now": {"zh": "现在是否又脏了", "en": "Messy again?"},
     "status_never": {"zh": "还没整理过", "en": "not tidied yet"},

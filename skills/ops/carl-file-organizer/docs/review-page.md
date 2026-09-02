@@ -1,8 +1,55 @@
 # 报告页视觉规范（report.html，v0.3 三色版）
 
-报告页是整个 skill 唯一给人看的界面。两个入口共用同一份模板：整理下载目录的页面读 plan.json，整机盘点的页面读 analysis.json。页面不加载任何外部资源，双击打开 file:// 也是零请求；同一份模板在 static 与 serve 两种模式下长得一样，只有底栏按钮的动作不同。
+报告页是整个 skill 唯一给人看的界面。一份模板三种形态，由 `data-kind` 决定：`combined` 是人真正看到的那一份，清理和搬动写在同一页，末尾带整理后预览；`organize` 只有整理这一半，`storage` 只有盘点这一半，两者是分步命令留下的旧形态。页面不加载任何外部资源，双击打开 file:// 也是零请求；同一份模板在 static 与 serve 两种模式下长得一样，只有底栏按钮的动作不同。
 
 三个文件对应本文：`assets/report_template.html` 是模板（样式、脚本、顶部的 TEXT 文案表），`scripts/build_report.py` 负责把数据脱敏后渲染成正文并注入模板，仓库根 `tests/test_cfo_report_template.py` 逐条断言本文的约束。改样式先改模板，改文案只改 TEXT。
+
+## combined：一份报告，一个入口，一份批准文件
+
+`render(data)` 收到 `{"plan": plan, "analysis": analysis}` 就渲染这一份。两半都在最好，只给一半也能渲染，页面上就少一块。两半分别脱敏，因为整理那半能从 `source_root` 反推自己的家目录，盘点那半没有这一对字段，只能退回当前账号的家目录。
+
+```
+顶栏         目录 · 机器 · 扫描时间 · 模式
+页面标题 + 一句引导
+总览双卡     左：磁盘条（盘点）+ 杂乱度大字与三色分段（整理）+ 一句话
+             右：先做什么，analysis.overview.priority 与整理三条建议合成一个编号清单
+最大的五项   只有带 analysis 时才有
+三色三个区   green → yellow → red，每区先「清理」后「搬动」两个小标题
+整理后预览   标题「整理后长这样」，下面是 preview.py 渲染的自足片段
+长期建议     盘点的 overview.long_term，加整理的静置到期时间与固定说明
+底栏         一个主按钮
+```
+
+小标题是 `<h3 class="subhead">`，空的那一组不渲染标题也不占位。三个区永远都在，整区空了才写一句本组没有条目。
+
+预览片段来自 `carl_file_organizer.preview`：`build_graph(plan, analysis)` 出图，`render_preview_html(graph, lang=, height=720)` 出片段，整块包在 `<section class="preview-wrap" id="gn-preview">` 里。片段自带样式和脚本，不加载任何外部资源，全页只出现一次。页面上勾选或取消任何一项时，`refresh()` 会 `window.dispatchEvent(new CustomEvent('cfo:selection', {detail: {action_ids, item_ids}}))`，预览里监听这个事件，把没勾中的「要搬」节点画成空心，并改写面板上的要搬与留下计数。首次渲染不发这个事件，所以打开页面看到的仍是完整的整理后状态。
+
+## combined 的批准文件
+
+static 模式底栏只有一个按钮，导出一份 `carl-file-organizer-decisions.json`：
+
+```json
+{
+  "schema": "carl-file-organizer/decisions",
+  "schema_version": 1,
+  "decided_at": "2026-09-02T12:00:00+09:00",
+  "decided_by": "html-static",
+  "plan": {
+    "approved_action_ids": ["9c1f0a7b2d3e4f55"],
+    "overrides": [{"action_id": "0112233445566a7b", "destination_key": "work.data"}],
+    "document": { "...": "渲染时用的 plan.json，已脱敏" }
+  },
+  "storage": {
+    "item_ids": ["st-pip-cache"],
+    "actions": {"st-pip-cache": "trash"},
+    "document": { "...": "渲染时用的 analysis.json，已脱敏" }
+  }
+}
+```
+
+`document` 两块是页面顺手带上的来源文件，所以 `apply` 只要这一个参数就够。两块都能缺，缺了就用 `--plan`、`--analysis` 或 `--managed-dir` 指过去。`apply` 先跑整理那段再跑盘点那段，两段各自写清单和审计，最后打一行合计。
+
+serve 模式底栏是「执行全部已选」，前端按类型拆开：先 POST `/api/apply`（body `{action_ids, overrides, dry_run}`），再 POST `/api/dispose`（body `{item_ids, action}`，废纸篓一次永久删除一次），逐项回显状态。同一个服务两个端点都接，`/api/plan` 返回 `{plan, analysis, executed_ids}`，两半共用一份 `executed_ids`。
 
 ## 一句话原则
 
@@ -26,7 +73,9 @@
 
 字体：正文 `-apple-system, "PingFang SC", "Segoe UI", "Noto Sans CJK SC", "Helvetica Neue", Arial, sans-serif`，15px 行高 1.6；路径、命令、id 用 `ui-monospace, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK SC", monospace`，13px。标题只有页面标题 26px/700 和分区标题 18px/700，小节标题 13px 灰色大写字距。没有 web font。
 
-## 布局（从上到下）
+## 布局（从上到下，organize 与 storage 两种旧形态）
+
+combined 的布局见开头那一节，下面这份是分步命令产出的单半页面。
 
 ```
 顶栏（sticky top，白底 92% 透明加轻微模糊，底边 1px）
@@ -79,17 +128,17 @@ Top 5 表（只有盘点页）：色点 · 大小 · 类型 · 名字 · 路径 
 
 | | static | serve |
 |---|---|---|
-| 主按钮 | 整理页导出 `carl-file-organizer-approved.json`（plan 本身加 `approved_action_ids / overrides / approved_at / approved_by`）；盘点页导出 `carl-file-organizer-decisions.json`（`item_ids` 加每个 id 的 `actions` 映射） | 整理页 POST `/api/apply`，body `{action_ids, overrides, dry_run}`；盘点页 POST `/api/dispose`，按动作分两次，body `{item_ids, action: "trash"|"delete"}` |
-| 其他按钮 | 无 | 停止服务（POST `/api/shutdown`）；整理页多「先试运行」；分区头多「执行本组已选」 |
+| 主按钮 | combined 导出一份 `carl-file-organizer-decisions.json`（格式见上）；整理页导出 `carl-file-organizer-approved.json`（plan 本身加 `approved_action_ids / overrides / approved_at / approved_by`）；盘点页导出 `carl-file-organizer-decisions.json` 的旧格式（`item_ids` 加每个 id 的 `actions` 映射） | combined 先 POST `/api/apply` 再 POST `/api/dispose`；整理页只 POST `/api/apply`，body `{action_ids, overrides, dry_run}`；盘点页只 POST `/api/dispose`，按动作分两次，body `{item_ids, action: "trash"\|"delete"}` |
+| 其他按钮 | 无 | 停止服务（POST `/api/shutdown`）；带整理那半时多「先预演」；分区头多「执行本组已选」 |
 | 打开所在位置 | 不渲染 | POST `/api/reveal`，body `{path_portable}` |
 | token | 不嵌 | 嵌进 config，也接受 `?t=` 后立即从地址栏抹掉；请求头 `X-GN-Token` |
-| 启动时 | 无请求 | 整理页 GET `/api/plan` 同步 `executed_ids` 与 `permanent_delete_enabled` |
+| 启动时 | 无请求 | 带整理那半时 GET `/api/plan` 同步 `executed_ids` 与 `permanent_delete_enabled` |
 
 服务端响应 `{results: [{action_id 或 item_id, status, detail}]}`，status 取 `moved / trashed / deleted / dry-run / skipped / refused / failed`。
 
 ## 脱敏
 
-页面和内嵌 JSON 里一个绝对路径都没有。渲染前整份数据过 `build_report.sanitize()`：`source_root`、`managed_dir`、每条 action 的 `source` 与 `destination`、每个 item 的 `path` 直接删掉，只留 `_portable` 双胞胎；其余任何字符串里出现家目录（按 plan 反推的 home，以及 `/Users/x`、`/home/x`、`C:\Users\x` 三种形态）都改写成 `$HOME`。测试扫整页不许出现 `/Users/`。
+页面和内嵌 JSON 里一个绝对路径都没有。渲染前整份数据过 `build_report.sanitize()`，combined 的两半各过一遍：`source_root`、`managed_dir`、每条 action 的 `source` 与 `destination`、每个 item 的 `path` 直接删掉，只留 `_portable` 双胞胎；其余任何字符串里出现家目录（按 plan 反推的 home，以及 `/Users/x`、`/home/x`、`C:\Users\x` 三种形态）都改写成 `$HOME`。测试扫整页不许出现 `/Users/`。
 
 ## 文案
 
@@ -97,7 +146,7 @@ Top 5 表（只有盘点页）：色点 · 大小 · 类型 · 名字 · 路径 
 
 ## 打印
 
-`@media print` 隐藏所有按钮、开关、折叠箭头和控件行，卡片全部展开，阴影换成 1px 边，顶栏与底栏取消 sticky。
+`@media print` 隐藏所有按钮、开关、折叠箭头、控件行和整理后预览，卡片全部展开，阴影换成 1px 边，顶栏与底栏取消 sticky。预览是张要拖要缩的画布，印在纸上没有意义。
 
 ## 为什么不做深色模式
 

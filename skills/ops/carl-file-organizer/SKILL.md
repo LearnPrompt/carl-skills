@@ -9,19 +9,27 @@ description: 文件整理与磁盘盘点。整理下载目录或任意散乱文�
 
 下面 `<skill>` 指这份 SKILL.md 所在的目录。所有命令用 `python3 <skill>/scripts/...` 的形式跑，零依赖，Python 3.9 以上就行。
 
-用户说的是哪件事，先分清。目录乱、文件多、想归档，走入口一。磁盘满、空间紧、想清缓存，走入口二。两件事都要就先做盘点再做整理，各出各的报告。用户只是问某个文件该放哪，不用跑工具，直接答。
+不管用户是嫌目录乱还是嫌磁盘满，流程只有一条，走完是一份报告、一个入口、一份批准文件。
 
-## 入口一，整理下载
-
-### 只读扫描
-
-```bash
-python3 <skill>/scripts/organize.py plan ~/Downloads --lang zh
+```
+scan  →  你写 notes.json 与 analysis.json  →  report  →  用户在页面上处理或导出  →  apply --dry-run  →  用户说执行才真跑
 ```
 
-用户没说目录就用 `~/Downloads`，不要自己猜别的路径。用户说英文目录名就把 `--lang` 换成 `en`。目录里已经有一套分区时工具会跟着已有的那套走，不必再传。
+两个场景的差别只在扫不扫盘点。用户说的是目录乱、文件多、想归档，加 `--no-storage`，报告里就只有整理这一半。用户说的是磁盘满、空间紧、想清缓存，默认就扫，两半都在。用户只是问某个文件该放哪，不用跑工具，直接答。
 
-这一步不动任何文件。产物落在目标目录下的管理目录里，中文是 `<目录>/00_下载目录管理/`，英文是 `<目录>/00_File_Organizer/`，里面有 `plan.json` 和一版还没有你说明的 `report.html`。终端里那句「本次只读扫描，没有移动或删除任何文件」原样带给用户。
+## 第一步，只读扫描
+
+```bash
+python3 <skill>/scripts/organize.py scan ~/Downloads --lang zh --budget-seconds 60
+```
+
+用户没说目录就用 `~/Downloads`，不要自己猜别的路径。用户说英文目录名就把 `--lang` 换成 `en`。目录里已经有一套分区时工具会跟着已有的那套走，不必再传。只整理不盘点就加 `--no-storage`。
+
+这一步不动任何文件。产物都落在目标目录下的管理目录里，中文是 `<目录>/00_下载目录管理/`，英文是 `<目录>/00_File_Organizer/`：`plan.json` 是整理这一半，`storage-scan.json` 是盘点这一半。后面你写的 `notes.json`、`analysis.json`，还有渲染出来的 `report.html` 和执行留下的清单，也全在这个目录里。终端里那句「本次只读扫描，没有移动或删除任何文件」原样带给用户。
+
+盘点默认六十秒预算，超时的条目标成 `partial`，体积是下限。macOS 上隐私保护会挡住一批目录，一次出现上百个读不到很正常，这句话要写给用户，因为总量因此偏小。`storage-scan.json` 里全是这台机器的绝对路径，它只给本机自己用，别当结论发出去。用户要把结果给别人看，发 `report.html`，那份渲染时已经把家目录换成 `$HOME` 了。
+
+## 第二步，读扫描结果，写人话
 
 ### 读 plan.json，只报数不拍板
 
@@ -64,33 +72,53 @@ python3 <skill>/scripts/organize.py plan ~/Downloads --lang zh
 }
 ```
 
-notes 只收这三个键，多写的键会被丢掉并记一条提醒。写不出来的项可以空着，页面会退回规则文案。
+notes 只收这三个键，多写的键会被丢掉并记一条提醒。写不出来的项可以空着，页面会退回规则文案。把这份存成管理目录里的 `notes.json`，`report` 默认就去那儿找。
 
-### 生成报告
+### 读 storage-scan.json，定色，写 analysis.json
 
-```bash
-python3 <skill>/scripts/organize.py build <管理目录>/plan.json --notes notes.json --report
-```
+跑了盘点才有这一步，加了 `--no-storage` 就跳过。
 
-说明并进 plan.json，report.html 在同一目录重新渲染。告诉用户报告路径，让他双击打开。想在页面上直接点按钮处置，就起本地服务，只绑 127.0.0.1 带一次性 token，关掉终端就失效。
+读扫描结果，对照 `<skill>/references/macos.md` 或 `windows.md` 给每一项定色。绿是纯缓存和构建产物，删了会自己长回来。黄是里面有用户数据或者只是暂时没用的，Application Support、Containers、安装包、Backups、agent 的会话日志都算，要用户自己看一眼。红是碰不得的，虚拟机镜像、浏览器的用户数据、钥匙串、邮件和信息的主数据、照片图库、iCloud 本地副本、活跃仓库的 `.git`。脚本给的 `suggested_color` 是起点，你可以改，改了要在 `what` 里说一句为什么。
 
-```bash
-python3 <skill>/scripts/organize.py review <管理目录>/plan.json --serve
-```
+每一项写 `what` 这是什么，`if_removed` 删了会怎样，`disposal` 建议怎么处置，`restore` 怎么回来。写给一个不知道 ms-playwright 是什么的人看，后果说具体，不写没事。
 
-### 用户批准，你预演
+`trash_paths` 只填你核实过的具体安全子路径。写 `$HOME/Library/Caches` 这种父目录不合格，要写到具体那个缓存目录。红项的 `trash_paths` 必须是空数组。路径必须落在家目录之内，不能有软链段，不能命中禁刀区。
 
-用户在页面上勾选、单选、改去向。静态页面导出的批准文件叫 `carl-file-organizer-approved.json`，落在浏览器的下载目录。serve 模式下按钮直接处置，每次点击浏览器都弹二次确认，这条线不需要你再跑 apply。
+`overview` 里 `headline` 一句话说清这台机器什么状况，第一刀该切哪。`priority` 列现在就能动的，按收益排，这几条会跟整理那半的建议合成报告顶上的一个编号清单。`long_term` 列适合冷存、外置盘、应用内清理的。Windows 上 WinSxS、hiberfil、pagefile 这些只写不扫的东西放进 `long_term`，给正规释放方式，别给删除按钮。
 
-拿到批准文件先预演，把输出原样贴给用户。
+把这些写成管理目录里的 `analysis.json`，字段表在 `<skill>/docs/storage-schema.md`。路径全部来自扫描结果，不许自己编一条。
+
+## 第三步，生成一份报告
 
 ```bash
-python3 <skill>/scripts/organize.py apply ~/Downloads/carl-file-organizer-approved.json --dry-run
+python3 <skill>/scripts/organize.py report <管理目录>
 ```
+
+一份 `report.html` 写在同一个目录里，清理和搬动在同一页，按绿黄红三个区排，每个区里先清理后搬动。顶上是磁盘条加杂乱度，右边是先做什么，中间是最大的五项，三色区下面是整理后预览，一张图告诉用户搬完长什么样，勾选变了图也跟着变。底下只有一个按钮。
+
+告诉用户报告路径，让他双击打开。想在页面上直接点按钮处置，就起本地服务，只绑 127.0.0.1 带一次性 token，关掉终端就失效。
+
+```bash
+python3 <skill>/scripts/organize.py report <管理目录> --serve
+```
+
+## 第四步，用户批准，你预演
+
+用户在页面上勾选、单选、改去向。静态页面底下那个按钮导出一份 `carl-file-organizer-decisions.json`，落在浏览器的下载目录，整理和清理都在里面。serve 模式下按钮直接处置，先搬后清，每次点击浏览器都弹二次确认，这条线不需要你再跑 apply。
+
+拿到那份决定清单先预演，把输出原样贴给用户。
+
+```bash
+python3 <skill>/scripts/organize.py apply ~/Downloads/carl-file-organizer-decisions.json --dry-run
+```
+
+先跑搬动这一段，再跑清理这一段，两段各自写清单和审计，都落在同一个管理目录里。
 
 用户在聊天里明确说了执行、apply、动手、可以了，你才去掉 `--dry-run` 跑真的。用户说整理一下、看看、先别动、再想想，都算没授权，继续停在预演。工具拒绝执行或者把某一批标成 refused，把那句话原样转告，不要绕路，不要换个命令重试。
 
-### 事后
+绿项可以进废纸篓，也可以永久删除，永久删除必须命令上带 `--allow-permanent-delete`，这个开关只能用户自己加。黄项只能进废纸篓。红项只能打开所在位置。执行前会复查占用。
+
+## 事后
 
 `status` 看最后一次整理的时间和现在是否又乱了，`undo` 按执行记录逆序把移动过的原路放回，`clear-tags` 清掉页面复查用的 Finder 标签。
 
@@ -100,39 +128,20 @@ python3 <skill>/scripts/organize.py undo <管理目录>/audit.jsonl
 python3 <skill>/scripts/organize.py clear-tags ~/Downloads
 ```
 
-## 入口二，磁盘盘点
+## 拆开跑的那套命令
 
-### 只读扫描
+`scan / report / apply` 是把下面这些包起来的三步。要单独跑某一段时才用它们，平时不用提。
 
 ```bash
+python3 <skill>/scripts/organize.py plan ~/Downloads --lang zh
+python3 <skill>/scripts/organize.py build <管理目录>/plan.json --notes notes.json --report
+python3 <skill>/scripts/organize.py review <管理目录>/plan.json --serve
 python3 <skill>/scripts/storage_scan.py --out storage-scan.json --budget-seconds 60
+python3 <skill>/scripts/organize.py storage-report <analysis.json> --serve
+python3 <skill>/scripts/organize.py dispose <analysis.json> <decisions.json> --dry-run
 ```
 
-只量大小，不动文件。macOS 和 Windows 都能跑，六十秒预算，超时的条目标成 `partial`，体积是下限。输出里 `disks` 是各卷的容量，`groups` 是按位置分的条目，`top_files` 是顺手捡到的大文件，`denied` 是没权限读的目录。macOS 上隐私保护会挡住一批目录，一次出现上百个读不到很正常，这句话要写给用户，因为总量因此偏小。
-
-storage-scan.json 里全是这台机器的绝对路径，它只给本机自己用，别当结论发出去。用户要把盘点结果给别人看，发 report.html，那份渲染时已经把家目录换成 `$HOME` 了。
-
-### 定色，写人话
-
-读扫描结果，对照 `<skill>/references/macos.md` 或 `windows.md` 给每一项定色。绿是纯缓存和构建产物，删了会自己长回来。黄是里面有用户数据或者只是暂时没用的，Application Support、Containers、安装包、Backups、agent 的会话日志都算，要用户自己看一眼。红是碰不得的，虚拟机镜像、浏览器的用户数据、钥匙串、邮件和信息的主数据、照片图库、iCloud 本地副本、活跃仓库的 `.git`。脚本给的 `suggested_color` 是起点，你可以改，改了要在 `what` 里说一句为什么。
-
-每一项写 `what` 这是什么，`if_removed` 删了会怎样，`disposal` 建议怎么处置，`restore` 怎么回来。写给一个不知道 ms-playwright 是什么的人看，后果说具体，不写没事。
-
-`trash_paths` 只填你核实过的具体安全子路径。写 `$HOME/Library/Caches` 这种父目录不合格，要写到具体那个缓存目录。红项的 `trash_paths` 必须是空数组。路径必须落在家目录之内，不能有软链段，不能命中禁刀区。
-
-`overview` 里 `one_line` 一句话说清这台机器什么状况，第一刀该切哪。`priority` 列现在就能动的，按收益排。`long_term` 列适合冷存、外置盘、应用内清理的。Windows 上 WinSxS、hiberfil、pagefile 这些只写不扫的东西放进 `long_term`，给正规释放方式，别给删除按钮。
-
-把这些写成 `analysis.json`，字段表在 `<skill>/docs/storage-schema.md`。路径全部来自扫描结果，不许自己编一条。
-
-### 生成报告
-
-```bash
-python3 <skill>/scripts/build_report.py analysis.json -o report.html
-```
-
-用户双击打开就能看，磁盘总览、最大的五项、三色分区、长期建议都在里面。想在页面上直接处置就走本地服务的 serve 模式，方式和整理页一样，把 `analysis.json` 交给 `organize.py review --serve`，点击都有二次确认。静态页面上用户可以导出决定清单 `carl-file-organizer-decisions.json`。
-
-绿项可以进废纸篓，也可以永久删除，永久删除必须服务启动时带 `--allow-permanent-delete`，这个开关只能用户自己加。黄项只能进废纸篓。红项只能打开所在位置。执行前会复查占用，执行后写清单和审计。
+它们出的是只有一半的报告和旧格式的批准文件，`apply` 照样认得。
 
 ## 铁律
 
@@ -157,6 +166,6 @@ python3 <skill>/scripts/build_report.py analysis.json -o report.html
 动了多少             移动 N 项，进废纸篓 N 项，永久删除 N 项
 跳过多少             跳过 N 项、被拒绝 N 项，各自为什么
 没碰的范围           禁刀区、静置期没到的、被占用或被引用的
-报告和清单           report.html、plan.json 或 analysis.json、approved.json、audit.jsonl 的路径
+报告和清单           report.html、plan.json 与 analysis.json、decisions.json、audit.jsonl 的路径，都在同一个管理目录里
 一句提醒             undo 能把这轮移动的原路放回，clear-tags 能清掉复查用的 Finder 标签
 ```

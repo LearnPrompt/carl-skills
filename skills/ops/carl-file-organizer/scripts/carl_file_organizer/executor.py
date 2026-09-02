@@ -1247,10 +1247,38 @@ def _recheck_with_planner(
 def run(args: Any) -> int:
     """``carl-file-organizer apply <approved.json> [--dry-run] [--allow-permanent-delete]``."""
 
+    approval_path = Path(args.approval).expanduser()
+    plan = json.loads(approval_path.read_text(encoding="utf-8"))
+    if not isinstance(plan, dict):
+        raise PlanError("the approval file must contain a JSON object")
+    return run_document(
+        plan,
+        dry_run=bool(args.dry_run),
+        allow_permanent_delete=bool(args.allow_permanent_delete),
+        audit=Path(args.audit).expanduser() if getattr(args, "audit", None) else None,
+        approval_path=approval_path,
+    )
+
+
+def run_document(
+    document: Dict[str, Any],
+    *,
+    dry_run: bool = False,
+    allow_permanent_delete: bool = False,
+    audit: Optional[Path] = None,
+    approval_path: Optional[Path] = None,
+) -> int:
+    """Apply one approved plan and print the same report the CLI has always printed.
+
+    Split out of :func:`run` so the combined decisions file can hand over the
+    plan it carries without first writing it back to disk.  Everything the
+    person sees -- the per-action lines, the summary, the manifest and audit
+    paths -- is produced here, once.
+    """
+
     from . import config as config_module
 
-    approval_path = Path(args.approval).expanduser()
-    plan = paths.hydrate_absolute(json.loads(approval_path.read_text(encoding="utf-8")))
+    plan = paths.hydrate_absolute(document)
     if not isinstance(plan, dict):
         raise PlanError("the approval file must contain a JSON object")
 
@@ -1266,14 +1294,12 @@ def run(args: Any) -> int:
     moment = datetime.now().astimezone()
     report = apply_approved_plan(
         plan,
-        dry_run=bool(args.dry_run),
-        allow_permanent_delete=bool(args.allow_permanent_delete),
+        dry_run=dry_run,
+        allow_permanent_delete=allow_permanent_delete,
         now=moment,
-        recheck_fn=None
-        if args.dry_run
-        else _recheck_with_planner(config.root, config, moment),
+        recheck_fn=None if dry_run else _recheck_with_planner(config.root, config, moment),
         config=config,
-        audit=Path(args.audit).expanduser() if getattr(args, "audit", None) else None,
+        audit=audit,
     )
 
     for record in report.results:
@@ -1307,10 +1333,11 @@ def run(args: Any) -> int:
             print(text("cli_audit", lang, path=report.audit))
         if report.review_log:
             print(text("cli_review_log", lang, path=report.review_log))
-        copy_target = _keep_approval(approval_path, config, report.run_id)
-        if copy_target is not None:
-            report.approved_copy = copy_target
-            print(text("cli_approved_copy", lang, path=copy_target))
+        if approval_path is not None:
+            copy_target = _keep_approval(approval_path, config, report.run_id)
+            if copy_target is not None:
+                report.approved_copy = copy_target
+                print(text("cli_approved_copy", lang, path=copy_target))
 
     return 2 if (report.counts.get("failed", 0) or report.counts.get("refused", 0)) else 0
 

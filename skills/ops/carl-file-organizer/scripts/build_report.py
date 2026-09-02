@@ -38,7 +38,7 @@ TEMPLATE_PATH = HERE.parent / "assets" / "report_template.html"
 
 LANGS = ("zh", "en")
 MODES = ("static", "serve")
-KINDS = ("organize", "storage")
+KINDS = ("organize", "storage", "combined")
 COLORS = ("green", "yellow", "red")
 PERMANENT_FLAG = "allow-permanent-delete"
 HOME_TOKEN = "$HOME"
@@ -232,6 +232,8 @@ def _segbar(parts: List[Tuple[str, float]]) -> str:
 
 
 def detect_kind(data: Dict[str, Any]) -> str:
+    if isinstance(data.get("plan"), dict) or isinstance(data.get("analysis"), dict):
+        return "combined"
     schema = str(data.get("schema") or "")
     if "storage" in schema or "analysis" in schema:
         return "storage"
@@ -492,7 +494,18 @@ def _section(
     t: _T,
     selectable: bool,
     tools_extra: str = "",
+    subgroups: Optional[List[Tuple[str, List[str]]]] = None,
 ) -> str:
+    """One coloured band.  ``subgroups`` splits it into labelled runs of cards.
+
+    The combined page needs each band to say cleanup first and moves second
+    without growing a second section markup; everything else -- the head, the
+    tools, the empty line -- is the same either way, so the two shapes share
+    this function and differ only in how the body is assembled.
+    """
+
+    if subgroups is not None:
+        cards = [card for _, group in subgroups for card in group]
     tools = []
     if cards:
         tools.append(
@@ -509,7 +522,16 @@ def _section(
         if mode == "serve":
             tools.append('<button type="button" class="btn small gn-section-run">{0}</button>'.format(t("btn_section")))
     tools.append(tools_extra)
-    body = "".join(cards) or '<p class="empty sub">{0}</p>'.format(t("empty"))
+    if subgroups is not None:
+        parts = []
+        for label, group in subgroups:
+            if not group:
+                continue
+            parts.append('<h3 class="subhead">{0}<span class="n">{1}</span></h3>'.format(_e(label), len(group)))
+            parts.extend(group)
+        body = "".join(parts) or '<p class="empty sub">{0}</p>'.format(t("empty"))
+    else:
+        body = "".join(cards) or '<p class="empty sub">{0}</p>'.format(t("empty"))
     return (
         '<section class="sec" data-color="{color}" data-group="{key}" id="sec-{key}">'
         '<div class="sec-head"><div><h2><span class="dot {color}"></span>{title}'
@@ -806,7 +828,23 @@ def _card_group(
     )
 
 
-def _organize_sections(plan: Dict[str, Any], lang: str, mode: str, t: _T) -> Tuple[str, Dict[str, int]]:
+def _permanent_switch(data: Dict[str, Any], mode: str, t: _T) -> str:
+    """The green section's permanent-delete toggle, or nothing when it is off."""
+
+    capabilities = data.get("capabilities") or {}
+    if not bool(capabilities.get("permanent_delete_offered", True)):
+        return ""
+    enabled = capabilities.get("permanent_delete_enabled", True)
+    disabled = " disabled" if mode == "serve" and not enabled else ""
+    note = t("permanent_not_enabled") if (mode == "serve" and not enabled) else t("permanent_static_note")
+    return '<label class="switch" title="{2}"><input type="checkbox" id="gn-permanent"{0}> {1}</label>'.format(
+        disabled, t("toggle_permanent"), _e(note)
+    )
+
+
+def _organize_buckets(plan: Dict[str, Any], lang: str, mode: str, t: _T) -> Dict[str, List[str]]:
+    """Every tidy-up card, already sorted, keyed by colour."""
+
     actions: List[Dict[str, Any]] = [a for a in (plan.get("actions") or []) if isinstance(a, dict)]
     groups: List[Dict[str, Any]] = [g for g in (plan.get("groups") or []) if isinstance(g, dict)]
     names: Dict[str, str] = {str(k): str(v) for k, v in (plan.get("names") or {}).items()}
@@ -863,27 +901,30 @@ def _organize_sections(plan: Dict[str, Any], lang: str, mode: str, t: _T) -> Tup
             (3, _card_candidate(trash, delete, color, notes, lang, mode, t, trash_available=trash_available, delete_offered=delete_offered))
         )
 
-    permanent = ""
-    if delete_offered:
-        enabled = capabilities.get("permanent_delete_enabled", True)
-        disabled = " disabled" if mode == "serve" and not enabled else ""
-        note = t("permanent_not_enabled") if (mode == "serve" and not enabled) else t("permanent_static_note")
-        permanent = '<label class="switch" title="{2}"><input type="checkbox" id="gn-permanent"{0}> {1}</label>'.format(
-            disabled, t("toggle_permanent"), _e(note)
-        )
+    return {c: [h for _, h in sorted(buckets[c], key=lambda x: x[0])] for c in COLORS}
 
+
+def _organize_sections(plan: Dict[str, Any], lang: str, mode: str, t: _T) -> Tuple[str, Dict[str, int]]:
+    buckets = _organize_buckets(plan, lang, mode, t)
+    permanent = _permanent_switch(plan, mode, t)
     counts = {c: len(buckets[c]) for c in COLORS}
     html = "".join(
         [
-            _section("green", "green", t("sec_green"), t("sec_green_desc"), [h for _, h in sorted(buckets["green"], key=lambda x: x[0])], mode=mode, t=t, selectable=True, tools_extra=permanent),
-            _section("yellow", "yellow", t("sec_yellow"), t("sec_yellow_desc"), [h for _, h in sorted(buckets["yellow"], key=lambda x: x[0])], mode=mode, t=t, selectable=True),
-            _section("red", "red", t("sec_red"), t("sec_red_desc"), [h for _, h in sorted(buckets["red"], key=lambda x: x[0])], mode=mode, t=t, selectable=False),
+            _section("green", "green", t("sec_green"), t("sec_green_desc"), buckets["green"], mode=mode, t=t, selectable=True, tools_extra=permanent),
+            _section("yellow", "yellow", t("sec_yellow"), t("sec_yellow_desc"), buckets["yellow"], mode=mode, t=t, selectable=True),
+            _section("red", "red", t("sec_red"), t("sec_red_desc"), buckets["red"], mode=mode, t=t, selectable=False),
         ]
     )
     return html, counts
 
 
-def _organize_overview(plan: Dict[str, Any], lang: str, mode: str, t: _T, counts: Dict[str, int]) -> str:
+def _mess_inner(plan: Dict[str, Any], lang: str, t: _T) -> str:
+    """The mess score, the pill, the counts, the three-colour bar and one line.
+
+    Both the tidy-up page and the combined page open with this block, so it
+    lives on its own rather than inside either overview.
+    """
+
     notes = plan.get("notes") or {}
     mess = plan.get("mess") if isinstance(plan.get("mess"), dict) else _mess_fallback(plan, t)
     mess_color = _color(mess.get("color"), "yellow")
@@ -905,31 +946,45 @@ def _organize_overview(plan: Dict[str, Any], lang: str, mode: str, t: _T, counts
         for c in COLORS
     )
     big = '<span class="big">{0}<small>/100</small></span>'.format(_e(score)) if isinstance(score, (int, float)) else ""
-    overview = (
-        '<div class="card overview"><h3>{title}</h3>'
+    return (
+        '<h3>{title}</h3>'
         '<div class="mess">{big}<span class="pill {color}">{label}</span></div>'
         '<div class="chips">{chips}</div>'
         "{bar}"
         '<div class="legend">{legend}</div>'
         '<p class="line">{line}</p>'
-        "</div>"
     ).format(
         title=t("mess_title"), big=big, color=mess_color, label=t("mess_" + mess_color), chips="".join(chips),
         bar=_segbar([(c, by_color[c]["count"]) for c in COLORS]), legend=legend, line=_e(line),
     )
+
+
+def _advice_items(counts: Dict[str, int], t: _T) -> List[str]:
+    """One line per colour that actually has cards, in colour order."""
+
+    items = []
+    for color in COLORS:
+        if counts.get(color):
+            items.append("<li>{0}</li>".format(_e(t("advice_" + color, n=counts[color]))))
+    return items
+
+
+def _pick_green_button(counts: Dict[str, int], t: _T) -> str:
+    if not counts.get("green"):
+        return ""
+    return '<div class="tools"><button type="button" class="btn" id="gn-pick-green">{0}</button></div>'.format(
+        t("btn_pick_green")
+    )
+
+
+def _organize_overview(plan: Dict[str, Any], lang: str, mode: str, t: _T, counts: Dict[str, int]) -> str:
+    notes = plan.get("notes") or {}
+    overview = '<div class="card overview">{0}</div>'.format(_mess_inner(plan, lang, t))
     folder_line = _pick(notes.get("folder_line"), lang)
-    advice_items = []
-    if counts["green"]:
-        advice_items.append("<li>{0}</li>".format(_e(t("advice_green", n=counts["green"]))))
-    if counts["yellow"]:
-        advice_items.append("<li>{0}</li>".format(_e(t("advice_yellow", n=counts["yellow"]))))
-    if counts["red"]:
-        advice_items.append("<li>{0}</li>".format(_e(t("advice_red", n=counts["red"]))))
+    advice_items = _advice_items(counts, t)
     if not advice_items:
         advice_items.append("<li>{0}</li>".format(_e(t("advice_none"))))
-    tools = ""
-    if counts["green"]:
-        tools = '<div class="tools"><button type="button" class="btn" id="gn-pick-green">{0}</button></div>'.format(t("btn_pick_green"))
+    tools = _pick_green_button(counts, t)
     advice = (
         '<div class="card advice"><h3>{title}</h3>{folder}<ol>{items}</ol>{tools}</div>'
     ).format(
@@ -989,9 +1044,10 @@ def _bar(brand: str, cells: List[Tuple[str, str]], mode: str, t: _T) -> str:
 def _footer(kind: str, mode: str, t: _T) -> str:
     if mode == "serve":
         buttons = ['<button type="button" class="btn" id="gn-shutdown">{0}</button>'.format(t("btn_shutdown"))]
-        if kind == "organize":
+        if kind in ("organize", "combined"):
             buttons.append('<button type="button" class="btn" id="gn-dry">{0}</button>'.format(t("btn_dry")))
-        buttons.append('<button type="button" class="btn primary" id="gn-main">{0}</button>'.format(t("btn_apply")))
+        label = t("btn_apply_all") if kind == "combined" else t("btn_apply")
+        buttons.append('<button type="button" class="btn primary" id="gn-main">{0}</button>'.format(label))
         hint = ""
     else:
         label = t("btn_export") if kind == "organize" else t("btn_export_decisions")
@@ -1116,7 +1172,9 @@ def _card_item(item: Dict[str, Any], color: str, notes: Dict[str, Any], lang: st
     )
 
 
-def _storage_sections(data: Dict[str, Any], lang: str, mode: str, t: _T) -> Tuple[str, Dict[str, int]]:
+def _storage_buckets(data: Dict[str, Any], lang: str, mode: str, t: _T) -> Dict[str, List[str]]:
+    """Every whole-machine card, keyed by colour."""
+
     items = [i for i in (data.get("items") or []) if isinstance(i, dict)]
     notes = data.get("notes") or {}
     capabilities = data.get("capabilities") or {}
@@ -1125,14 +1183,12 @@ def _storage_sections(data: Dict[str, Any], lang: str, mode: str, t: _T) -> Tupl
     for item in items:
         color = item_color(item)
         buckets[color].append(_card_item(item, color, notes, lang, mode, t, delete_offered=delete_offered))
-    permanent = ""
-    if delete_offered:
-        enabled = capabilities.get("permanent_delete_enabled", True)
-        disabled = " disabled" if mode == "serve" and not enabled else ""
-        note = t("permanent_not_enabled") if (mode == "serve" and not enabled) else t("permanent_static_note")
-        permanent = '<label class="switch" title="{2}"><input type="checkbox" id="gn-permanent"{0}> {1}</label>'.format(
-            disabled, t("toggle_permanent"), _e(note)
-        )
+    return buckets
+
+
+def _storage_sections(data: Dict[str, Any], lang: str, mode: str, t: _T) -> Tuple[str, Dict[str, int]]:
+    buckets = _storage_buckets(data, lang, mode, t)
+    permanent = _permanent_switch(data, mode, t)
     counts = {c: len(buckets[c]) for c in COLORS}
     html = "".join(
         [
@@ -1158,16 +1214,22 @@ def _disk_segments(disk: Dict[str, Any], items: List[Dict[str, Any]], primary: b
     return [("green", colored["green"]), ("yellow", colored["yellow"]), ("red", colored["red"]), ("other", other), ("free", free)]
 
 
-def _storage_overview(data: Dict[str, Any], lang: str, mode: str, t: _T, counts: Dict[str, int]) -> str:
+def _priority_items(data: Dict[str, Any], lang: str) -> List[str]:
+    """``overview.priority`` as list items; the Agent's own order is kept."""
+
+    out = []
+    for entry in (data.get("overview") or {}).get("priority") or []:
+        text = _pick(entry.get("text") if isinstance(entry, dict) else entry, lang)
+        if text:
+            out.append("<li>{0}</li>".format(_e(text)))
+    return out
+
+
+def _disk_bars(data: Dict[str, Any], t: _T) -> str:
+    """One bar per volume, used dividing into green / yellow / red / other / free."""
+
     items = [i for i in (data.get("items") or []) if isinstance(i, dict)]
     disks = [d for d in (data.get("disks") or []) if isinstance(d, dict)]
-    machine = data.get("machine") or {}
-    summary = data.get("summary") or {}
-    scan = data.get("scan") or {}
-    overview = data.get("overview") or {}
-    notes = data.get("notes") or {}
-    by_color = _normalise_by_color(summary.get("by_color"), _by_color_items(items))
-
     disk_html = []
     for index, disk in enumerate(disks):
         primary = bool(disk.get("primary")) or (index == 0 and not any(d.get("primary") for d in disks))
@@ -1186,6 +1248,18 @@ def _storage_overview(data: Dict[str, Any], lang: str, mode: str, t: _T, counts:
                 lf=_e(t("disk_free", free=format_bytes(disk.get("free_bytes")))),
             )
         )
+    return "".join(disk_html)
+
+
+def _storage_overview(data: Dict[str, Any], lang: str, mode: str, t: _T, counts: Dict[str, int]) -> str:
+    items = [i for i in (data.get("items") or []) if isinstance(i, dict)]
+    machine = data.get("machine") or {}
+    summary = data.get("summary") or {}
+    scan = data.get("scan") or {}
+    overview = data.get("overview") or {}
+    notes = data.get("notes") or {}
+    by_color = _normalise_by_color(summary.get("by_color"), _by_color_items(items))
+
     sys_rows = [
         (t("sys_host"), machine.get("hostname")),
         (t("sys_os"), " ".join(str(x) for x in (machine.get("os"), machine.get("arch")) if x)),
@@ -1212,23 +1286,13 @@ def _storage_overview(data: Dict[str, Any], lang: str, mode: str, t: _T, counts:
         '<h3 style="margin-top:20px">{lt}</h3>{bar}<div class="legend">{legend}</div>{line}'
         '<h3 style="margin-top:20px">{st}</h3><div class="sys">{sys}</div></div>'
     ).format(
-        dt=t("disk_title"), disks="".join(disk_html), lt=t("color_split"), bar=_segbar([(c, by_color[c]["bytes"]) for c in COLORS]),
+        dt=t("disk_title"), disks=_disk_bars(data, t), lt=t("color_split"), bar=_segbar([(c, by_color[c]["bytes"]) for c in COLORS]),
         legend=legend, line='<p class="line">{0}</p>'.format(_e(headline)) if headline else "", st=t("sys_title"), sys=sys_html,
     )
-    priority = overview.get("priority") or []
-    li = []
-    for entry in priority:
-        text = _pick(entry.get("text") if isinstance(entry, dict) else entry, lang)
-        if text:
-            li.append("<li>{0}</li>".format(_e(text)))
-    if not li:
-        for c in COLORS:
-            if counts[c]:
-                li.append("<li>{0}</li>".format(_e(t("advice_" + c, n=counts[c]))))
-    tools = ""
-    if counts["green"]:
-        tools = '<div class="tools"><button type="button" class="btn" id="gn-pick-green">{0}</button></div>'.format(t("btn_pick_green"))
-    right = '<div class="card advice"><h3>{0}</h3><ol>{1}</ol>{2}</div>'.format(t("advice_title"), "".join(li), tools)
+    li = _priority_items(data, lang) or _advice_items(counts, t)
+    right = '<div class="card advice"><h3>{0}</h3><ol>{1}</ol>{2}</div>'.format(
+        t("advice_title"), "".join(li), _pick_green_button(counts, t)
+    )
     return '<div class="grid2">{0}{1}</div>'.format(left, right)
 
 
@@ -1312,6 +1376,197 @@ def render_storage_body(data: Dict[str, Any], lang: str, mode: str, t: _T) -> st
 
 
 # --------------------------------------------------------------------------
+# combined page: one report, one entrance, one approval file
+# --------------------------------------------------------------------------
+
+
+def _clean_combined(
+    data: Dict[str, Any], notes: Optional[Dict[str, Any]], home: Optional[Union[str, Path]]
+) -> Dict[str, Any]:
+    """Redact the two halves separately, then put them back in one envelope.
+
+    They cannot share a pass: the tidy-up half knows its own home directory
+    from ``source_root``/``source_root_portable``, the whole-machine half has no
+    such pair and falls back to this account's home.  The Agent's notes are laid
+    over both, and each half reads only the tables it knows.
+    """
+
+    plan, analysis = split_combined(data)
+    out: Dict[str, Any] = {}
+    if plan:
+        out["plan"] = sanitize(merge_notes(plan, notes), home)
+    if analysis:
+        out["analysis"] = sanitize(merge_notes(analysis, notes), home)
+    lang = data.get("lang") or (plan.get("lang") if plan else None) or (analysis.get("lang") if analysis else None)
+    if lang:
+        out["lang"] = lang
+    capabilities: Dict[str, Any] = {}
+    for half in (plan, analysis):
+        capabilities.update(half.get("capabilities") or {})
+    if capabilities:
+        out["capabilities"] = capabilities
+    executed = data.get("executed_ids")
+    out["executed_ids"] = list(executed) if isinstance(executed, list) else []
+    return out
+
+
+def split_combined(data: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """``{"plan": ..., "analysis": ...}`` -> the two halves, either of them empty.
+
+    A caller may hand over only one half; the page then simply has one block
+    fewer.  Anything that is not a dict is treated as absent rather than as an
+    error, because a half-written analysis.json should still let the tidy-up
+    half render.
+    """
+
+    plan = data.get("plan")
+    analysis = data.get("analysis")
+    return (plan if isinstance(plan, dict) else {}), (analysis if isinstance(analysis, dict) else {})
+
+
+def _combined_bar(plan: Dict[str, Any], analysis: Dict[str, Any], mode: str, t: _T) -> str:
+    machine = analysis.get("machine") or {}
+    cells = []
+    if plan:
+        cells.append((t("bar_dir"), '<span class="v mono">{0}</span>'.format(_e(plan.get("source_root_portable") or ""))))
+    if analysis:
+        cells.append(
+            (
+                t("bar_machine"),
+                '<span class="v">{0}</span>'.format(
+                    _e(" · ".join(str(x) for x in (machine.get("hostname"), machine.get("os")) if x))
+                ),
+            )
+        )
+    when = plan.get("created_at") or plan.get("now") or analysis.get("created_at") or ""
+    cells.append((t("bar_time"), '<span class="v">{0}</span>'.format(_display_time(when))))
+    cells.append((t("bar_mode"), '<span class="v">{0}</span>'.format(t("mode_" + mode))))
+    return _bar(t("title_combined"), cells, mode, t)
+
+
+def _combined_overview(
+    plan: Dict[str, Any], analysis: Dict[str, Any], lang: str, mode: str, t: _T, counts: Dict[str, int]
+) -> str:
+    """Left: the disks and the mess score.  Right: one numbered list of what to do first."""
+
+    left_parts = []
+    if analysis.get("disks"):
+        left_parts.append("<h3>{0}</h3>{1}".format(t("disk_title"), _disk_bars(analysis, t)))
+    if plan:
+        left_parts.append(
+            '<div class="block">{0}</div>'.format(_mess_inner(plan, lang, t))
+            if left_parts
+            else _mess_inner(plan, lang, t)
+        )
+    headline = ""
+    if analysis:
+        notes = analysis.get("notes") or {}
+        headline = _pick(notes.get("headline"), lang) or _pick((analysis.get("overview") or {}).get("headline"), lang)
+    if headline:
+        left_parts.append('<p class="line">{0}</p>'.format(_e(headline)))
+    left = '<div class="card overview">{0}</div>'.format("".join(left_parts))
+
+    items = _priority_items(analysis, lang) if analysis else []
+    items.extend(_advice_items(counts, t))
+    if not items:
+        items.append("<li>{0}</li>".format(_e(t("advice_none"))))
+    folder_line = _pick((plan.get("notes") or {}).get("folder_line"), lang) if plan else ""
+    right = '<div class="card advice"><h3>{title}</h3>{folder}<ol>{items}</ol>{tools}</div>'.format(
+        title=t("advice_title"),
+        folder='<p class="line">{0}</p>'.format(_e(folder_line)) if folder_line else "",
+        items="".join(items),
+        tools=_pick_green_button(counts, t),
+    )
+    return '<div class="grid2">{0}{1}</div>'.format(left, right)
+
+
+def _combined_sections(
+    plan: Dict[str, Any], analysis: Dict[str, Any], lang: str, mode: str, t: _T
+) -> Tuple[str, Dict[str, int]]:
+    """Three bands, each one cleanup first and moves second."""
+
+    clean = _storage_buckets(analysis, lang, mode, t) if analysis else {c: [] for c in COLORS}
+    move = _organize_buckets(plan, lang, mode, t) if plan else {c: [] for c in COLORS}
+    permanent = _permanent_switch(analysis or plan, mode, t)
+    counts = {c: len(clean[c]) + len(move[c]) for c in COLORS}
+    titles = {"green": "cb_green", "yellow": "cb_yellow", "red": "cb_red"}
+    html = []
+    for color in COLORS:
+        html.append(
+            _section(
+                color,
+                color,
+                t(titles[color]),
+                t(titles[color] + "_desc"),
+                [],
+                mode=mode,
+                t=t,
+                selectable=color != "red",
+                tools_extra=permanent if color == "green" else "",
+                subgroups=[(t("sub_clean"), clean[color]), (t("sub_move"), move[color])],
+            )
+        )
+    return "".join(html), counts
+
+
+def _preview_block(plan: Dict[str, Any], analysis: Dict[str, Any], lang: str, t: _T) -> str:
+    """The after picture, rendered by ``carl_file_organizer.preview``.
+
+    The fragment carries its own style and script and loads nothing, so it is
+    dropped in verbatim.  A preview that cannot be built is not worth failing a
+    report over, so a broken one leaves the section out entirely.
+    """
+
+    try:
+        if str(HERE) not in sys.path:
+            sys.path.insert(0, str(HERE))
+        from carl_file_organizer import preview as preview_module
+    except Exception:  # noqa: BLE001 - a missing preview costs the page one block
+        return ""
+    try:
+        graph = preview_module.build_graph(plan or {}, analysis or None)
+        fragment = preview_module.render_preview_html(graph, lang=lang, height=720)
+    except Exception:  # noqa: BLE001 - same reasoning
+        return ""
+    return (
+        '<section class="preview-wrap" id="gn-preview">'
+        '<div class="sec-head"><div><h2>{0}</h2><p class="sub">{1}</p></div></div>'
+        "{2}</section>"
+    ).format(_e(t("preview_title")), _e(t("preview_note")), fragment)
+
+
+def _combined_longterm(plan: Dict[str, Any], analysis: Dict[str, Any], lang: str, t: _T) -> str:
+    blocks = []
+    if analysis:
+        blocks.append(_storage_longterm(analysis, lang, t))
+    if plan:
+        blocks.append(_organize_longterm(plan, lang, t))
+    return "".join(b for b in blocks if b)
+
+
+def render_combined_body(data: Dict[str, Any], lang: str, mode: str, t: _T) -> str:
+    plan, analysis = split_combined(data)
+    sections, counts = _combined_sections(plan, analysis, lang, mode, t)
+    return "".join(
+        [
+            _combined_bar(plan, analysis, mode, t),
+            '<main class="wrap">',
+            '<div class="intro"><h1>{0}</h1><p class="lede">{1}</p></div>'.format(
+                t("heading_combined"), t("lede_combined")
+            ),
+            _combined_overview(plan, analysis, lang, mode, t, counts),
+            _storage_top5(analysis, lang, t) if analysis else "",
+            sections,
+            _preview_block(plan, analysis, lang, t),
+            _combined_longterm(plan, analysis, lang, t),
+            '<p class="colophon">{0}</p>'.format(t("print_hint")),
+            "</main>",
+            _footer("combined", mode, t),
+        ]
+    )
+
+
+# --------------------------------------------------------------------------
 # public API
 # --------------------------------------------------------------------------
 
@@ -1336,7 +1591,10 @@ def render(
         raise ValueError("kind must be one of {0}".format(", ".join(KINDS)))
     template = load_template(template_path)
     text = template_text(template)
-    clean = sanitize(merge_notes(data, notes), home)
+    if kind == "combined":
+        clean = _clean_combined(data, notes, home)
+    else:
+        clean = sanitize(merge_notes(data, notes), home)
     lang = _lang_of(clean, lang)
     t = _T(text, lang)
     if mode != "serve":
@@ -1350,7 +1608,12 @@ def render(
         "capabilities": capabilities,
         "generator": "build_report.py {0}".format(__version__),
     }
-    body = render_organize_body(clean, lang, mode, t) if kind == "organize" else render_storage_body(clean, lang, mode, t)
+    if kind == "combined":
+        body = render_combined_body(clean, lang, mode, t)
+    elif kind == "organize":
+        body = render_organize_body(clean, lang, mode, t)
+    else:
+        body = render_storage_body(clean, lang, mode, t)
     mapping = {
         "LANG": "zh-CN" if lang == "zh" else "en",
         "TITLE": _e(t("title_" + kind)),

@@ -360,6 +360,10 @@ def build_graph(plan: Mapping[str, Any], analysis: Optional[Mapping[str, Any]] =
             "hint": _pick_lang(hint_map, lang),
             "hint_i18n": _scrub(dict(hint_map)) if hint_map else None,
             "moving": kind == "move",
+            # The report page ticks actions, not subjects.  Carrying the action
+            # id lets a ``cfo:selection`` event find this node without the
+            # fragment having to know anything about plan.json.
+            "action_id": str(action.get("id") or ""),
         }
 
         parent = "root"
@@ -1189,10 +1193,14 @@ _FRAGMENT = r"""<section id="__CFO_ID__" class="cfo-preview" data-lang="__CFO_LA
       b.addEventListener("click", function () { flightUntil = 0; go(b.dataset.state); });
     })(buttons[bi]);
   }
-  ROOT.querySelector(".cfo-stats").innerHTML =
-    "<b>" + (stats.moving || 0) + "</b> " + TEXT.stat_moving + "<br>" +
-    "<b>" + (stats.staying || 0) + "</b> " + TEXT.stat_staying + "<br>" +
-    TEXT.stat_reclaim + " <b>" + bytes(stats.reclaim_bytes) + "</b>";
+  var shown = { moving: stats.moving || 0, staying: stats.staying || 0, reclaim: stats.reclaim_bytes || 0 };
+  function statsChrome() {
+    ROOT.querySelector(".cfo-stats").innerHTML =
+      "<b>" + shown.moving + "</b> " + TEXT.stat_moving + "<br>" +
+      "<b>" + shown.staying + "</b> " + TEXT.stat_staying + "<br>" +
+      TEXT.stat_reclaim + " <b>" + bytes(shown.reclaim) + "</b>";
+  }
+  statsChrome();
   ROOT.querySelector(".cfo-colors").innerHTML =
     '<div><i style="background:var(--cfo-green)"></i>' + TEXT.legend_green + "</div>" +
     '<div><i style="background:var(--cfo-yellow)"></i>' + TEXT.legend_yellow + "</div>" +
@@ -1311,7 +1319,35 @@ _FRAGMENT = r"""<section id="__CFO_ID__" class="cfo-preview" data-lang="__CFO_LA
   // The whole trick: hold the mess for a beat, then let it fly into place.
   if (reduce) { mix = 1; state = "after"; syncChrome(); draw(); }
   else { flightUntil = performance.now() + 1000; request(); }
-  ROOT.__cfoPreview = { nodes: nodes, links: links, go: go, cam: cam, stats: stats };
+  // ---------- live selection ----------
+  // The report page ticks and unticks rows; the picture should agree with it.
+  // Only fills change: a node nobody ticked goes hollow, and the counter on the
+  // panel follows.  Positions are already computed, so nothing here moves.
+  function applySelection(detail) {
+    var picked = {}, moved = 0, kept = 0;
+    var actionIds = (detail && detail.action_ids) || [];
+    var itemIds = (detail && detail.item_ids) || [];
+    for (var i = 0; i < actionIds.length; i++) { picked["a:" + actionIds[i]] = true; }
+    for (var j = 0; j < itemIds.length; j++) { picked["s:" + itemIds[j]] = true; }
+    nodes.forEach(function (n) {
+      if (n.type === "file") {
+        if (!n.moving) { kept += 1; return; }
+        n.solid = !!(picked["a:" + (n.action_id || "-")] || picked["a:" + n.id.slice(2)]);
+        if (n.solid) { moved += 1; } else { kept += 1; }
+        return;
+      }
+      if (n.type === "storage" && n.pending_clean) {
+        n.solid = !!picked["s:" + n.id.slice(2)];
+      }
+    });
+    shown.moving = moved;
+    shown.staying = kept;
+    statsChrome();
+    draw();
+  }
+  window.addEventListener("cfo:selection", function (e) { applySelection(e.detail || {}); });
+
+  ROOT.__cfoPreview = { nodes: nodes, links: links, go: go, cam: cam, stats: stats, select: applySelection };
 })();
 </script>
 </section>"""

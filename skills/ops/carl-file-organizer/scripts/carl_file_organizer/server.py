@@ -1,11 +1,12 @@
 """``review --serve`` and ``storage-report --serve``: the page on 127.0.0.1.
 
-One server, two pages.  Which one it is comes from the file it was handed: a
-plan.json turns into the tidy-up page and answers ``/api/apply``, an
-analysis.json turns into the whole-machine page and answers ``/api/dispose``.
-Everything else -- the page itself, the token, the checks, the reveal endpoint,
-the shutdown -- is the same on both, because there is one template and one set
-of rules about what may leave this process.
+One server, one page, whichever halves it was handed.  A plan.json alone
+answers ``/api/apply``, an analysis.json alone answers ``/api/dispose``, and the
+combined envelope ``{"plan": ..., "analysis": ...}`` answers both, which is what
+``report --serve`` sends.  Everything else -- the page itself, the token, the
+checks, the reveal endpoint, the shutdown -- is the same in all three cases,
+because there is one template and one set of rules about what may leave this
+process.
 
 Security model (see docs/review-page.md):
 
@@ -50,6 +51,7 @@ JSON_TYPE = "application/json"
 
 ORGANIZE = "organize"
 STORAGE = "storage"
+COMBINED = "combined"
 
 ApplyFn = Callable[..., Any]
 DisposeFn = Callable[..., Any]
@@ -142,13 +144,44 @@ class ReviewState:
         self.port = 0
         self.home = Path(home) if home is not None else self._home_of(plan)
         self.managed_dir = Path(managed_dir) if managed_dir is not None else None
-        caps = dict(plan.get("capabilities") or {})
-        caps["permanent_delete_enabled"] = bool(allow_permanent_delete)
-        self.plan["capabilities"] = caps
+        for document in self._documents():
+            caps = dict(document.get("capabilities") or {})
+            caps["permanent_delete_enabled"] = bool(allow_permanent_delete)
+            document["capabilities"] = caps
+
+    def _documents(self) -> List[Dict[str, Any]]:
+        """The one or two documents this run is about, in the order they render."""
+
+        if self.kind != COMBINED:
+            return [self.plan]
+        return [half for half in (self.organize_doc, self.storage_doc) if half]
+
+    @property
+    def organize_doc(self) -> Dict[str, Any]:
+        """The tidy-up half, or an empty dict when this run has none."""
+
+        if self.kind == STORAGE:
+            return {}
+        if self.kind == ORGANIZE:
+            return self.plan
+        inner = self.plan.get("plan")
+        return inner if isinstance(inner, dict) else {}
+
+    @property
+    def storage_doc(self) -> Dict[str, Any]:
+        """The whole-machine half, or an empty dict when this run has none."""
+
+        if self.kind == ORGANIZE:
+            return {}
+        if self.kind == STORAGE:
+            return self.plan
+        inner = self.plan.get("analysis")
+        return inner if isinstance(inner, dict) else {}
 
     def _home_of(self, plan: Dict[str, Any]) -> Path:
-        if self.kind == ORGANIZE:
-            return Path(paths.plan_home(plan))
+        organize = self.organize_doc
+        if organize:
+            return Path(paths.plan_home(organize))
         return Path.home()
 
     @property
@@ -177,10 +210,17 @@ class ReviewState:
         the engine, so stripping here costs the acting path nothing.
         """
 
-        if self.kind == STORAGE:
+        if self.kind == ORGANIZE:
+            data = paths.strip_absolute(self.plan)
+        elif self.kind == STORAGE:
             data = render_module.sanitize(self.plan, self.home)
         else:
-            data = paths.strip_absolute(self.plan)
+            data = {}
+            if self.organize_doc:
+                data["plan"] = paths.strip_absolute(self.organize_doc)
+            if self.storage_doc:
+                data["analysis"] = render_module.sanitize(self.storage_doc, self.home)
+            data["capabilities"] = dict((self.storage_doc or self.organize_doc).get("capabilities") or {})
         data["executed_ids"] = list(self.executed_ids)
         return data
 
@@ -203,7 +243,8 @@ class ReviewState:
             raise ServerError(str(error)) from error
 
     def kinds_for(self, action_ids: List[str]) -> Dict[str, str]:
-        index = {str(a.get("id")): str(a.get("kind", "")) for a in self.plan.get("actions") or [] if isinstance(a, dict)}
+        actions = (self.organize_doc or {}).get("actions") or []
+        index = {str(a.get("id")): str(a.get("kind", "")) for a in actions if isinstance(a, dict)}
         return {i: index.get(i, "") for i in action_ids}
 
 
@@ -357,9 +398,9 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def _endpoints(self) -> Dict[str, Callable[[Dict[str, Any]], None]]:
         table: Dict[str, Callable[[Dict[str, Any]], None]] = {"/api/reveal": self._reveal}
-        if self.state.kind == ORGANIZE:
+        if self.state.organize_doc:
             table["/api/apply"] = self._apply
-        else:
+        if self.state.storage_doc:
             table["/api/dispose"] = self._dispose
         return table
 
@@ -414,7 +455,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
                     },
                 )
                 return
-            plan = copy.deepcopy(state.plan)
+            plan = copy.deepcopy(state.organize_doc)
             plan["approved_action_ids"] = list(action_ids)
             plan["overrides"] = list(overrides)
             plan["approved_at"] = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
@@ -487,7 +528,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
             }
             try:
                 report = state.dispose_fn(
-                    copy.deepcopy(state.plan),
+                    copy.deepcopy(state.storage_doc),
                     decisions,
                     dry_run=False,
                     allow_permanent_delete=state.allow_permanent_delete,
@@ -587,7 +628,7 @@ def build_server(
 
 
 def serve_review(
-    plan_path: Union[str, Path],
+    plan_path: Union[str, Path, Dict[str, Any]],
     *,
     host: str = "127.0.0.1",
     port: int = 0,
@@ -615,11 +656,10 @@ def serve_review(
         lang=lang,
     )
     state = server.gn_state  # type: ignore[attr-defined]
-    if state.kind == ORGANIZE:
-        if apply_fn is None:
-            # fail early with a clear line instead of a 422 on the first click
-            state.apply_fn  # noqa: B018
-    elif dispose_fn is None:
+    # fail early with a clear line instead of a 422 on the first click
+    if state.organize_doc and apply_fn is None:
+        state.apply_fn  # noqa: B018
+    if state.storage_doc and dispose_fn is None:
         state.dispose_fn  # noqa: B018
     bound_port = server.server_address[1]
     url = "http://127.0.0.1:{0}/?t={1}".format(bound_port, token)

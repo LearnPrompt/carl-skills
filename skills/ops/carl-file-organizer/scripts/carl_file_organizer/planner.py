@@ -1412,19 +1412,23 @@ def run(args: Any) -> int:
     write_plan(plan, where.plan)
     print(i18n.t("cli_plan_written", cfg.lang, path=where.plan))
 
-    try:
-        from . import render
+    # ``scan`` switches this off: it renders one combined report a step later,
+    # and a tidy-up-only page next to the plan would just be a second thing to
+    # open and a second thing to keep in step.
+    if bool(getattr(args, "write_report", True)):
+        try:
+            from . import render
 
-        where.report.write_text(
-            render.render(plan, mode="static", lang=cfg.lang), encoding="utf-8"
-        )
-    except Exception as error:  # noqa: BLE001 - the plan itself is the deliverable
-        print(
-            i18n.t("cli_report_skipped", cfg.lang, module="build_report.py")
-            + " ({0})".format(error)
-        )
-    else:
-        print(i18n.t("cli_report_written", cfg.lang, path=where.report))
+            where.report.write_text(
+                render.render(plan, mode="static", lang=cfg.lang), encoding="utf-8"
+            )
+        except Exception as error:  # noqa: BLE001 - the plan itself is the deliverable
+            print(
+                i18n.t("cli_report_skipped", cfg.lang, module="build_report.py")
+                + " ({0})".format(error)
+            )
+        else:
+            print(i18n.t("cli_report_written", cfg.lang, path=where.report))
 
     approvable = sum(1 for action in plan["actions"] if action["approvable"])
     print(

@@ -840,16 +840,42 @@ def run(args: Any) -> int:
 
     analysis = _read_json(Path(getattr(args, "analysis")), "analysis.json")
     decisions = _read_json(Path(getattr(args, "decisions")), "decisions.json")
-    lang = str(analysis.get("lang") or getattr(args, "lang", None) or "en")
-    if lang not in TEXT:
-        lang = "en"
-    dry_run = bool(getattr(args, "dry_run", False))
+    return run_document(
+        analysis,
+        decisions,
+        dry_run=bool(getattr(args, "dry_run", False)),
+        allow_permanent_delete=bool(getattr(args, "allow_permanent_delete", False)),
+        lang=getattr(args, "lang", None),
+    )
+
+
+def run_document(
+    analysis: Mapping[str, Any],
+    decisions: Mapping[str, Any],
+    *,
+    dry_run: bool = False,
+    allow_permanent_delete: bool = False,
+    managed: Optional[Path] = None,
+    lang: Optional[str] = None,
+) -> int:
+    """Act on one decisions document and print what the CLI has always printed.
+
+    Split out of :func:`run` so the combined decisions file can hand over the
+    analysis it carries without writing it back to disk first, and so the paper
+    trail can land in the same managed folder as the tidy-up half.
+    """
+
+    speech = str(analysis.get("lang") or lang or "en")
+    if speech not in TEXT:
+        speech = "en"
+    lang = speech
 
     report = apply_decisions(
         analysis,
         decisions,
         dry_run=dry_run,
-        allow_permanent_delete=bool(getattr(args, "allow_permanent_delete", False)),
+        allow_permanent_delete=allow_permanent_delete,
+        managed_dir=managed,
     )
     for record in report.results:
         print(

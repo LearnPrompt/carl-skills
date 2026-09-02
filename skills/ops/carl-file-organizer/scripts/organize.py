@@ -7,26 +7,35 @@ directory at the front of ``sys.path`` and hands over to the package CLI.  That
 is the whole job; every flag and every subcommand lives in
 ``carl_file_organizer/cli.py``.
 
-Usage (run it with any Python 3.9 or newer; there are no dependencies):
+Three commands do the job (any Python 3.9 or newer; there are no dependencies):
+
+    python3 organize.py scan   ~/Downloads --lang zh
+    python3 organize.py report ~/Downloads/00_下载目录管理
+    python3 organize.py apply  <decisions.json> --dry-run
+
+``scan`` reads the folder and, unless you pass ``--no-storage``, the machine,
+and writes plan.json and storage-scan.json into the folder's managed directory.
+The Agent then writes notes.json and analysis.json next to them.  ``report``
+turns whatever that directory holds into one page: the cleanup and the moves in
+the same three colour bands, the after picture below them, and one button that
+exports one decisions file (or, with ``--serve``, runs the lot straight away).
+``apply`` acts on that file, the moves first and the cleanup second.
+
+The same work split into steps, for when you want one piece on its own:
 
     python3 organize.py plan  ~/Downloads --lang zh
-    python3 organize.py build ~/Downloads/00_.../plan.json --notes notes.json
+    python3 organize.py build <plan.json> --notes notes.json --report
     python3 organize.py review <plan.json> --serve
-    python3 organize.py apply  <approved.json>
+    python3 organize.py storage-report <analysis.json> [--serve]
+    python3 organize.py dispose <analysis.json> <decisions.json> --dry-run
     python3 organize.py undo   <audit.jsonl>
     python3 organize.py status ~/Downloads
     python3 organize.py clear-tags ~/Downloads
     python3 organize.py --version
 
-The second entrance, the whole-machine inventory, shares the same engine:
-
-    python3 storage_scan.py --out storage-scan.json      # read only
-    python3 organize.py storage-report <analysis.json> [--serve]
-    python3 organize.py dispose <analysis.json> <decisions.json> --dry-run
-
-``plan``, ``status`` and ``storage-report`` only read.  ``build`` only rewrites
-the plan's prose.  ``apply`` and ``dispose`` are the two that touch anything, and
-they touch only the ids you approved.
+``scan``, ``report``, ``plan``, ``status`` and ``storage-report`` only read.
+``build`` only rewrites the plan's prose.  ``apply`` and ``dispose`` are the two
+that touch anything, and they touch only the ids you approved.
 """
 
 import os
