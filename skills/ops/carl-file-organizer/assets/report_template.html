@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="__REPORT_LANG__">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>__REPORT_TITLE__</title>
+<!--
+  carl-file-organizer v0.3 report template. One file, three shapes
+  (data-kind="combined" | "organize" | "storage"), two modes
+  (data-mode="static" | "serve"). "combined" is the one people see: cleanup and
+  moves in the same three colour bands, the after picture below them, and one
+  button at the foot that exports or runs the lot.
+  build_report.py fills the __REPORT_*__ slots; the page loads nothing from the
+  network, so it works from file:// with zero requests.
+  All copy lives in the TEXT block right below (zh + en).
+-->
+<script id="report-text" type="application/json">
+{
+  "zh": {
+    "title_organize": "整理方案",
+    "title_storage": "整机盘点",
+    "title_combined": "整理与清理",
+    "heading_organize": "这个目录，先看再动",
+    "heading_storage": "这台机器的空间，谁能清谁不能",
+    "heading_combined": "该清的、该搬的、搬完长什么样",
+    "lede_organize": "扫描只读，一个文件都没动。页面上每一项都要你亲手勾选、亲手确认，它才会执行。",
+    "lede_storage": "扫描只读，一个文件都没动。绿的可以清，黄的你看一眼再定，红的别动。",
+    "lede_combined": "扫描只读，一个文件都没动。清理和搬动写在同一页，勾完在底下一次点掉，最后那张图是搬完的样子。",
+    "cb_green": "放心做，勾上就走",
+    "cb_green_desc": "缓存和构建产物删了会自己长回来，规则明确的移动只改路径不改内容。",
+    "cb_yellow": "你看一眼再定",
+    "cb_yellow_desc": "里面可能有你的数据，或者去向还没定。这里每一步都能撤回。",
+    "cb_red": "别动",
+    "cb_red_desc": "禁刀区、系统核心、正被占用、被别处引用、还在静置期。只说为什么，不给按钮。",
+    "sub_clean": "清理",
+    "sub_move": "搬动",
+    "preview_title": "整理后长这样",
+    "preview_note": "橙的会搬，空心的留下，右边是本机上待清的。",
+    "bar_dir": "目录",
+    "bar_machine": "机器",
+    "bar_time": "扫描时间",
+    "bar_mode": "模式",
+    "mode_static": "静态页面",
+    "mode_serve": "本地服务",
+    "serve_note": "本页只在这台机器可见，关掉终端即失效。",
+    "mess_title": "杂乱度",
+    "mess_green": "整洁",
+    "mess_yellow": "有点乱",
+    "mess_red": "泥石流",
+    "color_split": "三色占比",
+    "mess_fallback": "{entries} 项散件，{pending} 项待判断，{groups} 组重复或配对，{holds} 项这轮不动。",
+    "count_scattered": "散件",
+    "count_loose": "散件",
+    "count_pending": "待判断",
+    "count_duplicate": "重复配对",
+    "count_groups": "重复配对",
+    "count_aging": "静置中",
+    "count_top_dirs": "顶层散目录",
+    "legend_green": "放心归位",
+    "legend_yellow": "你看一眼",
+    "legend_red": "别动",
+    "sec_green": "放心归位，勾上就走",
+    "sec_green_desc": "规则明确的移动、敏感命名隔离、可再生产物。移动只改路径不删内容。",
+    "sec_yellow": "你看一眼再定",
+    "sec_yellow_desc": "待判断的、成对的压缩包、重复的副本、冷存候选。这里的每一步都能撤回。",
+    "sec_red": "别动",
+    "sec_red_desc": "禁刀区、正被占用、被别处引用、还在静置期。只告诉你为什么，没有任何删除按钮。",
+    "st_sec_green": "可以直接清",
+    "st_sec_green_desc": "纯缓存和构建产物，删了会自己长回来。",
+    "st_sec_yellow": "你看一眼再定",
+    "st_sec_yellow_desc": "里面有你的数据，或者只是暂时没用上。这里最多进废纸篓，随时能捞回来。",
+    "st_sec_red": "别动",
+    "st_sec_red_desc": "系统核心、正在被用、动了就坏。只告诉你它是什么，不给按钮。",
+    "advice_title": "先做什么",
+    "advice_green": "{n} 项可以直接归位或清掉，一键勾上。",
+    "advice_yellow": "{n} 项要你看一眼，每张卡片都写了为什么。",
+    "advice_red": "{n} 项这轮别动，原因在红区。",
+    "advice_none": "这个目录挺干净，没什么要做的。",
+    "btn_pick_green": "勾选全部绿项",
+    "top5_title": "最大的五项",
+    "th_color": "",
+    "th_size": "大小",
+    "th_kind": "类型",
+    "th_name": "名字",
+    "th_path": "路径",
+    "th_note": "一句话",
+    "disk_title": "磁盘",
+    "disk_used": "已用 {used} / {total}",
+    "disk_free": "可用 {free}",
+    "seg_other": "其他占用",
+    "seg_free": "可用",
+    "sys_title": "这台机器",
+    "sys_os": "系统",
+    "sys_cpu": "处理器",
+    "sys_mem": "内存",
+    "sys_uptime": "开机",
+    "sys_uptime_days": "{n} 天",
+    "sys_host": "主机名",
+    "sys_scanned": "扫描覆盖",
+    "sys_elapsed": "耗时",
+    "sys_reclaim": "可释放",
+    "sys_denied": "没权限看的目录",
+    "longterm_title": "长期建议",
+    "aging_title": "静置中的到期时间",
+    "aging_line": "{name} 静置到 {time}",
+    "undo_hint": "执行过的任何一批都能撤销，跑 organize.py undo，或者照清单里的 mv 命令原路放回。",
+    "pledge": "移动只改路径不删内容，任何软件找不到文件时，用 undo 或清单里的 mv 命令原路放回。",
+    "pledge_more": "计划生成后先别改动这些文件和目录，改过的条目执行时会被跳过，重新 plan 即可。",
+    "disk_note": "同一卷上移动释放 0 字节，只有进废纸篓和永久删除的行会腾出空间。",
+    "expand": "展开",
+    "collapse": "收起",
+    "expand_all": "全部展开",
+    "collapse_all": "全部收起",
+    "path": "路径",
+    "what": "这是什么",
+    "why": "为什么这么判",
+    "if_removed": "动了会怎样",
+    "restore": "怎么恢复",
+    "commands": "命令",
+    "copy": "复制",
+    "copied": "已复制",
+    "reveal": "打开所在位置",
+    "reveal_done": "已打开所在位置",
+    "opt_trash": "移到废纸篓（可逆）",
+    "opt_delete": "永久删除",
+    "keep_here": "留在原处",
+    "adopt_group": "采纳这组",
+    "members": "成员",
+    "to_dest": "归到 {dest}",
+    "change_dest": "改去向",
+    "trash_paths": "会进废纸篓的路径",
+    "kill_processes": "执行前要先退出",
+    "toggle_permanent": "显示永久删除选项",
+    "permanent_not_enabled": "服务启动时没加 --allow-permanent-delete，永久删除在本页不可用。",
+    "permanent_static_note": "导出后执行时也要加 --allow-permanent-delete，否则整批拒绝。",
+    "no_trash_backend": "本机没有废纸篓后端，进废纸篓的选项已隐藏。",
+    "confirm_delete": "永久删除 {path}（{size}）？删掉就没了，废纸篓里也找不到。",
+    "confirm_apply": "将执行 {moves} 项移动、{trash} 项进废纸篓、{delete} 项永久删除，预计释放 {bytes}。继续？",
+    "confirm_dispose": "将把 {trash} 项移到废纸篓、{delete} 项永久删除，预计释放 {bytes}。继续？",
+    "confirm_dry": "只预演一遍，不动任何文件。先走一遍这 {n} 项？",
+    "confirm_shutdown": "停掉本地服务？之后要重新运行 review --serve。",
+    "nothing_selected": "还什么都没勾。",
+    "exported_note": "批准文件已下载，把它交给 organize.py apply。",
+    "exported_decisions": "决定清单已下载，把它交给 organize.py dispose。",
+    "exported_all": "决定清单已下载，把它交给 organize.py apply，先预演再执行。",
+    "empty": "这一组是空的。",
+    "footer_count": "已选 {moves} 项移动 · {trash} 项进废纸篓 · {delete} 项永久删除 · 预计释放 {bytes}",
+    "footer_count_storage": "已选 {trash} 项进废纸篓 · {delete} 项永久删除 · 预计释放 {bytes}",
+    "btn_export": "导出批准文件",
+    "btn_export_decisions": "导出决定清单",
+    "btn_apply": "执行已选",
+    "btn_apply_all": "执行全部已选",
+    "btn_dry": "先预演",
+    "btn_section": "执行本组已选",
+    "btn_select_all": "本组全选",
+    "btn_clear_all": "本组清空",
+    "btn_shutdown": "停止服务",
+    "status_working": "处理中",
+    "status_moved": "已移动",
+    "status_trashed": "已进废纸篓",
+    "status_deleted": "已删除",
+    "status_dry": "预演通过",
+    "status_failed": "失败了，去终端看原因",
+    "status_skipped": "已跳过",
+    "status_refused": "被拒绝",
+    "status_done": "已完成",
+    "request_failed": "请求失败，{status} {detail}",
+    "network_failed": "连不上本地服务，终端可能已经关掉。",
+    "hint": "提示",
+    "tags": "标签",
+    "dir_files": "{n} 个文件",
+    "dir_files_trunc": "至少 {n} 个文件",
+    "dir_label": "目录",
+    "sensitive_label": "敏感命名",
+    "pending_label": "待判断",
+    "ready_at": "静置到 {time}",
+    "open_by": "被进程占用",
+    "referenced_in": "被引用",
+    "symlinks": "被软链指向",
+    "shape": "目录形态",
+    "potential": "可腾出 {bytes}",
+    "restore_trash": "废纸篓里选放回原处",
+    "restore_delete": "删了就没了",
+    "footer_static_hint": "导出的文件会落在浏览器的下载目录，下次扫描前把它交给 apply 或者收走。",
+    "print_hint": "打印版只留清单，按钮都藏起来。",
+    "kind_cache": "缓存",
+    "kind_build": "构建产物",
+    "kind_app-data": "应用数据",
+    "kind_installer": "安装包",
+    "kind_media": "媒体库",
+    "kind_system": "系统",
+    "kind_log": "日志",
+    "kind_other": "其他",
+    "badge": {
+      "aging": "静置中",
+      "in_use": "被占用",
+      "referenced": "被引用",
+      "forbidden": "禁刀区",
+      "pinned": "常驻",
+      "pending": "待判断",
+      "pair": "成对",
+      "duplicate": "重复",
+      "regenerable": "可再生",
+      "cold": "冷存",
+      "sensitive": "敏感命名",
+      "dir": "目录",
+      "dev_cache": "开发缓存",
+      "app_data": "应用数据",
+      "build_artifact": "构建产物",
+      "cache": "缓存",
+      "installer": "安装包",
+      "media": "媒体",
+      "project": "项目",
+      "unknown": "未知"
+    }
+  },
+  "en": {
+    "title_organize": "Tidy-up plan",
+    "title_storage": "Storage check",
+    "title_combined": "Clear out and tidy up",
+    "heading_organize": "Look first, then move",
+    "heading_storage": "What on this machine can go, and what cannot",
+    "heading_combined": "What to clear, what to move, and how it ends up",
+    "lede_organize": "The scan was read-only and nothing has been touched. Every item on this page runs only after you tick it and confirm.",
+    "lede_storage": "The scan was read-only and nothing has been touched. Green can go, yellow deserves a look, red stays.",
+    "lede_combined": "The scan was read-only and nothing has been touched. Cleanup and moves share one page, one button at the bottom runs the lot, and the picture at the end is what you get.",
+    "cb_green": "Safe to do, tick and go",
+    "cb_green_desc": "Caches and build output grow back on their own; clear-cut moves change the path, never the contents.",
+    "cb_yellow": "Have a look first",
+    "cb_yellow_desc": "May hold your own data, or the destination is not settled yet. Every step here can be undone.",
+    "cb_red": "Leave it",
+    "cb_red_desc": "No-go zone, system core, in use, referenced elsewhere, still settling. Explained only, no buttons.",
+    "sub_clean": "Clear out",
+    "sub_move": "Move",
+    "preview_title": "How it ends up",
+    "preview_note": "Filled dots move, hollow ones stay, and the right-hand side is what gets cleared off this machine.",
+    "bar_dir": "Folder",
+    "bar_machine": "Machine",
+    "bar_time": "Scanned",
+    "bar_mode": "Mode",
+    "mode_static": "static page",
+    "mode_serve": "local server",
+    "serve_note": "This page is only reachable from this machine and stops working when the terminal closes.",
+    "mess_title": "Mess level",
+    "mess_green": "tidy",
+    "mess_yellow": "a bit messy",
+    "mess_red": "landslide",
+    "color_split": "By colour",
+    "mess_fallback": "{entries} loose entries, {pending} undecided, {groups} duplicate or pair groups, {holds} left alone this round.",
+    "count_scattered": "loose",
+    "count_loose": "loose",
+    "count_pending": "undecided",
+    "count_duplicate": "dup / pair",
+    "count_groups": "dup / pair",
+    "count_aging": "settling",
+    "count_top_dirs": "loose folders",
+    "legend_green": "safe to file",
+    "legend_yellow": "have a look",
+    "legend_red": "leave it",
+    "sec_green": "Safe to file, tick and go",
+    "sec_green_desc": "Clear-cut moves, sensitive names set aside, regenerable output. Moves change the path, never the contents.",
+    "sec_yellow": "Have a look first",
+    "sec_yellow_desc": "Undecided files, archive pairs, duplicate copies, cold candidates. Every step here can be undone.",
+    "sec_red": "Leave it",
+    "sec_red_desc": "No-go zone, in use, referenced elsewhere, still settling. Explained only, no delete buttons.",
+    "st_sec_green": "Safe to clear",
+    "st_sec_green_desc": "Pure caches and build output; they grow back on their own.",
+    "st_sec_yellow": "Have a look first",
+    "st_sec_yellow_desc": "Holds your data, or is just unused for now. Trash at most, and the Trash gives it back.",
+    "st_sec_red": "Leave it",
+    "st_sec_red_desc": "System core, in use, or breaks when touched. Explained only, no buttons.",
+    "advice_title": "What to do first",
+    "advice_green": "{n} items can be filed or cleared right away; tick them all at once.",
+    "advice_yellow": "{n} items need a look; every card says why.",
+    "advice_red": "{n} items stay untouched this round; the reasons are in the red section.",
+    "advice_none": "This folder is in good shape. Nothing to do.",
+    "btn_pick_green": "Tick every green item",
+    "top5_title": "Five largest",
+    "th_color": "",
+    "th_size": "Size",
+    "th_kind": "Type",
+    "th_name": "Name",
+    "th_path": "Path",
+    "th_note": "In a sentence",
+    "disk_title": "Disks",
+    "disk_used": "{used} of {total} used",
+    "disk_free": "{free} free",
+    "seg_other": "other",
+    "seg_free": "free",
+    "sys_title": "This machine",
+    "sys_os": "System",
+    "sys_cpu": "Processor",
+    "sys_mem": "Memory",
+    "sys_uptime": "Up for",
+    "sys_uptime_days": "{n} days",
+    "sys_host": "Host",
+    "sys_scanned": "Scanned",
+    "sys_elapsed": "Took",
+    "sys_reclaim": "Reclaimable",
+    "sys_denied": "Folders without permission",
+    "longterm_title": "Longer term",
+    "aging_title": "Still settling",
+    "aging_line": "{name} settles at {time}",
+    "undo_hint": "Any applied batch can be undone by running organize.py undo, or by following the mv commands in the manifest.",
+    "pledge": "Moves only change the path, never the contents. If any software cannot find a file, run undo or the mv command in the manifest.",
+    "pledge_more": "Leave these files alone until you apply the plan; anything changed in between is skipped, and a fresh plan fixes that.",
+    "disk_note": "Moving files on the same volume reclaims 0 bytes; only the trash and permanent-delete rows free up space.",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "expand_all": "Expand all",
+    "collapse_all": "Collapse all",
+    "path": "Path",
+    "what": "What it is",
+    "why": "Why this call",
+    "if_removed": "What happens if you act",
+    "restore": "How to restore",
+    "commands": "Commands",
+    "copy": "Copy",
+    "copied": "Copied",
+    "reveal": "Open its location",
+    "reveal_done": "Opened its location",
+    "opt_trash": "Move to Trash (reversible)",
+    "opt_delete": "Delete permanently",
+    "keep_here": "Keep in place",
+    "adopt_group": "Adopt this group",
+    "members": "Members",
+    "to_dest": "File under {dest}",
+    "change_dest": "Change destination",
+    "trash_paths": "Paths that go to the Trash",
+    "kill_processes": "Quit first",
+    "toggle_permanent": "Show permanent delete options",
+    "permanent_not_enabled": "The server was started without --allow-permanent-delete, so permanent deletion is unavailable here.",
+    "permanent_static_note": "Apply the exported file with --allow-permanent-delete, otherwise the whole batch is refused.",
+    "no_trash_backend": "No trash backend on this machine; the trash options are hidden.",
+    "confirm_delete": "Permanently delete {path} ({size})? It will not be in the Trash afterwards.",
+    "confirm_apply": "Run {moves} moves, {trash} to Trash and {delete} permanent deletes, reclaiming about {bytes}. Continue?",
+    "confirm_dispose": "Send {trash} items to the Trash and permanently delete {delete}, reclaiming about {bytes}. Continue?",
+    "confirm_dry": "Dry run only, nothing is touched. Walk through these {n} items first?",
+    "confirm_shutdown": "Stop the local server? You will need to run review --serve again.",
+    "nothing_selected": "Nothing ticked yet.",
+    "exported_note": "The approval file was downloaded. Hand it to organize.py apply.",
+    "exported_decisions": "The decisions file was downloaded. Hand it to organize.py dispose.",
+    "exported_all": "The decisions file was downloaded. Hand it to organize.py apply, dry run first.",
+    "empty": "This group is empty.",
+    "footer_count": "{moves} moves · {trash} to Trash · {delete} permanent deletes · about {bytes} reclaimed",
+    "footer_count_storage": "{trash} to Trash · {delete} permanent deletes · about {bytes} reclaimed",
+    "btn_export": "Export approved plan",
+    "btn_export_decisions": "Export decisions",
+    "btn_apply": "Apply ticked items",
+    "btn_apply_all": "Run everything ticked",
+    "btn_dry": "Dry run first",
+    "btn_section": "Apply this group",
+    "btn_select_all": "Select all here",
+    "btn_clear_all": "Clear all here",
+    "btn_shutdown": "Stop server",
+    "status_working": "Working",
+    "status_moved": "Moved",
+    "status_trashed": "In Trash",
+    "status_deleted": "Deleted",
+    "status_dry": "Dry run passed",
+    "status_failed": "Failed, the terminal has the reason",
+    "status_skipped": "Skipped",
+    "status_refused": "Refused",
+    "status_done": "Done",
+    "request_failed": "Request failed, {status} {detail}",
+    "network_failed": "Cannot reach the local server; the terminal may have been closed.",
+    "hint": "Hint",
+    "tags": "Tags",
+    "dir_files": "{n} files",
+    "dir_files_trunc": "at least {n} files",
+    "dir_label": "folder",
+    "sensitive_label": "sensitive name",
+    "pending_label": "undecided",
+    "ready_at": "settles at {time}",
+    "open_by": "Held open by",
+    "referenced_in": "Referenced in",
+    "symlinks": "Symlinked from",
+    "shape": "Folder shape",
+    "potential": "frees {bytes}",
+    "restore_trash": "Put Back from the Trash",
+    "restore_delete": "Gone for good",
+    "footer_static_hint": "The export lands in the browser download folder; hand it to apply or move it away before the next scan.",
+    "print_hint": "The print version keeps the list and hides the buttons.",
+    "kind_cache": "cache",
+    "kind_build": "build output",
+    "kind_app-data": "app data",
+    "kind_installer": "installer",
+    "kind_media": "media library",
+    "kind_system": "system",
+    "kind_log": "logs",
+    "kind_other": "other",
+    "badge": {
+      "aging": "settling",
+      "in_use": "in use",
+      "referenced": "referenced",
+      "forbidden": "no-go",
+      "pinned": "pinned",
+      "pending": "undecided",
+      "pair": "pair",
+      "duplicate": "duplicate",
+      "regenerable": "regenerable",
+      "cold": "cold storage",
+      "sensitive": "sensitive name",
+      "dir": "folder",
+      "dev_cache": "dev cache",
+      "app_data": "app data",
+      "build_artifact": "build output",
+      "cache": "cache",
+      "installer": "installer",
+      "media": "media",
+      "project": "project",
+      "unknown": "unknown"
+    }
+  }
+}
+</script>
+<style>
+:root{
+  --bg:#f6f7f9;--card:#ffffff;--ink:#1d2129;--muted:#86909c;--line:#e5e6eb;--line-soft:#f2f3f5;
+  --green:#00b42a;--green-bg:#e8ffea;--yellow:#ff7d00;--yellow-bg:#fff7e8;--red:#f53f3f;--red-bg:#ffece8;
+  --other:#c9cdd4;
+  --radius:14px;--radius-s:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.04);
+  --sans:-apple-system,"PingFang SC","Segoe UI","Noto Sans CJK SC","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Noto Sans Mono CJK SC",monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono);font-size:13px}
+.sub{color:var(--muted);font-size:13px;line-height:1.55}
+h1{font-size:26px;font-weight:700;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:18px;font-weight:700;line-height:1.4;margin:0}
+h3{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin:0 0 12px;text-transform:uppercase}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 24px;margin-top:16px}
+.card h2{margin-bottom:8px}
+
+/* top bar */
+.bar{position:sticky;top:0;z-index:6;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--line)}
+.bar .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 24px;padding:14px 0}
+.bar .brand{font-weight:700;font-size:15px;margin-right:auto}
+.bar .cell{display:flex;gap:6px;align-items:baseline;min-width:0;max-width:100%}
+.bar .k{color:var(--muted);font-size:12px;white-space:nowrap}
+.bar .v{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .v.mono{font-size:12px}
+.serve-line{border-top:1px solid var(--line-soft);padding:6px 0;font-size:12px;color:var(--muted)}
+
+.intro{padding:28px 0 0}
+.lede{margin:0;color:var(--muted)}
+
+/* overview grid */
+.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;align-items:stretch}
+.grid2>.card{margin-top:16px}
+.mess{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.mess .big{font-size:56px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.mess .big small{font-size:16px;font-weight:600;color:var(--muted);margin-left:4px;letter-spacing:0}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:600;line-height:20px;vertical-align:middle}
+.pill.green{background:var(--green-bg);color:var(--green)}
+.pill.yellow{background:var(--yellow-bg);color:var(--yellow)}
+.pill.red{background:var(--red-bg);color:var(--red)}
+.chips{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0}
+.chips span{font-size:12px;color:var(--muted)}
+.chips b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.segbar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--line);margin:14px 0 10px}
+.seg{height:100%;flex:none}
+.seg.green{background:var(--green)}
+.seg.yellow{background:var(--yellow)}
+.seg.red{background:var(--red)}
+.seg.other{background:var(--other)}
+.seg.free{background:transparent}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}
+.legend b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:-1px;margin-right:6px;background:var(--other)}
+.dot.green{background:var(--green)}
+.dot.yellow{background:var(--yellow)}
+.dot.red{background:var(--red)}
+.line{margin:12px 0 0;font-size:15px}
+.advice ol{margin:0;padding-left:20px}
+.advice li{margin:6px 0}
+.advice .tools{margin-top:12px}
+.longterm ul{margin:0;padding-left:20px}
+.longterm li{margin:6px 0}
+.notes p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+
+/* disks */
+.disk{padding:12px 0;border-top:1px solid var(--line-soft)}
+.disk:first-of-type{border-top:0;padding-top:0}
+.disk .head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.disk .name{font-weight:600}
+.disk .segbar{margin:10px 0 8px}
+.sys{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 20px}
+.sys .k{display:block;color:var(--muted);font-size:12px}
+.sys .v{display:block;font-size:14px;overflow-wrap:anywhere}
+
+/* top5 table */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th{text-align:left;color:var(--muted);font-weight:500;font-size:12px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.size{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+td.c{width:24px;padding-right:0}
+
+/* sections */
+.sec{margin-top:32px}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:0 4px 10px}
+.sec-head .count{color:var(--muted);font-weight:500;margin-left:8px;font-size:15px}
+.sec-head p{margin:2px 0 0}
+.sec-tools{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;align-items:center}
+.sec-tools .switch{font-size:13px;color:var(--muted);white-space:nowrap}
+.sec[data-color=green] .sec-head h2 .dot{background:var(--green)}
+.sec[data-color=yellow] .sec-head h2 .dot{background:var(--yellow)}
+.sec[data-color=red] .sec-head h2 .dot{background:var(--red)}
+.empty{padding:16px 24px;margin:0;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+.subhead{margin:18px 0 6px;padding:0 4px}
+.subhead:first-child{margin-top:4px}
+.subhead .n{margin-left:8px;font-weight:500;letter-spacing:0;font-variant-numeric:tabular-nums}
+
+/* combined page: the after picture */
+.preview-wrap{margin-top:32px}
+.preview-wrap .sec-head{padding-bottom:10px}
+.preview-wrap .cfo-preview{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.overview .block{margin-top:20px;padding-top:16px;border-top:1px solid var(--line-soft)}
+
+/* item cards */
+.item{position:relative;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-top:10px;overflow:hidden}
+.item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--other)}
+.item[data-color=green]::before{background:var(--green)}
+.item[data-color=yellow]::before{background:var(--yellow)}
+.item[data-color=red]::before{background:var(--red)}
+.item-head{display:flex;align-items:center;gap:12px;padding:14px 18px 14px 20px;cursor:pointer;user-select:none}
+.item-head .pick{flex:none;display:flex;align-items:center}
+.item-head .title{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.item-head .name{font-weight:600;overflow-wrap:anywhere}
+.item-head .size{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.item-head .gn-status{white-space:nowrap;font-size:13px;color:var(--muted);min-width:0}
+.item.done .gn-status{color:var(--green)}
+.item.failed .gn-status{color:var(--red);font-weight:600}
+.item.working .gn-status{color:var(--muted)}
+.item.done .name{color:var(--muted);text-decoration:line-through}
+.chev{flex:none;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);position:relative;background:transparent}
+.chev::after{content:"";position:absolute;left:6px;top:4px;width:5px;height:5px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg)}
+.item.open .chev::after{transform:rotate(225deg);top:7px}
+.badge{display:inline-block;padding:0 8px;border-radius:999px;font-size:12px;line-height:20px;font-weight:500;background:var(--line-soft);color:var(--muted);white-space:nowrap}
+.badge.dest{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:12px}
+.badge.green{background:var(--green-bg);color:var(--green)}
+.badge.yellow{background:var(--yellow-bg);color:var(--yellow)}
+.badge.red{background:var(--red-bg);color:var(--red)}
+.item-body{display:none;padding:0 18px 16px 20px;border-top:1px solid var(--line-soft)}
+.item.open .item-body{display:block}
+.item-body .path{margin:12px 0 0;color:var(--muted);overflow-wrap:anywhere}
+.item-body dl{display:grid;grid-template-columns:minmax(88px,auto) 1fr;gap:6px 14px;margin:12px 0 0}
+.item-body dt{color:var(--muted);font-size:13px;white-space:nowrap}
+.item-body dd{margin:0}
+.item-body .sub+.sub{margin-top:2px}
+.members{list-style:none;margin:12px 0 0;padding:0}
+.members li{padding:6px 0;border-top:1px solid var(--line-soft);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.members li:first-child{border-top:0}
+.members .mono{color:var(--muted)}
+.cmd{position:relative;margin:10px 0 0;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-s);padding:10px 84px 10px 12px;font-family:var(--mono);font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.cmd code{font:inherit}
+.cmd .copy{position:absolute;right:8px;top:7px}
+.controls{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft)}
+.choice{white-space:nowrap;font-size:14px}
+.choice.needs-permanent{color:var(--red)}
+body[data-permanent="off"] .needs-permanent{display:none}
+input[type=checkbox],input[type=radio]{accent-color:var(--ink);width:16px;height:16px;margin:0 6px 0 0;vertical-align:-3px;cursor:pointer}
+select.gn-dest{height:34px;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--card);color:var(--ink);padding:0 10px;max-width:100%;font:inherit;font-size:13px;font-family:var(--mono)}
+
+/* buttons */
+.btn{height:36px;padding:0 16px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--line);border-radius:var(--radius-s);background:var(--card);color:var(--ink);white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#ffffff}
+.btn.primary:hover{background:#000000}
+.btn.small{height:28px;padding:0 10px;font-size:12px}
+.btn:disabled,.btn.primary:disabled{background:var(--bg);border-color:var(--line);color:var(--muted);cursor:not-allowed}
+
+/* footer */
+.foot{position:sticky;bottom:0;z-index:6;background:rgba(255,255,255,.94);backdrop-filter:saturate(1.2) blur(8px);border-top:1px solid var(--line);margin-top:32px}
+.foot-row{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:14px 0}
+.foot-buttons{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+#gn-count{font-weight:600}
+.colophon{padding:24px 0 40px;color:var(--muted);font-size:12px;text-align:center}
+
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+@media (max-width:640px){.wrap{padding:0 14px}.card{padding:16px}.mess .big{font-size:44px}.sec-head,.foot-row{flex-direction:column;align-items:stretch}.item-head{flex-wrap:wrap}.item-body dl{grid-template-columns:1fr}.item-body dt{margin-top:6px}}
+@media print{
+  .btn,.foot-buttons,.sec-tools,.switch,.chev,.controls,.serve-line,.preview-wrap{display:none!important}
+  .bar,.foot{position:static;background:#fff;backdrop-filter:none}
+  .item .item-body{display:block}
+  .card,.item,.empty{box-shadow:none;border:1px solid var(--line)}
+  body{font-size:12px;background:#fff}
+}
+</style>
+</head>
+<body data-kind="__REPORT_KIND__" data-mode="__REPORT_MODE__" data-permanent="off">
+__REPORT_BODY__
+<script id="report-data" type="application/json">__REPORT_DATA__</script>
+<script id="report-config" type="application/json">__REPORT_CONFIG__</script>
+<script>
+(function () {
+  function readJson(id) { return JSON.parse(document.getElementById(id).textContent); }
+  var config = readJson('report-config');
+  var texts = readJson('report-text');
+  window.GN = {
+    config: config,
+    data: readJson('report-data'),
+    text: texts[config.lang] || texts.zh,
+    token: config.token || '',
+    busy: false
+  };
+  var D = window.GN.data;
+  // One page shape, three payloads: a bare plan, a bare analysis, or the
+  // combined envelope that carries both halves under their own keys.
+  window.GN.planDoc = D.plan || (D.actions ? D : null);
+  window.GN.analysisDoc = D.analysis || (D.items ? D : null);
+  window.GN.plan = window.GN.planDoc || D;
+})();
+</script>
+<script>
+(function () {
+  var GN = window.GN, C = GN.config, T = GN.text, D = GN.data;
+  var KIND = C.kind, MODE = C.mode;
+  var PLAN = GN.planDoc, ANALYSIS = GN.analysisDoc;
+  var byId = {};
+  ((PLAN && PLAN.actions) || []).forEach(function (a) { byId[a.id] = a; });
+  ((ANALYSIS && ANALYSIS.items) || []).forEach(function (a) { byId[a.id] = a; });
+  var permanentOn = false;
+  var executed = {};
+  var touched = false;
+
+  function $(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function fmt(tpl, vars) { return String(tpl).replace(/\{(\w+)\}/g, function (m, k) { return vars[k] !== undefined ? vars[k] : m; }); }
+  function fmtBytes(n) {
+    var size = Number(n) || 0, units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    for (var i = 0; i < units.length; i++) {
+      if (size < 1024 || i === units.length - 1) return (i === 0 ? Math.round(size) : size.toFixed(1)) + ' ' + units[i];
+      size /= 1024;
+    }
+    return size.toFixed(1) + ' TB';
+  }
+  function hasId(el, id) { return (' ' + (el.dataset.ids || '') + ' ').indexOf(' ' + id + ' ') >= 0; }
+  function elementsFor(id) { return $('[data-ids]').filter(function (el) { return hasId(el, id); }); }
+  function message(text) { var el = document.getElementById('gn-message'); if (el) el.textContent = text || ''; }
+
+  /* ---- selection ---- */
+  function chosenFor(cb) {
+    var chosen = document.querySelector('input.gn-choice[name="' + cb.dataset.choice + '"]:checked');
+    return chosen && !chosen.disabled ? chosen : null;
+  }
+  function selection(root) {
+    var ids = [];
+    $('input.gn-pick:checked', root).forEach(function (cb) {
+      if (cb.disabled) return;
+      if (cb.dataset.actionId) { ids.push(cb.dataset.actionId); return; }
+      if (cb.dataset.itemId) {
+        var pick = chosenFor(cb);
+        ids.push({ id: cb.dataset.itemId, action: pick ? pick.dataset.action : 'trash' });
+        return;
+      }
+      var chosen = chosenFor(cb);
+      if (chosen) ids.push(chosen.value);
+    });
+    $('input.gn-adopt:checked', root).forEach(function (cb) {
+      if (cb.disabled) return;
+      var block = cb.closest('[data-group-id]');
+      var opt = block ? block.querySelector('input.gn-option:checked') : null;
+      if (opt && !opt.disabled) opt.dataset.actionIds.split(' ').forEach(function (id) { if (id && ids.indexOf(id) < 0) ids.push(id); });
+    });
+    return ids.filter(function (entry) { var id = typeof entry === 'string' ? entry : entry.id; return !executed[id]; });
+  }
+  function overrides() {
+    var out = [];
+    $('select.gn-dest').forEach(function (sel) {
+      if (sel.disabled) return;
+      if (sel.value !== sel.dataset.original) out.push({ action_id: sel.dataset.actionId, destination_key: sel.value });
+    });
+    return out;
+  }
+  function tally(ids) {
+    var t = { move: 0, trash: 0, delete: 0, bytes: 0 };
+    ids.forEach(function (entry) {
+      var id = typeof entry === 'string' ? entry : entry.id;
+      var a = byId[id]; if (!a) return;
+      var kind = typeof entry === 'string' ? a.kind : entry.action;
+      t[kind] = (t[kind] || 0) + 1;
+      t.bytes += Number(typeof entry === 'string' ? a.reclaims_bytes : a.size_bytes) || 0;
+    });
+    return t;
+  }
+  /* Tell the after picture what is ticked right now.  It stays quiet until the
+     first real interaction, so the page still opens on the full after state. */
+  function announce(ids) {
+    if (!touched && !ids.length) return;
+    if (typeof window.CustomEvent !== 'function') return;
+    var detail = { action_ids: [], item_ids: [] };
+    ids.forEach(function (e) { if (typeof e === 'string') detail.action_ids.push(e); else detail.item_ids.push(e.id); });
+    window.dispatchEvent(new CustomEvent('cfo:selection', { detail: detail }));
+  }
+  function split(ids) {
+    var out = { actions: [], items: [] };
+    ids.forEach(function (e) { if (typeof e === 'string') out.actions.push(e); else out.items.push(e); });
+    return out;
+  }
+  function refresh() {
+    var ids = selection();
+    var t = tally(ids);
+    var count = document.getElementById('gn-count');
+    if (count) count.textContent = KIND === 'storage'
+      ? fmt(T.footer_count_storage, { trash: t.trash, delete: t.delete, bytes: fmtBytes(t.bytes) })
+      : fmt(T.footer_count, { moves: t.move, trash: t.trash, delete: t.delete, bytes: fmtBytes(t.bytes) });
+    announce(ids);
+    if (GN.busy) return;
+    ['gn-main', 'gn-dry'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = ids.length === 0; });
+  }
+
+  /* ---- permanent delete gate ---- */
+  function fallbackChoice(input) {
+    var group = $('input[name="' + input.name + '"]');
+    var def = group.filter(function (i) { return i.dataset.default === '1' && !i.disabled; })[0]
+      || group.filter(function (i) { return !i.disabled && i !== input; })[0];
+    input.checked = false;
+    if (def) def.checked = true;
+  }
+  function applyPermanent() {
+    document.body.dataset.permanent = permanentOn ? 'on' : 'off';
+    $('.needs-permanent input').forEach(function (inp) {
+      if (inp.dataset.executed === '1') return;
+      inp.disabled = !permanentOn;
+      if (!permanentOn && inp.checked) fallbackChoice(inp);
+    });
+    refresh();
+  }
+
+  /* ---- status ---- */
+  function disableInputs(el) {
+    $('input, select', el).forEach(function (inp) {
+      if (inp.type === 'checkbox') inp.checked = false;
+      inp.disabled = true;
+      inp.dataset.executed = '1';
+    });
+    $('button[data-action="trash"], button[data-action="delete"]', el).forEach(function (b) { b.disabled = true; });
+  }
+  function setStatus(id, cls, text) {
+    elementsFor(id).forEach(function (el) {
+      el.classList.remove('working', 'done', 'failed');
+      if (cls) el.classList.add(cls);
+      var cell = el.querySelector('.gn-status');
+      if (cell) cell.textContent = text;
+      if (cls === 'done') disableInputs(el);
+    });
+  }
+  function markResults(results) {
+    (results || []).forEach(function (r) {
+      var id = r.action_id || r.item_id;
+      var st = r.status;
+      var tail = r.detail ? ' · ' + r.detail : '';
+      if (st === 'moved' || st === 'trashed' || st === 'deleted') {
+        executed[id] = true;
+        setStatus(id, 'done', T['status_' + st] || T.status_done);
+      } else if (st === 'dry-run') {
+        setStatus(id, '', T.status_dry + tail);
+      } else if (st === 'skipped' || st === 'refused') {
+        setStatus(id, 'failed', (T['status_' + st] || T.status_failed) + tail);
+      } else {
+        setStatus(id, 'failed', T.status_failed + tail);
+      }
+    });
+    refresh();
+  }
+  function markExecuted(ids) {
+    (ids || []).forEach(function (id) {
+      executed[id] = true;
+      var a = byId[id] || {};
+      var key = a.kind === 'move' ? 'status_moved' : a.kind === 'trash' ? 'status_trashed' : a.kind === 'delete' ? 'status_deleted' : 'status_done';
+      setStatus(id, 'done', T[key]);
+    });
+    refresh();
+  }
+
+  /* ---- clipboard ---- */
+  function copyText(text, btn) {
+    function done() { var old = btn.textContent; btn.textContent = T.copied; setTimeout(function () { btn.textContent = old; }, 1200); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { legacy(); });
+    } else { legacy(); }
+    function legacy() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  /* ---- reveal (serve only) ---- */
+  function headers() { return { 'Content-Type': 'application/json', 'X-GN-Token': GN.token || '' }; }
+  function reveal(path, btn) {
+    if (MODE !== 'serve') return;
+    fetch('/api/reveal', { method: 'POST', headers: headers(), body: JSON.stringify({ path_portable: path }) })
+      .then(function (r) { if (!r.ok) throw new Error(String(r.status)); message(T.reveal_done); })
+      .catch(function () { message(T.network_failed); });
+  }
+
+  /* ---- events ---- */
+  document.addEventListener('change', function (e) {
+    var el = e.target;
+    touched = true;
+    if (el.matches && el.matches('input[data-kind="delete"]') && el.checked) {
+      if (!confirm(fmt(T.confirm_delete, { path: el.dataset.path || '', size: el.dataset.size || '' }))) fallbackChoice(el);
+    }
+    if (el.id === 'gn-permanent') { permanentOn = el.checked; applyPermanent(); return; }
+    refresh();
+  });
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var btn = t.closest ? t.closest('button') : null;
+    if (btn) {
+      if (btn.classList.contains('gn-toggle-all')) {
+        var sec = btn.closest('section');
+        var boxes = $('input.gn-pick, input.gn-adopt', sec).filter(function (b) { return !b.disabled; });
+        var turnOn = boxes.some(function (b) { return !b.checked; });
+        boxes.forEach(function (b) { b.checked = turnOn; });
+        btn.textContent = turnOn ? btn.dataset.off : btn.dataset.on;
+        touched = true;
+        refresh();
+        return;
+      }
+      if (btn.classList.contains('gn-fold-all')) {
+        var s2 = btn.closest('section');
+        var items = $('.item', s2);
+        var open = items.some(function (i) { return !i.classList.contains('open'); });
+        items.forEach(function (i) { i.classList.toggle('open', open); });
+        btn.textContent = open ? btn.dataset.off : btn.dataset.on;
+        return;
+      }
+      if (btn.id === 'gn-pick-green') {
+        var g = document.querySelector('section.sec[data-color="green"]');
+        if (g) {
+          $('input.gn-pick, input.gn-adopt', g).forEach(function (b) { if (!b.disabled) b.checked = true; });
+          g.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          touched = true;
+          refresh();
+        }
+        return;
+      }
+      if (btn.dataset.action === 'copy') {
+        var block = btn.closest('.cmd');
+        var code = block ? block.querySelector('code') : null;
+        if (code) copyText(code.textContent, btn);
+        return;
+      }
+      if (btn.dataset.action === 'reveal') { reveal(btn.dataset.path || '', btn); return; }
+    }
+    var head = t.closest ? t.closest('.item-head') : null;
+    if (head && !(t.closest('input, button, select, label, a'))) {
+      head.parentNode.classList.toggle('open');
+    }
+  });
+
+  GN.api = { $: $, fmt: fmt, fmtBytes: fmtBytes, selection: selection, overrides: overrides, tally: tally, refresh: refresh, message: message, markResults: markResults, markExecuted: markExecuted, setStatus: setStatus, headers: headers, byId: byId, split: split };
+  applyPermanent();
+  markExecuted(D.executed_ids || []);
+})();
+</script>
+<script>
+(function () {
+  var GN = window.GN, A = GN.api, T = GN.text, C = GN.config, D = GN.data;
+  var main = document.getElementById('gn-main');
+  if (!main) return;
+
+  function download(name, payload) {
+    var blob = new Blob([JSON.stringify(payload, null, 2) + '\n'], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url; link.download = name;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  if (C.mode === 'static') {
+    main.addEventListener('click', function () {
+      var ids = A.selection();
+      if (!ids.length) { alert(T.nothing_selected); return; }
+      if (C.kind === 'combined') {
+        /* One file for both halves: the tidy-up ids under plan, the cleanup ids
+           under storage, and each half's source document alongside them so
+           apply needs nothing but this file. */
+        var parts = A.split(ids);
+        var storageActions = {};
+        parts.items.forEach(function (e) { storageActions[e.id] = e.action; });
+        var payload = {
+          schema: 'carl-file-organizer/decisions',
+          schema_version: 1,
+          decided_at: new Date().toISOString(),
+          decided_by: 'html-static',
+          plan: { approved_action_ids: parts.actions, overrides: A.overrides() },
+          storage: { item_ids: parts.items.map(function (e) { return e.id; }), actions: storageActions }
+        };
+        if (GN.planDoc) payload.plan.document = GN.planDoc;
+        if (GN.analysisDoc) payload.storage.document = GN.analysisDoc;
+        download('carl-file-organizer-decisions.json', payload);
+        A.message(T.exported_all);
+        return;
+      }
+      if (C.kind === 'storage') {
+        var actions = {};
+        ids.forEach(function (e) { actions[e.id] = e.action; });
+        download('carl-file-organizer-decisions.json', {
+          schema: 'carl-file-organizer/storage-decisions',
+          schema_version: 1,
+          source: D.schema || '',
+          item_ids: ids.map(function (e) { return e.id; }),
+          actions: actions,
+          decided_at: new Date().toISOString(),
+          decided_by: 'html-static'
+        });
+        A.message(T.exported_decisions);
+        return;
+      }
+      var approved = {};
+      Object.keys(D).forEach(function (k) { if (k !== 'executed_ids') approved[k] = D[k]; });
+      approved.approved_action_ids = ids;
+      approved.overrides = A.overrides();
+      approved.approved_at = new Date().toISOString();
+      approved.approved_by = 'html-static';
+      download('carl-file-organizer-approved.json', approved);
+      A.message(T.exported_note);
+    });
+    return;
+  }
+
+  /* serve mode */
+  (function () {
+    var m = location.search.match(/[?&]t=([^&]+)/);
+    if (m && !GN.token) GN.token = decodeURIComponent(m[1]);
+    if (location.search && window.history && history.replaceState) history.replaceState(null, '', location.pathname);
+  })();
+  function busy(on) {
+    GN.busy = on;
+    ['gn-main', 'gn-dry'].forEach(function (id) { var b = document.getElementById(id); if (b) b.disabled = on; });
+    A.$('.gn-section-run').forEach(function (b) { b.disabled = on; });
+    A.refresh();
+  }
+  function post(url, body) {
+    return fetch(url, { method: 'POST', headers: A.headers(), body: JSON.stringify(body) })
+      .then(function (r) { return r.text().then(function (text) { var j = {}; try { j = JSON.parse(text); } catch (e) { j = { error: text }; } return { status: r.status, body: j }; }); });
+  }
+  function idsOf(entries) { return entries.map(function (e) { return typeof e === 'string' ? e : e.id; }); }
+  function failAll(entries, detail) {
+    idsOf(entries).forEach(function (id) { A.setStatus(id, 'failed', T.status_failed); });
+    if (detail) A.message(detail);
+  }
+  function handle(entries, res) {
+    if (res.status !== 200) {
+      failAll(entries, A.fmt(T.request_failed, { status: res.status, detail: res.body.error || '' }));
+      return;
+    }
+    A.markResults(res.body.results || []);
+    if (res.body.error) A.message(res.body.error);
+  }
+  function submitOrganize(ids, dryRun) {
+    if (!ids.length) { alert(T.nothing_selected); return; }
+    var t = A.tally(ids);
+    var text = dryRun ? A.fmt(T.confirm_dry, { n: ids.length })
+      : A.fmt(T.confirm_apply, { moves: t.move, trash: t.trash, delete: t.delete, bytes: A.fmtBytes(t.bytes) });
+    if (!confirm(text)) return;
+    A.message('');
+    ids.forEach(function (id) { A.setStatus(id, 'working', T.status_working); });
+    busy(true);
+    post('/api/apply', { action_ids: ids, overrides: A.overrides(), dry_run: !!dryRun })
+      .then(function (res) { handle(ids, res); })
+      .catch(function () { failAll(ids, T.network_failed); })
+      .then(function () { busy(false); });
+  }
+  function disposeChain(entries) {
+    var buckets = { trash: [], delete: [] };
+    entries.forEach(function (e) { (buckets[e.action] || buckets.trash).push(e.id); });
+    var chain = Promise.resolve();
+    ['trash', 'delete'].forEach(function (action) {
+      if (!buckets[action].length) return;
+      chain = chain.then(function () {
+        return post('/api/dispose', { item_ids: buckets[action], action: action })
+          .then(function (res) { handle(buckets[action], res); })
+          .catch(function () { failAll(buckets[action], T.network_failed); });
+      });
+    });
+    return chain;
+  }
+  function submitStorage(entries) {
+    if (!entries.length) { alert(T.nothing_selected); return; }
+    var t = A.tally(entries);
+    if (!confirm(A.fmt(T.confirm_dispose, { trash: t.trash, delete: t.delete, bytes: A.fmtBytes(t.bytes) }))) return;
+    A.message('');
+    idsOf(entries).forEach(function (id) { A.setStatus(id, 'working', T.status_working); });
+    busy(true);
+    disposeChain(entries).then(function () { busy(false); });
+  }
+  /* One button, two engines: the moves go through /api/apply first so nothing
+     is cleared out from under a file that was about to be filed, then the
+     cleanup goes through /api/dispose, trash before permanent delete. */
+  function submitCombined(entries, dryRun) {
+    if (!entries.length) { alert(T.nothing_selected); return; }
+    var parts = A.split(entries);
+    var t = A.tally(entries);
+    var text = dryRun ? A.fmt(T.confirm_dry, { n: entries.length })
+      : A.fmt(T.confirm_apply, { moves: t.move, trash: t.trash, delete: t.delete, bytes: A.fmtBytes(t.bytes) });
+    if (!confirm(text)) return;
+    A.message('');
+    idsOf(entries).forEach(function (id) { A.setStatus(id, 'working', T.status_working); });
+    busy(true);
+    var chain = Promise.resolve();
+    if (parts.actions.length) {
+      chain = chain.then(function () {
+        return post('/api/apply', { action_ids: parts.actions, overrides: A.overrides(), dry_run: !!dryRun })
+          .then(function (res) { handle(parts.actions, res); })
+          .catch(function () { failAll(parts.actions, T.network_failed); });
+      });
+    }
+    if (parts.items.length) {
+      if (dryRun) {
+        chain = chain.then(function () {
+          idsOf(parts.items).forEach(function (id) { A.setStatus(id, '', T.status_dry); });
+        });
+      } else {
+        chain = chain.then(function () { return disposeChain(parts.items); });
+      }
+    }
+    chain.then(function () { busy(false); });
+  }
+  function submit(root, dryRun) {
+    var sel = A.selection(root);
+    if (C.kind === 'combined') submitCombined(sel, dryRun);
+    else if (C.kind === 'storage') submitStorage(sel);
+    else submitOrganize(sel, dryRun);
+  }
+  main.addEventListener('click', function () { submit(null, false); });
+  var dry = document.getElementById('gn-dry');
+  if (dry) dry.addEventListener('click', function () { submit(null, true); });
+  var stop = document.getElementById('gn-shutdown');
+  if (stop) stop.addEventListener('click', function () {
+    if (!confirm(T.confirm_shutdown)) return;
+    fetch('/api/shutdown', { method: 'POST', headers: A.headers(), body: '{}' })
+      .then(function () { A.message(T.network_failed); }, function () { A.message(T.network_failed); });
+  });
+  A.$('.gn-section-run').forEach(function (btn) {
+    btn.addEventListener('click', function () { submit(btn.closest('section'), false); });
+  });
+  if (C.kind === 'organize' || C.kind === 'combined') {
+    fetch('/api/plan', { headers: A.headers() })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (plan) {
+        if (!plan) return;
+        if (plan.executed_ids) A.markExecuted(plan.executed_ids);
+        var caps = plan.capabilities || {};
+        var toggle = document.getElementById('gn-permanent');
+        if (toggle && caps.permanent_delete_enabled === false) { toggle.checked = false; toggle.disabled = true; }
+      })
+      .catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

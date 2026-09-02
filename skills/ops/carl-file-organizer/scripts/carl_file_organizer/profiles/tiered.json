@@ -1,0 +1,501 @@
+{
+  "profile": "tiered",
+  "profile_version": 1,
+  "lang": null,
+  "managed_dir": {
+    "zh": "00_下载目录管理",
+    "en": "00_File_Organizer"
+  },
+  "transient_tag": {
+    "zh": "文件移动",
+    "en": "Moved by File Organizer"
+  },
+  "review_log": {
+    "zh": "人工调整日志.md",
+    "en": "review-log.md"
+  },
+  "names": {
+    "inbox": {
+      "zh": "00_收件箱",
+      "en": "00_Inbox"
+    },
+    "inbox.pending": {
+      "zh": "待判断",
+      "en": "Pending"
+    },
+    "inbox.by_tag": {
+      "zh": "按标签",
+      "en": "By_Tag"
+    },
+    "inbox.dup": {
+      "zh": "重复待确认",
+      "en": "Duplicates_Review"
+    },
+    "work": {
+      "zh": "10_工作区",
+      "en": "10_Workspace"
+    },
+    "work.code": {
+      "zh": "项目代码",
+      "en": "Projects"
+    },
+    "work.tools": {
+      "zh": "工具与导出",
+      "en": "Tools_Exports"
+    },
+    "work.tools.scripts": {
+      "zh": "脚本",
+      "en": "Scripts"
+    },
+    "work.db": {
+      "zh": "数据库与查询",
+      "en": "Database"
+    },
+    "work.db.sql": {
+      "zh": "SQL",
+      "en": "SQL"
+    },
+    "library": {
+      "zh": "20_知识库",
+      "en": "20_Library"
+    },
+    "library.docs": {
+      "zh": "文档资料",
+      "en": "Documents"
+    },
+    "library.docs.md": {
+      "zh": "Markdown",
+      "en": "Markdown"
+    },
+    "library.docs.pdf": {
+      "zh": "PDF",
+      "en": "PDF"
+    },
+    "library.docs.ppt": {
+      "zh": "PPT",
+      "en": "PPT"
+    },
+    "library.docs.csv": {
+      "zh": "CSV",
+      "en": "CSV"
+    },
+    "library.docs.txt": {
+      "zh": "TXT",
+      "en": "TXT"
+    },
+    "library.docs.office": {
+      "zh": "办公文档",
+      "en": "Office"
+    },
+    "library.images": {
+      "zh": "图片素材",
+      "en": "Images"
+    },
+    "library.images.png": {
+      "zh": "PNG",
+      "en": "PNG"
+    },
+    "library.images.jpeg": {
+      "zh": "JPEG",
+      "en": "JPEG"
+    },
+    "library.images.gif": {
+      "zh": "GIF",
+      "en": "GIF"
+    },
+    "library.images.other": {
+      "zh": "其他图片",
+      "en": "Other"
+    },
+    "library.video": {
+      "zh": "视频素材",
+      "en": "Video"
+    },
+    "library.video.mp4": {
+      "zh": "MP4",
+      "en": "MP4"
+    },
+    "library.video.mov": {
+      "zh": "MOV",
+      "en": "MOV"
+    },
+    "library.audio": {
+      "zh": "音频素材",
+      "en": "Audio"
+    },
+    "library.web": {
+      "zh": "网页资料",
+      "en": "Web"
+    },
+    "library.web.html": {
+      "zh": "HTML",
+      "en": "HTML"
+    },
+    "sensitive": {
+      "zh": "60_敏感信息",
+      "en": "60_Sensitive"
+    },
+    "sensitive.pending": {
+      "zh": "待转移",
+      "en": "Pending"
+    },
+    "sensitive.dup": {
+      "zh": "重复待确认",
+      "en": "Duplicates_Review"
+    },
+    "archive": {
+      "zh": "90_归档",
+      "en": "90_Archive"
+    },
+    "archive.zip": {
+      "zh": "压缩包",
+      "en": "Compressed"
+    },
+    "archive.zip.zip": {
+      "zh": "ZIP",
+      "en": "ZIP"
+    },
+    "archive.zip.other": {
+      "zh": "其他压缩包",
+      "en": "Other"
+    },
+    "archive.installers": {
+      "zh": "安装包",
+      "en": "Installers"
+    },
+    "archive.installers.dmg": {
+      "zh": "DMG",
+      "en": "DMG"
+    },
+    "archive.installers.other": {
+      "zh": "其他安装包",
+      "en": "Other"
+    }
+  },
+  "aging": {
+    "default_hours": 48,
+    "archive_hours": 168
+  },
+  "rules": {
+    ".md": {
+      "dest": "library.docs.md",
+      "reason": "ext_doc"
+    },
+    ".pdf": {
+      "dest": "library.docs.pdf",
+      "reason": "ext_doc"
+    },
+    ".ppt": {
+      "dest": "library.docs.ppt",
+      "reason": "ext_doc"
+    },
+    ".pptx": {
+      "dest": "library.docs.ppt",
+      "reason": "ext_doc"
+    },
+    ".doc": {
+      "dest": "library.docs.office",
+      "reason": "ext_doc"
+    },
+    ".docx": {
+      "dest": "library.docs.office",
+      "reason": "ext_doc"
+    },
+    ".xls": {
+      "dest": "library.docs.office",
+      "reason": "ext_doc"
+    },
+    ".xlsx": {
+      "dest": "library.docs.office",
+      "reason": "ext_doc"
+    },
+    ".csv": {
+      "dest": "library.docs.csv",
+      "reason": "ext_doc"
+    },
+    ".txt": {
+      "dest": "library.docs.txt",
+      "reason": "ext_doc"
+    },
+    ".png": {
+      "dest": "library.images.png",
+      "reason": "ext_image"
+    },
+    ".jpg": {
+      "dest": "library.images.jpeg",
+      "reason": "ext_image"
+    },
+    ".jpeg": {
+      "dest": "library.images.jpeg",
+      "reason": "ext_image"
+    },
+    ".gif": {
+      "dest": "library.images.gif",
+      "reason": "ext_image"
+    },
+    ".webp": {
+      "dest": "library.images.other",
+      "reason": "ext_image"
+    },
+    ".heic": {
+      "dest": "library.images.other",
+      "reason": "ext_image"
+    },
+    ".svg": {
+      "dest": "library.images.other",
+      "reason": "ext_image"
+    },
+    ".mp4": {
+      "dest": "library.video.mp4",
+      "reason": "ext_video"
+    },
+    ".mov": {
+      "dest": "library.video.mov",
+      "reason": "ext_video"
+    },
+    ".mp3": {
+      "dest": "library.audio",
+      "reason": "ext_audio"
+    },
+    ".m4a": {
+      "dest": "library.audio",
+      "reason": "ext_audio"
+    },
+    ".wav": {
+      "dest": "library.audio",
+      "reason": "ext_audio"
+    },
+    ".html": {
+      "dest": "library.web.html",
+      "reason": "ext_web"
+    },
+    ".js": {
+      "dest": "work.tools.scripts",
+      "reason": "ext_script"
+    },
+    ".sh": {
+      "dest": "work.tools.scripts",
+      "reason": "ext_script"
+    },
+    ".py": {
+      "dest": "work.tools.scripts",
+      "reason": "ext_script"
+    },
+    ".sql": {
+      "dest": "work.db.sql",
+      "reason": "ext_data"
+    },
+    ".zip": {
+      "dest": "archive.zip.zip",
+      "min_age_hours": 168,
+      "reason": "ext_archive"
+    },
+    ".tar.gz": {
+      "dest": "archive.zip.other",
+      "min_age_hours": 168,
+      "reason": "ext_archive"
+    },
+    ".7z": {
+      "dest": "archive.zip.other",
+      "min_age_hours": 168,
+      "reason": "ext_archive"
+    },
+    ".rar": {
+      "dest": "archive.zip.other",
+      "min_age_hours": 168,
+      "reason": "ext_archive"
+    },
+    ".dmg": {
+      "dest": "archive.installers.dmg",
+      "min_age_hours": 168,
+      "reason": "ext_installer"
+    },
+    ".pkg": {
+      "dest": "archive.installers.other",
+      "min_age_hours": 168,
+      "reason": "ext_installer"
+    },
+    ".iso": {
+      "dest": "archive.installers.other",
+      "min_age_hours": 168,
+      "reason": "ext_installer"
+    }
+  },
+  "name_patterns": [],
+  "sensitive": {
+    "exact_names": [
+      ".env",
+      ".netrc",
+      "credentials.json",
+      "id_rsa",
+      "id_ed25519",
+      "secrets.json",
+      "service-account.json"
+    ],
+    "exact_stems": [
+      "key",
+      "keys",
+      "env",
+      "pass",
+      "token",
+      "tokens",
+      "secret",
+      "auth",
+      "cred",
+      "creds"
+    ],
+    "suffixes": [
+      ".cer",
+      ".crt",
+      ".key",
+      ".pem",
+      ".p12",
+      ".pfx",
+      ".mobileprovision",
+      ".env",
+      ".keystore",
+      ".jks"
+    ],
+    "markers": [
+      "credential",
+      "password",
+      "passwd",
+      "apikey",
+      "api-key",
+      "api_key",
+      "access-token",
+      "access_token",
+      "private-key",
+      "privatekey",
+      "recovery",
+      "secret",
+      "mnemonic",
+      "seed-phrase",
+      "密码",
+      "密钥",
+      "凭证",
+      "恢复码",
+      "身份证",
+      "银行卡",
+      "营业执照"
+    ],
+    "marker_min_len": 5
+  },
+  "pinned": [
+    "carl-file-organizer-*.json"
+  ],
+  "forbidden": {
+    "basenames": [
+      ".git",
+      "Library",
+      "Keychains",
+      "Messages",
+      "Mail",
+      "vm_bundles",
+      "Time Machine Backups"
+    ],
+    "suffixes": [
+      ".photoslibrary",
+      ".aplibrary",
+      ".musiclibrary",
+      ".tvlibrary",
+      ".sparsebundle",
+      ".vmwarevm",
+      ".pvm",
+      ".utm"
+    ],
+    "markers": [
+      ".obsidian",
+      "Default/History"
+    ],
+    "glob": [
+      "Profile *",
+      "Photos Library*"
+    ]
+  },
+  "regenerable": {
+    "basenames": [
+      "node_modules",
+      ".next",
+      "dist",
+      "build",
+      "coverage",
+      "__pycache__",
+      ".turbo",
+      ".cache",
+      ".pytest_cache",
+      "target"
+    ],
+    "scan_depth": 3,
+    "restore": {
+      "node_modules": {
+        "zh": "重新 npm/pnpm/bun install",
+        "en": "re-run npm/pnpm/bun install"
+      },
+      ".next": {
+        "zh": "重新 build 或 dev",
+        "en": "re-run build or dev"
+      },
+      "__pycache__": {
+        "zh": "下次运行自动生成",
+        "en": "regenerated on next run"
+      },
+      "_default": {
+        "zh": "由构建再生",
+        "en": "regenerated by the build"
+      }
+    }
+  },
+  "derivative_hints": [
+    "-fix-",
+    "-worktree-",
+    "-scratch",
+    "-backup",
+    "-copy",
+    " copy"
+  ],
+  "archive_suffixes": [
+    ".zip",
+    ".tar.gz",
+    ".tgz",
+    ".tar",
+    ".7z",
+    ".rar",
+    ".gz",
+    ".xz",
+    ".bz2"
+  ],
+  "installer_suffixes": [
+    ".dmg",
+    ".pkg",
+    ".iso",
+    ".exe",
+    ".msi",
+    ".apk"
+  ],
+  "dedupe": {
+    "hash_max_bytes": 2147483648,
+    "copy_patterns": [
+      "^(?P<base>.+?) \\((?P<n>\\d+)\\)(?P<ext>\\.[^.]+)?$",
+      "^(?P<base>.+?)_(?P<n>\\d+)(?P<ext>\\.[^.]+)?$",
+      "^(?P<base>.+?) (?P<n>\\d+)$"
+    ]
+  },
+  "tags": {
+    "group_by_user_tags": false
+  },
+  "guard": {
+    "reference_files": [],
+    "reference_scan_roots": [
+      "$HOME",
+      "$HOME/projects",
+      "$HOME/bin",
+      "$HOME/.local/bin",
+      "/usr/local/bin",
+      "/opt/homebrew/bin"
+    ],
+    "recent_minutes": 10,
+    "lsof_timeout_s": 5
+  },
+  "large_bytes": 524288000
+}

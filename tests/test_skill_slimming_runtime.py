@@ -4,6 +4,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import os
 import stat
 import tempfile
 import threading
@@ -332,9 +333,13 @@ class RuntimeContractTests(unittest.TestCase):
             store = runtime.StateStore(root, "test-profile", inventory)
             saved = store.save(valid_complete_state(inventory))
             self.assertEqual(saved["reviewStatus"], "complete")
-            mode = stat.S_IMODE(store.current_path.stat().st_mode)
-            self.assertEqual(mode, 0o600)
-            self.assertEqual(stat.S_IMODE(root.stat().st_mode), 0o700)
+            if os.name != "nt":
+                # Windows has no POSIX permission bits: chmod 0o600 there sets
+                # the read-only flag and stat reports 0o666.  Privacy on that
+                # platform is an ACL question, not this assertion's.
+                mode = stat.S_IMODE(store.current_path.stat().st_mode)
+                self.assertEqual(mode, 0o600)
+                self.assertEqual(stat.S_IMODE(root.stat().st_mode), 0o700)
 
             restored = runtime.StateStore(root, "test-profile", inventory)
             self.assertEqual(restored.state["reviewStatus"], "complete")

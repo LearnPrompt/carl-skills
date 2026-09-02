@@ -1,0 +1,500 @@
+{
+  "profile": "simple",
+  "profile_version": 1,
+  "lang": "en",
+  "managed_dir": {
+    "zh": "00_File_Organizer",
+    "en": "00_File_Organizer"
+  },
+  "transient_tag": {
+    "zh": "文件移动",
+    "en": "Moved by File Organizer"
+  },
+  "review_log": {
+    "zh": "review-log.md",
+    "en": "review-log.md"
+  },
+  "names": {
+    "documents": {
+      "zh": "Documents",
+      "en": "Documents"
+    },
+    "images": {
+      "zh": "Images",
+      "en": "Images"
+    },
+    "video": {
+      "zh": "Video",
+      "en": "Video"
+    },
+    "audio": {
+      "zh": "Audio",
+      "en": "Audio"
+    },
+    "archives": {
+      "zh": "Archives",
+      "en": "Archives"
+    },
+    "installers": {
+      "zh": "Installers",
+      "en": "Installers"
+    },
+    "code": {
+      "zh": "Code & Data",
+      "en": "Code & Data"
+    },
+    "other": {
+      "zh": "Other",
+      "en": "Other"
+    },
+    "inbox": {
+      "zh": "Other",
+      "en": "Other"
+    },
+    "inbox.pending": {
+      "zh": "Pending",
+      "en": "Pending"
+    },
+    "inbox.dup": {
+      "zh": "Duplicates_Review",
+      "en": "Duplicates_Review"
+    },
+    "sensitive": {
+      "zh": "Sensitive",
+      "en": "Sensitive"
+    },
+    "sensitive.pending": {
+      "zh": "Pending",
+      "en": "Pending"
+    },
+    "sensitive.dup": {
+      "zh": "Duplicates_Review",
+      "en": "Duplicates_Review"
+    }
+  },
+  "aging": {
+    "default_hours": 0,
+    "archive_hours": 0
+  },
+  "rules": {
+    ".doc": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".docx": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".epub": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".key": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".md": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".numbers": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".pages": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".pdf": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".ppt": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".pptx": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".rtf": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".txt": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".xls": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".xlsx": {
+      "dest": "documents",
+      "reason": "ext_doc"
+    },
+    ".avif": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".gif": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".heic": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".jpeg": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".jpg": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".png": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".svg": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".tif": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".tiff": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".webp": {
+      "dest": "images",
+      "reason": "ext_image"
+    },
+    ".avi": {
+      "dest": "video",
+      "reason": "ext_video"
+    },
+    ".m4v": {
+      "dest": "video",
+      "reason": "ext_video"
+    },
+    ".mkv": {
+      "dest": "video",
+      "reason": "ext_video"
+    },
+    ".mov": {
+      "dest": "video",
+      "reason": "ext_video"
+    },
+    ".mp4": {
+      "dest": "video",
+      "reason": "ext_video"
+    },
+    ".webm": {
+      "dest": "video",
+      "reason": "ext_video"
+    },
+    ".aac": {
+      "dest": "audio",
+      "reason": "ext_audio"
+    },
+    ".flac": {
+      "dest": "audio",
+      "reason": "ext_audio"
+    },
+    ".m4a": {
+      "dest": "audio",
+      "reason": "ext_audio"
+    },
+    ".mp3": {
+      "dest": "audio",
+      "reason": "ext_audio"
+    },
+    ".ogg": {
+      "dest": "audio",
+      "reason": "ext_audio"
+    },
+    ".wav": {
+      "dest": "audio",
+      "reason": "ext_audio"
+    },
+    ".7z": {
+      "dest": "archives",
+      "reason": "ext_archive"
+    },
+    ".bz2": {
+      "dest": "archives",
+      "reason": "ext_archive"
+    },
+    ".gz": {
+      "dest": "archives",
+      "reason": "ext_archive"
+    },
+    ".rar": {
+      "dest": "archives",
+      "reason": "ext_archive"
+    },
+    ".tar": {
+      "dest": "archives",
+      "reason": "ext_archive"
+    },
+    ".tgz": {
+      "dest": "archives",
+      "reason": "ext_archive"
+    },
+    ".xz": {
+      "dest": "archives",
+      "reason": "ext_archive"
+    },
+    ".zip": {
+      "dest": "archives",
+      "reason": "ext_archive"
+    },
+    ".apk": {
+      "dest": "installers",
+      "reason": "ext_installer"
+    },
+    ".dmg": {
+      "dest": "installers",
+      "reason": "ext_installer"
+    },
+    ".exe": {
+      "dest": "installers",
+      "reason": "ext_installer"
+    },
+    ".iso": {
+      "dest": "installers",
+      "reason": "ext_installer"
+    },
+    ".msi": {
+      "dest": "installers",
+      "reason": "ext_installer"
+    },
+    ".pkg": {
+      "dest": "installers",
+      "reason": "ext_installer"
+    },
+    ".c": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".cpp": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".css": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".csv": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".go": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".html": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".ipynb": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".java": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".js": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".json": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".jsx": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".py": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".rb": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".rs": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".sql": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".swift": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".toml": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".ts": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".tsx": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".xml": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".yaml": {
+      "dest": "code",
+      "reason": "ext_data"
+    },
+    ".yml": {
+      "dest": "code",
+      "reason": "ext_data"
+    }
+  },
+  "name_patterns": [],
+  "sensitive": {
+    "exact_names": [
+      ".env",
+      ".netrc",
+      "credentials.json",
+      "id_rsa",
+      "id_ed25519",
+      "secrets.json"
+    ],
+    "exact_stems": [
+      "key",
+      "keys",
+      "env",
+      "pass",
+      "token",
+      "secret",
+      "auth"
+    ],
+    "suffixes": [
+      ".cer",
+      ".crt",
+      ".pem",
+      ".p12",
+      ".pfx",
+      ".mobileprovision",
+      ".env"
+    ],
+    "markers": [
+      "credential",
+      "password",
+      "passwd",
+      "apikey",
+      "api-key",
+      "api_key",
+      "private-key",
+      "recovery",
+      "secret"
+    ],
+    "marker_min_len": 5
+  },
+  "pinned": [
+    "carl-file-organizer-*.json"
+  ],
+  "forbidden": {
+    "basenames": [
+      ".git",
+      "Library",
+      "Keychains",
+      "Messages",
+      "Mail"
+    ],
+    "suffixes": [
+      ".photoslibrary",
+      ".aplibrary",
+      ".sparsebundle",
+      ".vmwarevm",
+      ".pvm"
+    ],
+    "markers": [
+      ".obsidian"
+    ],
+    "glob": [
+      "Profile *",
+      "Photos Library*"
+    ]
+  },
+  "regenerable": {
+    "basenames": [
+      "node_modules",
+      ".next",
+      "dist",
+      "build",
+      "coverage",
+      "__pycache__"
+    ],
+    "scan_depth": 3,
+    "restore": {
+      "_default": {
+        "zh": "由构建再生",
+        "en": "regenerated by the build"
+      }
+    }
+  },
+  "derivative_hints": [
+    "-copy",
+    " copy",
+    "-backup"
+  ],
+  "archive_suffixes": [
+    ".zip",
+    ".tar.gz",
+    ".tgz",
+    ".tar",
+    ".7z",
+    ".rar",
+    ".gz",
+    ".xz",
+    ".bz2"
+  ],
+  "installer_suffixes": [
+    ".dmg",
+    ".pkg",
+    ".iso",
+    ".exe",
+    ".msi",
+    ".apk"
+  ],
+  "dedupe": {
+    "hash_max_bytes": 2147483648,
+    "copy_patterns": [
+      "^(?P<base>.+?) \\((?P<n>\\d+)\\)(?P<ext>\\.[^.]+)?$",
+      "^(?P<base>.+?)_(?P<n>\\d+)(?P<ext>\\.[^.]+)?$"
+    ]
+  },
+  "tags": {
+    "group_by_user_tags": false
+  },
+  "guard": {
+    "reference_files": [],
+    "reference_scan_roots": [
+      "$HOME",
+      "$HOME/bin",
+      "$HOME/.local/bin",
+      "/usr/local/bin",
+      "/opt/homebrew/bin"
+    ],
+    "recent_minutes": 10,
+    "lsof_timeout_s": 5
+  },
+  "large_bytes": 524288000
+}
