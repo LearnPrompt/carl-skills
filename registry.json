@@ -3,8 +3,8 @@
   "description": "Real-world AI workflows for creators.",
   "homepage": "https://github.com/LearnPrompt/carl-skills",
   "license": "MIT",
-  "version": "0.8.0",
-  "updated": "2026-09-02",
+  "version": "0.9.0",
+  "updated": "2026-09-03",
   "model": "catalog-first",
   "install_logic": "Carl Skills is the catalog. Each entry declares either a raw_skill_url or a folder-aware install_mode/install_command; collection-native skills are maintained directly under this repository's skills directory.",
   "catalog_order": [
@@ -17,6 +17,7 @@
     "paoding",
     "partner-skill",
     "x-article-publisher",
+    "wechat-article-video-download",
     "skill-sync",
     "skill-slimming",
     "carl-file-organizer",
@@ -99,6 +100,23 @@
       "source_commit": "012a080b25087d780241731d86a53c0d81a84cf3",
       "installable": true,
       "raw_skill_url": "https://raw.githubusercontent.com/LearnPrompt/x-article-publisher-skill/main/skills/x-article-publisher/SKILL.md"
+    },
+    {
+      "id": "wechat-article-video-download",
+      "name": "微信公众号视频下载",
+      "status": "active",
+      "category": "media",
+      "catalog_anchor": "wechat-article-video-download",
+      "summary": "从公开微信公众号文章中按正文序号提取视频，下载临时 MP4，并校验容器、哈希和音视频元数据。",
+      "canonical_repo": "https://github.com/LearnPrompt/carl-skills",
+      "canonical_branch": "main",
+      "canonical_path": "skills/media/wechat-article-video-download/SKILL.md",
+      "distribution": "collection-native",
+      "installable": true,
+      "install_mode": "skill-folder",
+      "install_command": "npx skills add LearnPrompt/carl-skills --skill wechat-article-video-download -g",
+      "hermes_installable": false,
+      "hermes_skip_reason": "完整运行时含下载脚本与真实 showcase，raw SKILL.md 装不全"
     },
     {
       "id": "skill-sync",
