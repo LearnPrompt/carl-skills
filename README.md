@@ -5,8 +5,8 @@
 #### 我自己真实跑通、反复用过的AI工作流，都收在这里
 
 [![License](https://img.shields.io/badge/License-MIT-3B82F6?style=for-the-badge)](./LICENSE)
-[![Workflows](https://img.shields.io/badge/Workflows-15-3B82F6?style=for-the-badge)](#-skills)
-[![Skills](https://img.shields.io/badge/Skills-20-10B981?style=for-the-badge)](./registry.json)
+[![Workflows](https://img.shields.io/badge/Workflows-16-3B82F6?style=for-the-badge)](#-skills)
+[![Skills](https://img.shields.io/badge/Skills-21-10B981?style=for-the-badge)](./registry.json)
 [![Registry](https://img.shields.io/badge/Registry-catalog--first-F59E0B?style=for-the-badge)](./registry.json)
 [![First Star](https://img.shields.io/badge/First_Star-Humanize_PPT-8B5CF6?style=for-the-badge)](https://github.com/LearnPrompt/humanize-ppt)
 
@@ -45,6 +45,7 @@
 | ✍️ [**x-article-publisher**](#x-article-publisher) | [![](https://img.shields.io/github/stars/LearnPrompt/x-article-publisher-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/x-article-publisher-skill) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
 | 🔁 [**skill-sync**](#skill-sync) | [![](https://img.shields.io/github/stars/LearnPrompt/skill-sync?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
 | 🧭 [**Skill 瘦身**](#skill-slimming) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-skills) | 把Agent能力整理成全局、项目和按需触发 | [collection-native](./skills/ops/skill-slimming/SKILL.md) |
+| 🗂️ [**文件整理 carl-file-organizer**](#carl-file-organizer) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-file-organizer?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-file-organizer) | 先看后动的下载目录整理器，只读扫出方案，网页勾选批准才移动，删除默认进废纸篓 | [canonical](https://github.com/LearnPrompt/carl-file-organizer) |
 | 🏮 [**阿福 afu**](#afu-llm-todo) | [![](https://img.shields.io/github/stars/LearnPrompt/afu-llm-todo?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/afu-llm-todo) | Obsidian收件箱管家，Inbox到Wiki到待办到周历一条线 | [canonical](https://github.com/LearnPrompt/afu-llm-todo) |
 | 📜 [**蔡伦 cailun**](#cailun) | [![](https://img.shields.io/github/stars/LearnPrompt/cailun-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/cailun-skill) | 把对话里聊出来的结论，3秒造成一页能传阅的单文件纸 | [canonical](https://github.com/LearnPrompt/cailun-skill) |
 | ⛰️ [**愚公 yugong**](#loop-engineering) | [![](https://img.shields.io/github/stars/LearnPrompt/loop-engineering?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/loop-engineering) | Loop工程方法论，把模糊目标改造成带验证门的自动循环 | [canonical](https://github.com/LearnPrompt/loop-engineering) |
@@ -483,6 +484,39 @@ npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
 [![Install](https://img.shields.io/badge/Install-skill_folder-10B981?style=flat-square)](./skills/ops/skill-slimming/SKILL.md)
 
 → [SKILL.md](./skills/ops/skill-slimming/SKILL.md) · [registry entry](./registry.json)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
+<a id="carl-file-organizer"></a>
+
+### 🗂️ 文件整理 carl-file-organizer
+
+> *"先站好队，再决定谁走，删谁都要你点头。"*
+
+它是一个零依赖的Python命令行工具，专门整理下载目录一类越堆越乱的文件夹。plan阶段只读扫描，给出一份整理方案；方案要在网页上逐条勾选批准，apply阶段才真正移动文件。目录按编号分区，00_收件箱、10_工作区、20_知识库、60_敏感信息、90_归档，中英文目录名都能用。
+
+判断一份文件该去哪，看的是静置期、敏感命名（只看名字不读内容）、成对压缩包、重复副本、可再生产物这些线索。删除动作默认进废纸篓，要永久删除得显式开关打开。真正动手前会先查一遍进程占用和配置引用，动完的每一步都能undo，Finder标签会打上「文件移动」方便复核。
+
+**适合**
+
+- 下载目录已经乱成泥石流
+- 想让Agent帮忙整理，但不放心它直接删东西
+- 想给每一次整理留一份可审计的记录
+
+**不适合**
+
+- 想要全自动、无人值守地清理
+- 想清系统缓存和大盘空间，那不是它管的事
+- Windows用户（目前macOS功能齐全，Linux只有基本功能）
+
+[![Repo](https://img.shields.io/badge/GitHub-carl--file--organizer-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-file-organizer)
+[![Install](https://img.shields.io/badge/Install-raw_SKILL.md-10B981?style=flat-square)](https://raw.githubusercontent.com/LearnPrompt/carl-file-organizer/main/skills/carl-file-organizer/SKILL.md)
+
+→ [canonical repo](https://github.com/LearnPrompt/carl-file-organizer) · [raw SKILL.md](https://raw.githubusercontent.com/LearnPrompt/carl-file-organizer/main/skills/carl-file-organizer/SKILL.md)
 
 </td></tr>
 </table>
