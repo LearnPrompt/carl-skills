@@ -1,0 +1,4 @@
+interface:
+  display_name: "微信公众号视频下载"
+  short_description: "从微信公众号文章中提取指定视频直链，安全下载并验证文件完整性"
+  default_prompt: "Use $wechat-article-video-download to download the first video from this WeChat article and verify the saved file."

@@ -5,8 +5,8 @@
 #### 我自己真实跑通、反复用过的AI工作流，都收在这里
 
 [![License](https://img.shields.io/badge/License-MIT-3B82F6?style=for-the-badge)](./LICENSE)
-[![Workflows](https://img.shields.io/badge/Workflows-16-3B82F6?style=for-the-badge)](#-skills)
-[![Skills](https://img.shields.io/badge/Skills-21-10B981?style=for-the-badge)](./registry.json)
+[![Workflows](https://img.shields.io/badge/Workflows-17-3B82F6?style=for-the-badge)](#-skills)
+[![Skills](https://img.shields.io/badge/Skills-22-10B981?style=for-the-badge)](./registry.json)
 [![Registry](https://img.shields.io/badge/Registry-catalog--first-F59E0B?style=for-the-badge)](./registry.json)
 [![First Star](https://img.shields.io/badge/First_Star-Humanize_PPT-8B5CF6?style=for-the-badge)](https://github.com/LearnPrompt/humanize-ppt)
 
@@ -43,6 +43,7 @@
 | 🔪 [**庖丁 paoding**](#paoding) | [![](https://img.shields.io/github/stars/LearnPrompt/paoding-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/paoding-skill) | 零API拆解任何博主的爆款打法，蒸馏成可安装的内容教练 | [canonical](https://github.com/LearnPrompt/paoding-skill) |
 | 🤝 [**搭子 dazi**](#partner-skill) | [![](https://img.shields.io/github/stars/LearnPrompt/partner-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/partner-skill) | 让Claude和Codex结对开发，分工、互查、合并一条线 | [canonical](https://github.com/LearnPrompt/partner-skill) |
 | ✍️ [**x-article-publisher**](#x-article-publisher) | [![](https://img.shields.io/github/stars/LearnPrompt/x-article-publisher-skill?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/x-article-publisher-skill) | 把飞书或本地Markdown文章发布到X Articles草稿 | [canonical](https://github.com/LearnPrompt/x-article-publisher-skill) |
+| 📥 [**微信公众号视频下载**](#wechat-article-video-download) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-skills) | 给一个公众号文章链接，按正文序号抓出视频并验证文件 | [collection-native](./skills/media/wechat-article-video-download/SKILL.md) |
 | 🔁 [**skill-sync**](#skill-sync) | [![](https://img.shields.io/github/stars/LearnPrompt/skill-sync?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/skill-sync) | 把多端Agent skills整理成一个可信来源 | [canonical](https://github.com/LearnPrompt/skill-sync) |
 | 🧭 [**Skill 瘦身**](#skill-slimming) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-skills) | 把Agent能力整理成全局、项目和按需触发 | [collection-native](./skills/ops/skill-slimming/SKILL.md) |
 | 🗂️ [**文件整理 carl-file-organizer**](#carl-file-organizer) | [![](https://img.shields.io/github/stars/LearnPrompt/carl-skills?style=flat&label=%E2%98%85&color=555)](https://github.com/LearnPrompt/carl-skills) | 先看后动的文件整理与磁盘盘点，只读扫出方案，三色分级，网页上点头才动 | [collection-native](./skills/ops/carl-file-organizer/SKILL.md) |
@@ -65,7 +66,7 @@ npx skills add LearnPrompt/carl-skills --skill skill-slimming -g
 
 这条命令会读取仓库目录来发现Skill，但只把`skill-slimming`这一个完整目录安装到Agent，不会把Carl Skills里的其他Skill一起启用。
 
-Skill 瘦身包含本地复审网页、状态服务和参考合同，不能只下载raw `SKILL.md`。因此它暂不支持Hermes的单文件raw安装；否则能看到提示词，却缺少实际运行层。文件整理carl-file-organizer也是同一套装法，把`--skill`换成`carl-file-organizer`即可。
+Skill 瘦身包含本地复审网页、状态服务和参考合同，不能只下载raw `SKILL.md`。因此它暂不支持Hermes的单文件raw安装；否则能看到提示词，却缺少实际运行层。文件整理和微信公众号视频下载也是同一套装法，把`--skill`分别换成`carl-file-organizer`或`wechat-article-video-download`即可。
 
 ### 装这个目录里的全部可安装skill
 
@@ -419,6 +420,43 @@ X Article Publisher负责把飞书或本地Markdown文章发布到X Articles草�
 <table>
 <tr><td>
 
+<a id="wechat-article-video-download"></a>
+
+### 📥 微信公众号视频下载
+
+> *"给我文章链接和第几个视频，剩下的别让我开开发者工具。"*
+
+这个 Skill 把一次真实跑通的公众号视频抓取流程收了起来：打开公开文章，从正文里的 `<video>` 元素按顺序找到目标，只在内存里使用带时效签名的 MP4 地址，然后原子下载到本地。下载完会检查 MP4 容器、计算 SHA-256；机器装了 `ffprobe` 时，还会返回时长、分辨率和音视频编码。
+
+它不会把临时直链写进最终回复或仓库，也不会为了“抓到”去导入 Cookie、登录账号、注入证书或绕过 DRM。公开文章里自然暴露的正文视频能抓就抓，视频号卡片、直播、登录限制或加密格式则明确停下。
+
+**适合**
+
+- 已经有公开微信公众号文章链接，想保存正文中的第一个或第 N 个视频
+- 不想手动打开 DevTools，在 Network 面板里翻临时 URL
+- 下载后需要确认文件大小、哈希、时长、分辨率和编码
+
+**不适合**
+
+- 视频号直播、短视频卡片、登录后才可见或已经失效的内容
+- 想绕过 DRM、验证码、付费墙或其他访问控制
+- 没有保存或使用该视频的权利
+
+```bash
+npx skills add LearnPrompt/carl-skills --skill wechat-article-video-download -g
+```
+
+[![Repo](https://img.shields.io/badge/GitHub-carl--skills-111827?style=flat-square&logo=github)](https://github.com/LearnPrompt/carl-skills)
+[![Install](https://img.shields.io/badge/Install-skill_folder-10B981?style=flat-square)](./skills/media/wechat-article-video-download/SKILL.md)
+
+→ [SKILL.md](./skills/media/wechat-article-video-download/SKILL.md) · [真实 Showcase：15 秒、720p、H.264 + AAC](./skills/media/wechat-article-video-download/showcase/wechat-first-video-wxv_4658090779037515777.mp4)
+
+</td></tr>
+</table>
+
+<table>
+<tr><td>
+
 <a id="skill-sync"></a>
 
 ### 🔁 skill-sync
@@ -685,7 +723,7 @@ npx skills add LearnPrompt/carl-irasutoya-illustrations -g
 - 应该用`raw_skill_url`还是完整`skill-folder`安装
 - 外部canonical skill当前索引到哪个`source_commit`
 - collection-native skill在本仓库的哪个`canonical_path`
-- 20个实际Skill如何通过`catalog_anchor`映射到上面的15个工作流卡片
+- 22个实际Skill如何通过`catalog_anchor`映射到上面的17个工作流卡片
 
 如果你只装一个skill，不需要关心registry。单文件Skill可以装raw `SKILL.md`；带脚本和资源的Skill要用目录感知安装器并通过`--skill`只选择目标项。
 
@@ -700,7 +738,7 @@ npx skills add LearnPrompt/carl-irasutoya-illustrations -g
 - [x] 将Humanize PPT安装入口改回canonical repo，避免collection mirror版本同步问题
 - [x] 将CC Harness Skills按suite统一分组
 - [x] 收录班门家族（鲁班/庖丁/搭子/蔡伦/愚公/阿福/Irasutoya配图）并为每项提供独立卡片
-- [x] 保证15个工作流目录、15张README卡片和20个Registry Skill自动对账
+- [x] 保证17个工作流目录、17张README卡片和22个Registry Skill自动对账
 - [x] 收录首个collection-native skill：Skill 瘦身
 - [ ] 给每个active skill补真实案例截图和更具体的使用入口
 
